@@ -2,27 +2,27 @@ package io.johnedquinn.kanonic.machine
 
 import io.johnedquinn.kanonic.Grammar
 import io.johnedquinn.kanonic.SymbolReference
-import io.johnedquinn.kanonic.TokenType
 
-class AutomatonGenerator {
+internal class AutomatonGenerator {
 
-    private val states = mutableSetOf<List<StateRule>>()
+    private val states = mutableMapOf<List<StateRule>, Int>()
+    private val edges = mutableMapOf<Int, MutableList<Int>>()
 
-    fun generate(grammar: Grammar): Automaton {
+    internal fun generate(grammar: Grammar): Automaton {
 
+        // Create Start State
+        val stateIndex = 0
         val kernel = createKernel(grammar, grammar.options.start)
         val closure = computeClosure(grammar, kernel)
-        states.add(closure.rules)
-        val children = createNextKernels(grammar, closure)
-        closure.children = children
+        states[closure.rules] = stateIndex
 
-        println("STATES")
-        states.forEachIndexed { index, stateRules ->
-            println("STATE_$index")
-            stateRules.forEachIndexed { ruleIndex, stateRule ->
-               println("  RULE_$ruleIndex: $stateRule")
-            }
-        }
+        // Create Children & Edges
+        val children = createChildrenStates(grammar, closure)
+        closure.children = children
+        addEdges(stateIndex, children)
+
+        // Print Information
+        printInfo()
 
         return Automaton(listOf(closure))
     }
@@ -33,23 +33,19 @@ class AutomatonGenerator {
         }.map { rule ->
             StateRule(rule, 0)
         }.toMutableList()
-        return State(kernelRules)
+        return State(states.size, kernelRules)
     }
 
-    private fun createNextKernels(grammar: Grammar, input: State): Map<SymbolReference, State> {
-        val remainingRules = input.rules.filter { stateRule ->
-            stateRule.position < stateRule.rule.items.lastIndex
-        }
+    private fun createChildrenStates(grammar: Grammar, input: State): Map<SymbolReference, State> {
+        // Grab rules that have transitions
+        val remainingRules = input.rules.filter { stateRule -> hasMoreItems(stateRule) }
 
-        val lastRules = input.rules.filter { stateRule ->
-            stateRule.position == stateRule.rule.items.lastIndex
-        }
-
+        // Find transitions
         val ruleMap: MutableMap<SymbolReference, MutableList<StateRule>> = mutableMapOf()
         remainingRules.forEach { stateRule ->
-            val symbol = stateRule.rule.items[stateRule.position]
+            val symbol = stateRule.plainRule.items[stateRule.position]
             val newRule = StateRule(
-                stateRule.rule,
+                stateRule.plainRule,
                 stateRule.position + 1
             )
             when (ruleMap.contains(symbol)) {
@@ -61,18 +57,22 @@ class AutomatonGenerator {
         // Recursively create next state
         val nextStates: MutableMap<SymbolReference, State> = mutableMapOf()
         ruleMap.forEach { (ref, ruleList) ->
-            val nextKernel = State(ruleList)
+            val nextKernel = State(states.size, ruleList)
             val nextClosure = computeClosure(grammar, nextKernel)
+            val nextStateIndex = states.size
             when (states.contains(nextClosure.rules)) {
-                true -> return@forEach
-                false -> states.add(nextClosure.rules)
+                true -> {
+                    val targetIndex = states[nextClosure.rules]!!
+                    addEdge(input.index, targetIndex)
+                    return@forEach
+                }
+                false -> states[nextClosure.rules] = nextStateIndex
             }
-            val children = createNextKernels(grammar, nextClosure)
+            val children = createChildrenStates(grammar, nextClosure)
+            addEdges(nextStateIndex, children)
             nextClosure.children = children
             nextStates[ref] = nextClosure
         }
-        states.add(lastRules)
-        nextStates[SymbolReference.TerminalReference(TokenType.EPSILON)] = State(lastRules)
         return nextStates
     }
 
@@ -85,8 +85,10 @@ class AutomatonGenerator {
         while (hasAdded) {
             hasAdded = false
             val toAddRules = mutableListOf<StateRule>()
-            closureRules.forEach { stateRule ->
-                val symbolReference = stateRule.rule.items[stateRule.position]
+            closureRules.filter { stateRule ->
+                hasMoreItems(stateRule)
+            }.forEach { stateRule ->
+                val symbolReference = stateRule.plainRule.items[stateRule.position]
                 if (symbolReference is SymbolReference.RuleReference && added.contains(symbolReference).not()) {
                     val rules = grammar.getRules(symbolReference)
                     val stateRules = rules.map { rule ->
@@ -100,6 +102,38 @@ class AutomatonGenerator {
             closureRules.addAll(toAddRules)
         }
 
-        return State(closureRules)
+        return State(states.size, closureRules)
+    }
+
+    private fun addEdges(srcIndex: Int, children: Map<SymbolReference, State>) {
+        children.forEach { (_, child) ->
+            addEdge(srcIndex, child.index)
+        }
+    }
+
+    private fun addEdge(srcIndex: Int, childIndex: Int) {
+        when (edges.contains(srcIndex)) {
+            true -> edges[srcIndex]!!.add(childIndex)
+            false -> edges[srcIndex] = mutableListOf(childIndex)
+        }
+    }
+
+    private fun printInfo() {
+        println("STATES")
+        states.forEach { (stateRules, index) ->
+            println("STATE_$index")
+            stateRules.forEachIndexed { ruleIndex, stateRule ->
+                println("  RULE_$ruleIndex: $stateRule")
+            }
+        }
+
+        println("EDGES")
+        edges.forEach { (src, children) ->
+            println("STATE_$src -> $children")
+        }
+    }
+
+    private fun hasMoreItems(stateRule: StateRule): Boolean {
+        return stateRule.position <= stateRule.plainRule.items.lastIndex
     }
 }
