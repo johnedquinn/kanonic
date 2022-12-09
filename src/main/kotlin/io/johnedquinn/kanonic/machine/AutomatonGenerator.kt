@@ -2,6 +2,7 @@ package io.johnedquinn.kanonic.machine
 
 import io.johnedquinn.kanonic.Grammar
 import io.johnedquinn.kanonic.SymbolReference
+import io.johnedquinn.kanonic.TokenType
 
 internal class AutomatonGenerator {
 
@@ -18,7 +19,6 @@ internal class AutomatonGenerator {
 
         // Create Children & Edges
         val children = createChildrenStates(grammar, closure)
-        closure.children = children
         addEdges(stateIndex, children)
 
         // Print Information
@@ -31,7 +31,7 @@ internal class AutomatonGenerator {
         val kernelRules = grammar.rules.filter { rule ->
             rule.name == start.name
         }.map { rule ->
-            StateRule(rule, 0)
+            StateRule(rule, 0, setOf(TokenType.EOF))
         }.toMutableList()
         return State(states.size, kernelRules)
     }
@@ -45,8 +45,9 @@ internal class AutomatonGenerator {
         remainingRules.forEach { stateRule ->
             val symbol = stateRule.plainRule.items[stateRule.position]
             val newRule = StateRule(
-                stateRule.plainRule,
-                stateRule.position + 1
+                plainRule = stateRule.plainRule,
+                position = stateRule.position + 1,
+                lookahead = stateRule.lookahead
             )
             when (ruleMap.contains(symbol)) {
                 false -> ruleMap[symbol] = mutableListOf(newRule)
@@ -54,7 +55,7 @@ internal class AutomatonGenerator {
             }
         }
 
-        // Recursively create next state
+        // Recursively create next states
         val nextStates: MutableMap<SymbolReference, State> = mutableMapOf()
         ruleMap.forEach { (ref, ruleList) ->
             val nextKernel = State(states.size, ruleList)
@@ -70,7 +71,6 @@ internal class AutomatonGenerator {
             }
             val children = createChildrenStates(grammar, nextClosure)
             addEdges(nextStateIndex, children)
-            nextClosure.children = children
             nextStates[ref] = nextClosure
         }
         return nextStates
@@ -88,11 +88,11 @@ internal class AutomatonGenerator {
             closureRules.filter { stateRule ->
                 hasMoreItems(stateRule)
             }.forEach { stateRule ->
-                val symbolReference = stateRule.plainRule.items[stateRule.position]
+                val symbolReference = getCurrentSymbol(stateRule)
                 if (symbolReference is SymbolReference.RuleReference && added.contains(symbolReference).not()) {
                     val rules = grammar.getRules(symbolReference)
                     val stateRules = rules.map { rule ->
-                        StateRule(rule, 0)
+                        StateRule(rule, 0, emptySet())
                     }
                     added.add(symbolReference)
                     toAddRules.addAll(stateRules)
@@ -100,6 +100,18 @@ internal class AutomatonGenerator {
                 }
             }
             closureRules.addAll(toAddRules)
+        }
+
+        // TODO: Compute Lookaheads
+        hasAdded = true
+        while (hasAdded) {
+            hasAdded = false
+            closureRules.filter { stateRule ->
+                hasMoreItems(stateRule)
+            }.forEach { stateRule ->
+                val currentSymbol = stateRule.plainRule.items[stateRule.position]
+                // if (isRule(currentSymbol) )
+            }
         }
 
         return State(states.size, closureRules)
@@ -136,4 +148,8 @@ internal class AutomatonGenerator {
     private fun hasMoreItems(stateRule: StateRule): Boolean {
         return stateRule.position <= stateRule.plainRule.items.lastIndex
     }
+
+    private fun getCurrentSymbol(stateRule: StateRule) = stateRule.plainRule.items[stateRule.position]
+
+    private fun isRule(symbolReference: SymbolReference) = symbolReference is SymbolReference.RuleReference
 }
