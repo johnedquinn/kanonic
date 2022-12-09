@@ -15,47 +15,35 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
     private fun computeFirstSet(): Map<SymbolReference, Set<TokenType>> {
         val firsts = mutableMapOf<SymbolReference, MutableSet<TokenType>>()
 
-        // Find Duplicate Definition Rules
-        val duplicateDefinedRules = mutableMapOf<SymbolReference, MutableList<Rule>>()
-        rules.forEach { rule ->
-            val ruleRef = SymbolReference.RuleReference(rule.name)
-            when (val duplicates = duplicateDefinedRules[ruleRef]) {
-                null -> duplicateDefinedRules[ruleRef] = mutableListOf(rule)
-                else -> duplicates.add(rule)
-            }
-        }
-
-        // Continue while changes still being made
         while (true) {
             var changesMade = false
-            duplicateDefinedRules.forEach { (ruleRef, ruleList) ->
-                println(ruleRef)
+
+            rules.forEach ruleList@{ rule ->
+                val ruleRef = SymbolReference.RuleReference(rule.name)
                 val firstsForRuleRef = mutableSetOf<TokenType>()
-                ruleList.forEach ruleList@{ rule ->
 
-                    // Check for empty rule
-                    if (rule.items.size == 1 && rule.items.first() == SymbolReference.TerminalReference(TokenType.EPSILON)) {
-                        firstsForRuleRef.add(TokenType.EPSILON)
-                        return@ruleList
-                    }
+                // Check for empty rule
+                if (rule.items.size == 1 && rule.items.first() == SymbolReference.TerminalReference(TokenType.EPSILON)) {
+                    firstsForRuleRef.add(TokenType.EPSILON)
+                }
 
-                    // Loop through items
+                // Loop through rule items
+                run itemsWrap@ {
                     rule.items.forEach { item ->
                         when (item) {
-
                             // Break on terminals
                             is SymbolReference.TerminalReference -> {
                                 firstsForRuleRef.add(item.type)
-                                return@ruleList
+                                return@itemsWrap
                             }
-
                             // Check for empty states
+                            // TODO: Do we add all of first from epsilon states? Or, do we just add the epsilon?
                             is SymbolReference.RuleReference -> {
                                 when (firsts[item]?.contains(TokenType.EPSILON)) {
                                     true -> firstsForRuleRef.addAll(firsts[item]!!)
                                     false -> {
                                         firstsForRuleRef.addAll(firsts[item]!!)
-                                        return@ruleList
+                                        return@itemsWrap
                                     }
                                     null -> { /* Do nothing */
                                     }
@@ -65,7 +53,7 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
                     }
                 }
 
-                // Add Results
+                // Add results and check for changes made
                 when (firsts[ruleRef]) {
                     null -> {
                         firsts[ruleRef] = firstsForRuleRef
@@ -83,7 +71,7 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
         return firsts
     }
 
-    fun computeFirst(symbolReference: SymbolReference) = when (symbolReference) {
+    internal fun computeFirst(symbolReference: SymbolReference) = when (symbolReference) {
         is SymbolReference.TerminalReference -> setOf(symbolReference)
         is SymbolReference.RuleReference -> firstSet[symbolReference]
     }
