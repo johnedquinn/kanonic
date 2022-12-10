@@ -8,6 +8,7 @@ import io.johnedquinn.kanonic.TokenType
 internal class AutomatonGenerator {
 
     private val states = mutableMapOf<List<StateRule>, Int>()
+    private val automatonStates = mutableListOf<State>()
     private val edges = mutableMapOf<Int, MutableList<Int>>()
 
     internal fun generate(grammar: Grammar): Automaton {
@@ -22,10 +23,7 @@ internal class AutomatonGenerator {
         val children = createChildrenStates(grammar, closure)
         addEdges(stateIndex, children)
 
-        // Print Information
-        printInfo()
-
-        return Automaton(listOf(closure))
+        return Automaton(automatonStates, edges)
     }
 
     private fun createKernel(grammar: Grammar, start: RuleReference): State {
@@ -34,7 +32,9 @@ internal class AutomatonGenerator {
         }.map { rule ->
             StateRule(rule, 0, setOf(TokenType.EOF))
         }.toMutableList()
-        return State(states.size, kernelRules)
+        val kernel = State(states.size, kernelRules)
+        automatonStates.add(kernel)
+        return kernel
     }
 
     private fun createChildrenStates(grammar: Grammar, input: State): Map<SymbolReference, State> {
@@ -68,7 +68,10 @@ internal class AutomatonGenerator {
                     addEdge(input.index, targetIndex)
                     return@forEach
                 }
-                false -> states[nextClosure.rules] = nextStateIndex
+                false -> {
+                    states[nextClosure.rules] = nextStateIndex
+                    automatonStates.add(nextClosure)
+                }
             }
             val children = createChildrenStates(grammar, nextClosure)
             addEdges(nextStateIndex, children)
@@ -118,39 +121,16 @@ internal class AutomatonGenerator {
         return State(states.size, closureRules)
     }
 
-    private fun addEdges(srcIndex: Int, children: Map<SymbolReference, State>) {
-        children.forEach { (_, child) ->
-            addEdge(srcIndex, child.index)
-        }
+    private fun addEdges(srcIndex: Int, children: Map<SymbolReference, State>) = children.forEach { (_, child) ->
+        addEdge(srcIndex, child.index)
     }
 
-    private fun addEdge(srcIndex: Int, childIndex: Int) {
-        when (edges.contains(srcIndex)) {
-            true -> edges[srcIndex]!!.add(childIndex)
-            false -> edges[srcIndex] = mutableListOf(childIndex)
-        }
+    private fun addEdge(srcIndex: Int, childIndex: Int) = when (edges.contains(srcIndex)) {
+        true -> edges[srcIndex]!!.add(childIndex)
+        false -> edges[srcIndex] = mutableListOf(childIndex)
     }
 
-    private fun printInfo() {
-        println("STATES")
-        states.forEach { (stateRules, index) ->
-            println("STATE_$index")
-            stateRules.forEachIndexed { ruleIndex, stateRule ->
-                println("  RULE_$ruleIndex: $stateRule")
-            }
-        }
-
-        println("EDGES")
-        edges.forEach { (src, children) ->
-            println("STATE_$src -> $children")
-        }
-    }
-
-    private fun hasMoreItems(stateRule: StateRule): Boolean {
-        return stateRule.position <= stateRule.plainRule.items.lastIndex
-    }
+    private fun hasMoreItems(stateRule: StateRule): Boolean = stateRule.position <= stateRule.plainRule.items.lastIndex
 
     private fun getCurrentSymbol(stateRule: StateRule) = stateRule.plainRule.items[stateRule.position]
-
-    private fun isRule(symbolReference: SymbolReference) = symbolReference is RuleReference
 }
