@@ -1,11 +1,12 @@
 package io.johnedquinn.kanonic
 
 data class Grammar(val rules: List<Rule>, val options: Options) {
-    internal val firstSet = computeFirstSet()
+    private val firstSet = computeFirstSet()
+    private val followSet = computeFollowSet()
 
     data class Options(
         val grammarName: String,
-        val start: RuleReference
+        var start: RuleReference
     )
 
     fun getRules(ref: RuleReference) = rules.filter { rule ->
@@ -17,8 +18,32 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
         is RuleReference -> firstSet[symbolReference]!!
     }
 
+    private fun computeFirst(refs: List<SymbolReference>): Set<TerminalReference> {
+        val firsts = mutableSetOf<TerminalReference>()
+        run wrapper@{
+            refs.forEachIndexed { refIndex, ref ->
+                val current = computeFirst(ref).toMutableSet()
+                if (current.contains(TerminalReference(TokenType.EPSILON)).not()) {
+                    firsts.addAll(current)
+                    return@wrapper
+                } else {
+                    val toAdd = when (refIndex != refs.lastIndex) {
+                        true -> current - setOf(TerminalReference(TokenType.EPSILON))
+                        false -> current
+                    }
+                    firsts.addAll(toAdd)
+                }
+            }
+        }
+        return firsts
+    }
+
     private fun computeFirstSet(): Map<SymbolReference, Set<TerminalReference>> {
+        // Initialize first set
         val firsts = mutableMapOf<SymbolReference, MutableSet<TokenType>>()
+        rules.forEach { rule ->
+            firsts[RuleReference(rule.name)] = mutableSetOf()
+        }
 
         while (true) {
             var changesMade = false
@@ -59,16 +84,8 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
                 }
 
                 // Add results and check for changes made
-                when (firsts[ruleRef]) {
-                    null -> {
-                        firsts[ruleRef] = firstsForRuleRef
-                        changesMade = true
-                    }
-                    else -> {
-                        if (firsts[ruleRef]!!.addAll(firstsForRuleRef)) {
-                            changesMade = true
-                        }
-                    }
+                if (firsts[ruleRef]!!.addAll(firstsForRuleRef)) {
+                    changesMade = true
                 }
             }
             if (changesMade.not()) break
@@ -77,6 +94,77 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
         // Convert token type to TerminalReference
         return firsts.entries.associate { entry ->
             entry.key to entry.value.map { type -> TerminalReference(type) }.toSet()
+        }
+    }
+
+    private fun computeFollowSet(): Map<SymbolReference, Set<TerminalReference>> {
+        // Initialize follow set
+        val follows = mutableMapOf<RuleReference, MutableSet<TokenType>>()
+        rules.forEach { rule -> follows[RuleReference(rule.name)] = mutableSetOf() }
+        follows[options.start]!!.add(TokenType.EOF)
+
+        while (true) {
+            var changesMade = false
+            rules.forEach ruleList@{ rule ->
+                rule.items.forEachIndexed { itemIndex, item ->
+                    if (item is TerminalReference) { return@forEachIndexed }
+                    val remaining = rule.items.subList(itemIndex + 1, rule.items.size)
+                    val nextFirsts = computeFirst(remaining).map { it.type }.toMutableSet()
+
+                    when (remaining.isEmpty() || nextFirsts.contains(TokenType.EPSILON)) {
+                        true -> {
+                            nextFirsts.remove(TokenType.EPSILON)
+                            if (follows[item]!!.addAll(nextFirsts)) { changesMade = true }
+                            if (follows[item]!!.addAll(follows[RuleReference(rule.name)]!!)) { changesMade = true}
+                        }
+                        false -> {
+                            if (follows[item]!!.addAll(nextFirsts)) { changesMade = true }
+                        }
+                    }
+                }
+            }
+            if (changesMade.not()) break
+        }
+        // Convert token type to TerminalReference
+        return follows.entries.associate { entry ->
+            entry.key to entry.value.map { type -> TerminalReference(type) }.toSet()
+        }
+    }
+
+    fun printInformation() {
+        println("GRAMMAR (name: ${options.grammarName}, start: ${options.start.name})")
+        printRules()
+        printFirst()
+        printFollow()
+    }
+
+    private fun printRules() {
+        println("RULES:")
+        rules.forEachIndexed { index, rule ->
+            print("\t$index: ")
+            rule.items.forEachIndexed { itemIndex, item ->
+                when (item) {
+                    is RuleReference -> print(item.name)
+                    is TerminalReference -> print(item.type)
+                }
+                if (itemIndex != rule.items.lastIndex)
+                    print(" - ")
+            }
+            println()
+        }
+    }
+
+    private fun printFirst() {
+        println("FIRST SET")
+        firstSet.forEach { entry ->
+            println("\t${entry.key} ---> ${entry.value}")
+        }
+    }
+
+    private fun printFollow() {
+        println("FOLLOW SET")
+        followSet.forEach { entry ->
+            println("\t${entry.key} ---> ${entry.value}")
         }
     }
 
