@@ -1,4 +1,3 @@
 package io.johnedquinn.kanonic
 
-sealed interface Symbol {
-}
+sealed interface Symbol

@@ -13,7 +13,7 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
         rule.name == ref.name
     }
 
-    internal fun computeFirst(symbolReference: SymbolReference) = when (symbolReference) {
+    private fun computeFirst(symbolReference: SymbolReference) = when (symbolReference) {
         is TerminalReference -> setOf(symbolReference)
         is RuleReference -> firstSet[symbolReference]!!
     }
