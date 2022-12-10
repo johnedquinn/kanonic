@@ -10,41 +10,41 @@ internal class ParserTests {
         val rule01 = Rule(
             name = "S",
             items = listOf(
-                SymbolReference.RuleReference("V"),
-                SymbolReference.TerminalReference(TokenType.EQUALS),
-                SymbolReference.RuleReference("E")
+                RuleReference("V"),
+                TerminalReference(TokenType.EQUALS),
+                RuleReference("E")
             )
         )
         val rule02 = Rule(
             name = "S",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.IDENTIFIER)
+                TerminalReference(TokenType.IDENTIFIER)
             )
         )
         val rule03 = Rule(
             name = "V",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.IDENTIFIER)
+                TerminalReference(TokenType.IDENTIFIER)
             )
         )
         val rule04 = Rule(
             name = "V",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.IDENTIFIER),
-                SymbolReference.TerminalReference(TokenType.BRACKET_LEFT),
-                SymbolReference.RuleReference("E"),
-                SymbolReference.TerminalReference(TokenType.BRACKET_RIGHT),
+                TerminalReference(TokenType.IDENTIFIER),
+                TerminalReference(TokenType.BRACKET_LEFT),
+                RuleReference("E"),
+                TerminalReference(TokenType.BRACKET_RIGHT),
             )
         )
         val rule05 = Rule(
             name = "E",
             items = listOf(
-                SymbolReference.RuleReference("V")
+                RuleReference("V")
             )
         )
         val grammar = Grammar(
             rules = listOf(rule01, rule02, rule03, rule04, rule05),
-            options = Grammar.Options("SimpleGrammar", SymbolReference.RuleReference("S"))
+            options = Grammar.Options("SimpleGrammar", RuleReference("S"))
         )
 
         val generator = AutomatonGenerator()
@@ -58,42 +58,42 @@ internal class ParserTests {
         val rule01 = Rule(
             name = "P",
             items = listOf(
-                SymbolReference.RuleReference("E")
+                RuleReference("E")
             )
         )
         val rule02 = Rule(
             name = "E",
             items = listOf(
-                SymbolReference.RuleReference("E"),
-                SymbolReference.TerminalReference(TokenType.PLUS),
-                SymbolReference.RuleReference("T")
+                RuleReference("E"),
+                TerminalReference(TokenType.PLUS),
+                RuleReference("T")
             )
         )
         val rule03 = Rule(
             name = "E",
             items = listOf(
-                SymbolReference.RuleReference("T")
+                RuleReference("T")
             )
         )
         val rule04 = Rule(
             name = "T",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.IDENTIFIER),
-                SymbolReference.TerminalReference(TokenType.PAREN_LEFT),
-                SymbolReference.RuleReference("E"),
-                SymbolReference.TerminalReference(TokenType.PAREN_RIGHT),
+                TerminalReference(TokenType.IDENTIFIER),
+                TerminalReference(TokenType.PAREN_LEFT),
+                RuleReference("E"),
+                TerminalReference(TokenType.PAREN_RIGHT),
             )
         )
         val rule05 = Rule(
             name = "T",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.IDENTIFIER)
+                TerminalReference(TokenType.IDENTIFIER)
             )
         )
 
         val grammar = Grammar(
             rules = listOf(rule01, rule02, rule03, rule04, rule05),
-            options = Grammar.Options("SimpleGrammar", SymbolReference.RuleReference("P"))
+            options = Grammar.Options("SimpleGrammar", RuleReference("P"))
         )
         val generator = AutomatonGenerator()
         val automaton = generator.generate(grammar)

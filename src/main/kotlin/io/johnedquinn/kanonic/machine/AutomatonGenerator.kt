@@ -1,6 +1,7 @@
 package io.johnedquinn.kanonic.machine
 
 import io.johnedquinn.kanonic.Grammar
+import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TokenType
 
@@ -27,7 +28,7 @@ internal class AutomatonGenerator {
         return Automaton(listOf(closure))
     }
 
-    private fun createKernel(grammar: Grammar, start: SymbolReference.RuleReference): State {
+    private fun createKernel(grammar: Grammar, start: RuleReference): State {
         val kernelRules = grammar.rules.filter { rule ->
             rule.name == start.name
         }.map { rule ->
@@ -78,7 +79,7 @@ internal class AutomatonGenerator {
 
     private fun computeClosure(grammar: Grammar, kernel: State): State {
         val closureRules = kernel.rules.toMutableList()
-        val added = mutableSetOf<SymbolReference.RuleReference>()
+        val added = mutableSetOf<RuleReference>()
 
         // Compute Closure
         var hasAdded = true
@@ -89,7 +90,7 @@ internal class AutomatonGenerator {
                 hasMoreItems(stateRule)
             }.forEach { stateRule ->
                 val symbolReference = getCurrentSymbol(stateRule)
-                if (symbolReference is SymbolReference.RuleReference && added.contains(symbolReference).not()) {
+                if (symbolReference is RuleReference && added.contains(symbolReference).not()) {
                     val rules = grammar.getRules(symbolReference)
                     val stateRules = rules.map { rule ->
                         StateRule(rule, 0, emptySet())
@@ -151,5 +152,5 @@ internal class AutomatonGenerator {
 
     private fun getCurrentSymbol(stateRule: StateRule) = stateRule.plainRule.items[stateRule.position]
 
-    private fun isRule(symbolReference: SymbolReference) = symbolReference is SymbolReference.RuleReference
+    private fun isRule(symbolReference: SymbolReference) = symbolReference is RuleReference
 }

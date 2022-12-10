@@ -10,62 +10,62 @@ class GrammarTest {
         val rule01 = Rule(
             name = "E",
             items = listOf(
-                SymbolReference.RuleReference("T"),
-                SymbolReference.RuleReference("R")
+                RuleReference("T"),
+                RuleReference("R")
             )
         )
         val rule02 = Rule(
             name = "R",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.PLUS),
-                SymbolReference.RuleReference("T"),
-                SymbolReference.RuleReference("R")
+                TerminalReference(TokenType.PLUS),
+                RuleReference("T"),
+                RuleReference("R")
             )
         )
         val rule03 = Rule(
             name = "R",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.HASHTAG)
+                TerminalReference(TokenType.HASHTAG)
             )
         )
         val rule04 = Rule(
             name = "T",
             items = listOf(
-                SymbolReference.RuleReference("F"),
-                SymbolReference.RuleReference("Y"),
+                RuleReference("F"),
+                RuleReference("Y"),
             )
         )
         val rule05 = Rule(
             name = "Y",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.ASTERISK),
-                SymbolReference.RuleReference("F"),
-                SymbolReference.RuleReference("Y"),
+                TerminalReference(TokenType.ASTERISK),
+                RuleReference("F"),
+                RuleReference("Y"),
             )
         )
         val rule06 = Rule(
             name = "Y",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.HASHTAG),
+                TerminalReference(TokenType.HASHTAG),
             )
         )
         val rule07 = Rule(
             name = "F",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.PAREN_LEFT),
-                SymbolReference.RuleReference("E"),
-                SymbolReference.TerminalReference(TokenType.PAREN_RIGHT),
+                TerminalReference(TokenType.PAREN_LEFT),
+                RuleReference("E"),
+                TerminalReference(TokenType.PAREN_RIGHT),
             )
         )
         val rule08 = Rule(
             name = "F",
             items = listOf(
-                SymbolReference.TerminalReference(TokenType.IDENTIFIER),
+                TerminalReference(TokenType.IDENTIFIER),
             )
         )
         val grammar = Grammar(
             rules = listOf(rule01, rule02, rule03, rule04, rule05, rule06, rule07, rule08),
-            options = Grammar.Options("SimpleGrammar", SymbolReference.RuleReference("E"))
+            options = Grammar.Options("SimpleGrammar", RuleReference("E"))
         )
 
         println(grammar.firstSet)
