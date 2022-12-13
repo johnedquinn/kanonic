@@ -25,7 +25,7 @@ data class Automaton(val states: List<State>, val edges: Map<Int, List<Int>>) {
     }
 
     private fun printStateRule(stateRule: StateRule) {
-        print("${stateRule.plainRule.name} --> ")
+        print("${stateRule.plainRule.name} ---> ")
         stateRule.plainRule.items.forEachIndexed { index, item ->
             if (stateRule.position == index) {
                 print("⚬")
@@ -34,7 +34,9 @@ data class Automaton(val states: List<State>, val edges: Map<Int, List<Int>>) {
                 is RuleReference -> print("\"${item.name}\"")
                 is TerminalReference -> print(item.type)
             }
-            if (index != stateRule.plainRule.items.lastIndex) { print(" ") }
+            print(" ")
         }
+
+        print("--- Lookahead: ${stateRule.lookahead}")
     }
 }

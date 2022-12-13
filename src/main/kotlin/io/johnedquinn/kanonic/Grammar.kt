@@ -13,12 +13,12 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
         rule.name == ref.name
     }
 
-    private fun computeFirst(symbolReference: SymbolReference) = when (symbolReference) {
+    internal fun computeFirst(symbolReference: SymbolReference) = when (symbolReference) {
         is TerminalReference -> setOf(symbolReference)
         is RuleReference -> firstSet[symbolReference]!!
     }
 
-    private fun computeFirst(refs: List<SymbolReference>): Set<TerminalReference> {
+    internal fun computeFirst(refs: List<SymbolReference>): Set<TerminalReference> {
         val firsts = mutableSetOf<TerminalReference>()
         run wrapper@{
             refs.forEachIndexed { refIndex, ref ->
@@ -141,7 +141,7 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
     private fun printRules() {
         println("RULES:")
         rules.forEachIndexed { index, rule ->
-            print("\t$index: ")
+            print("\t${rule.name} --> ")
             rule.items.forEachIndexed { itemIndex, item ->
                 when (item) {
                     is RuleReference -> print(item.name)

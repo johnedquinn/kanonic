@@ -17,6 +17,7 @@ internal class ParserTests {
         }.toGrammar()
         val generator = AutomatonGenerator()
         val automaton = generator.generate(grammar)
+        grammar.printInformation()
         automaton.printInfo()
     }
 
@@ -32,6 +33,7 @@ internal class ParserTests {
         }.toGrammar()
         val generator = AutomatonGenerator()
         val automaton = generator.generate(grammar)
+        grammar.printInformation()
         automaton.printInfo()
     }
 }

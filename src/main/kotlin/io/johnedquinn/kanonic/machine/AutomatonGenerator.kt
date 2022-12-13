@@ -1,13 +1,11 @@
 package io.johnedquinn.kanonic.machine
 
-import io.johnedquinn.kanonic.Grammar
-import io.johnedquinn.kanonic.RuleReference
-import io.johnedquinn.kanonic.SymbolReference
-import io.johnedquinn.kanonic.TokenType
+import io.johnedquinn.kanonic.*
 
 internal class AutomatonGenerator {
 
     private val states = mutableMapOf<List<StateRule>, Int>()
+    private val statesTemp = mutableSetOf<State>()
     private val automatonStates = mutableListOf<State>()
     private val edges = mutableMapOf<Int, MutableList<Int>>()
 
@@ -17,6 +15,7 @@ internal class AutomatonGenerator {
         val stateIndex = 0
         val kernel = createKernel(grammar, grammar.options.start)
         val closure = computeClosure(grammar, kernel)
+        automatonStates.add(closure)
         states[closure.rules] = stateIndex
 
         // Create Children & Edges
@@ -30,11 +29,9 @@ internal class AutomatonGenerator {
         val kernelRules = grammar.rules.filter { rule ->
             rule.name == start.name
         }.map { rule ->
-            StateRule(rule, 0, setOf(TokenType.EOF))
+            StateRule(rule, 0, mutableSetOf(TokenType.EOF))
         }.toMutableList()
-        val kernel = State(states.size, kernelRules)
-        automatonStates.add(kernel)
-        return kernel
+        return State(states.size, kernelRules)
     }
 
     private fun createChildrenStates(grammar: Grammar, input: State): Map<SymbolReference, State> {
@@ -45,10 +42,11 @@ internal class AutomatonGenerator {
         val ruleMap: MutableMap<SymbolReference, MutableList<StateRule>> = mutableMapOf()
         remainingRules.forEach { stateRule ->
             val symbol = stateRule.plainRule.items[stateRule.position]
+            val newLookahead = mutableSetOf<TokenType>().also { it.addAll(stateRule.lookahead) }
             val newRule = StateRule(
                 plainRule = stateRule.plainRule,
                 position = stateRule.position + 1,
-                lookahead = stateRule.lookahead
+                lookahead = newLookahead
             )
             when (ruleMap.contains(symbol)) {
                 false -> ruleMap[symbol] = mutableListOf(newRule)
@@ -82,39 +80,64 @@ internal class AutomatonGenerator {
 
     private fun computeClosure(grammar: Grammar, kernel: State): State {
         val closureRules = kernel.rules.toMutableList()
+        val kernelRuleLastIndex = kernel.rules.lastIndex
         val added = mutableSetOf<RuleReference>()
 
         // Compute Closure
-        var hasAdded = true
-        while (hasAdded) {
-            hasAdded = false
+        var hasModified = true
+        while (hasModified) {
+            hasModified = false
             val toAddRules = mutableListOf<StateRule>()
             closureRules.filter { stateRule ->
                 hasMoreItems(stateRule)
             }.forEach { stateRule ->
                 val symbolReference = getCurrentSymbol(stateRule)
-                if (symbolReference is RuleReference && added.contains(symbolReference).not()) {
-                    val rules = grammar.getRules(symbolReference)
-                    val stateRules = rules.map { rule ->
-                        StateRule(rule, 0, emptySet())
-                    }
-                    added.add(symbolReference)
-                    toAddRules.addAll(stateRules)
-                    hasAdded = true
-                }
+                if (symbolReference !is RuleReference || added.contains(symbolReference)) { return@forEach }
+                val rules = grammar.getRules(symbolReference)
+                val lookahead = mutableSetOf<TokenType>()
+                val stateRules = rules.map { rule -> StateRule(rule, 0, lookahead) }
+                added.add(symbolReference)
+                toAddRules.addAll(stateRules)
+                hasModified = true
+
             }
             closureRules.addAll(toAddRules)
         }
 
-        // TODO: Compute Lookaheads
-        hasAdded = true
-        while (hasAdded) {
-            hasAdded = false
+        hasModified = true
+        while (hasModified) {
+            hasModified = false
             closureRules.filter { stateRule ->
                 hasMoreItems(stateRule)
             }.forEach { stateRule ->
-                val currentSymbol = stateRule.plainRule.items[stateRule.position]
-                // if (isRule(currentSymbol) )
+                val symbolReference = getCurrentSymbol(stateRule)
+                if (symbolReference !is RuleReference) {
+                    return@forEach
+                }
+
+                // Calculate Lookahead
+                val remainingItems = stateRule.plainRule.items.subList(stateRule.position + 1, stateRule.plainRule.items.size)
+                val remainingFirstSet = grammar.computeFirst(remainingItems).map { it.type }.toMutableSet()
+                val lookaheadAdder = when {
+                    // For an item like A → α.B with a lookahead of {L},
+                    //  add new rules like B → .γ with a lookahead of {L}.
+                    remainingItems.isEmpty() -> stateRule.lookahead
+                    // For an item like A → α.Bβ, with a lookahead of {L}, and If β CANNOT produce ε,
+                    //  add new rules like B → .γ with a lookahead as follows: the lookahead is FIRST(β).
+                    remainingFirstSet.contains(TokenType.EPSILON).not() -> remainingFirstSet
+                    // For an item like A → α.Bβ, with a lookahead of {L}, and if β CAN produce ε
+                    //  add new rules like B → .γ with a lookahead as follows: the lookahead is FIRST(β) ∪{L}.
+                    else -> remainingFirstSet.union(stateRule.lookahead).toMutableSet()
+                }
+                val lookahead = mutableSetOf<TokenType>().also { it.addAll(lookaheadAdder) }
+
+                // Modify Relevant Rules
+                val toModifyRules = closureRules.filterIndexed { index, closureRule ->
+                    closureRule.plainRule.name == symbolReference.name && index > kernelRuleLastIndex
+                }
+                toModifyRules.forEach { toModifyRule ->
+                    if (toModifyRule.lookahead.addAll(lookahead)) hasModified = true
+                }
             }
         }
 
