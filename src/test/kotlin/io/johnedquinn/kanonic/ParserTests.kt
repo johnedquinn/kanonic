@@ -2,6 +2,7 @@ package io.johnedquinn.kanonic
 
 import io.johnedquinn.kanonic.dsl.grammar
 import io.johnedquinn.kanonic.machine.AutomatonGenerator
+import io.johnedquinn.kanonic.machine.TableGenerator
 import org.junit.jupiter.api.Test
 
 internal class ParserTests {
@@ -19,6 +20,7 @@ internal class ParserTests {
         val automaton = generator.generate(grammar)
         grammar.printInformation()
         automaton.printInfo()
+        TableGenerator(grammar, automaton).generate()
     }
 
 
@@ -35,5 +37,7 @@ internal class ParserTests {
         val automaton = generator.generate(grammar)
         grammar.printInformation()
         automaton.printInfo()
+
+        TableGenerator(grammar, automaton).generate()
     }
 }
