@@ -1,9 +1,16 @@
 package io.johnedquinn.kanonic.machine
 
 import io.johnedquinn.kanonic.RuleReference
+import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
+import io.johnedquinn.kanonic.TokenType
 
-data class Automaton(val states: List<State>, val edges: Map<Int, List<Int>>) {
+data class Automaton(val states: List<State>, val edges: Map<Int, List<EdgeTarget>>) {
+
+    data class EdgeTarget(
+        val edge: SymbolReference,
+        val targetState: Int
+    )
 
     internal fun printInfo() {
         println("GENERAL INFORMATION")

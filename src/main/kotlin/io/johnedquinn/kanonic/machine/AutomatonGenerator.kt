@@ -5,9 +5,8 @@ import io.johnedquinn.kanonic.*
 internal class AutomatonGenerator {
 
     private val states = mutableMapOf<List<StateRule>, Int>()
-    private val statesTemp = mutableSetOf<State>()
     private val automatonStates = mutableListOf<State>()
-    private val edges = mutableMapOf<Int, MutableList<Int>>()
+    private val edges = mutableMapOf<Int, MutableList<Automaton.EdgeTarget>>()
 
     internal fun generate(grammar: Grammar): Automaton {
 
@@ -34,7 +33,7 @@ internal class AutomatonGenerator {
         return State(states.size, kernelRules)
     }
 
-    private fun createChildrenStates(grammar: Grammar, input: State): Map<SymbolReference, State> {
+    private fun createChildrenStates(grammar: Grammar, input: State): Map<SymbolReference, Automaton.EdgeTarget> {
         // Grab rules that have transitions
         val remainingRules = input.rules.filter { stateRule -> hasMoreItems(stateRule) }
 
@@ -55,6 +54,7 @@ internal class AutomatonGenerator {
         }
 
         // Recursively create next states
+        val allEdges = mutableMapOf<SymbolReference, Automaton.EdgeTarget>()
         val nextStates: MutableMap<SymbolReference, State> = mutableMapOf()
         ruleMap.forEach { (ref, ruleList) ->
             val nextKernel = State(states.size, ruleList)
@@ -63,19 +63,20 @@ internal class AutomatonGenerator {
             when (states.contains(nextClosure.rules)) {
                 true -> {
                     val targetIndex = states[nextClosure.rules]!!
-                    addEdge(input.index, targetIndex)
+                    addEdge(input.index, Automaton.EdgeTarget(ref, targetIndex))
                     return@forEach
                 }
                 false -> {
                     states[nextClosure.rules] = nextStateIndex
                     automatonStates.add(nextClosure)
+                    allEdges[ref] = Automaton.EdgeTarget(ref, nextStateIndex)
                 }
             }
             val children = createChildrenStates(grammar, nextClosure)
             addEdges(nextStateIndex, children)
             nextStates[ref] = nextClosure
         }
-        return nextStates
+        return allEdges
     }
 
     private fun computeClosure(grammar: Grammar, kernel: State): State {
@@ -144,13 +145,13 @@ internal class AutomatonGenerator {
         return State(states.size, closureRules)
     }
 
-    private fun addEdges(srcIndex: Int, children: Map<SymbolReference, State>) = children.forEach { (_, child) ->
-        addEdge(srcIndex, child.index)
+    private fun addEdges(srcIndex: Int, children: Map<SymbolReference, Automaton.EdgeTarget>) = children.forEach { (_, child) ->
+        addEdge(srcIndex, child)
     }
 
-    private fun addEdge(srcIndex: Int, childIndex: Int) = when (edges.contains(srcIndex)) {
-        true -> edges[srcIndex]!!.add(childIndex)
-        false -> edges[srcIndex] = mutableListOf(childIndex)
+    private fun addEdge(srcIndex: Int, target: Automaton.EdgeTarget) = when (edges.contains(srcIndex)) {
+        true -> edges[srcIndex]!!.add(target)
+        false -> edges[srcIndex] = mutableListOf(target)
     }
 
     private fun hasMoreItems(stateRule: StateRule): Boolean = stateRule.position <= stateRule.plainRule.items.lastIndex
