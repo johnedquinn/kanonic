@@ -22,6 +22,7 @@ object Dependencies {
 dependencies {
     // Main
     implementation(kotlin("stdlib"))
+    implementation("de.m3y.kformat:kformat:0.9")
 
     // Test
     testImplementation(Dependencies.kotlinTest)

@@ -20,9 +20,9 @@ internal class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
     val actionTable: List<MutableList<Action?>> = List(numberOfStates) { MutableList(numberOfTerminals) { null } }
     val goToTable: List<MutableList<Action?>> = List(numberOfStates) { MutableList(numberOfNonTerminals) { null } }
 
-    internal fun generate() {
+    internal fun generate(): ParseTable {
         automaton.states.forEachIndexed { stateIndex, state ->
-            val edges = automaton.edges[state.index] ?: return@forEachIndexed
+            val edges = automaton.edges[state.index] ?: emptyList()
             edges.forEach { edgeTarget ->
                 when (val edgeSymbol = edgeTarget.edge) {
                     // Add Shifts
@@ -31,6 +31,7 @@ internal class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
                             when (foundAction) {
                                 is ShiftAction -> throw RuntimeException("Shift-shift conflict!")
                                 is ReduceAction -> throw RuntimeException("Shift-reduce conflict!")
+                                else -> TODO()
                             }
                         }
                         actionTable[stateIndex][edgeSymbol.type.ordinal] = ShiftAction(edgeTarget.targetState)
@@ -42,14 +43,38 @@ internal class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
                             when (foundAction) {
                                 is ShiftAction -> throw RuntimeException("Shift-shift conflict!")
                                 is ReduceAction -> throw RuntimeException("Shift-reduce conflict!")
+                                else -> TODO()
                             }
                         }
                         actionTable[stateIndex][nonTerminalIndex] = ShiftAction(edgeTarget.targetState)
                     }
                 }
             }
+
+            // Add Reduce and Accept
+            state.rules.forEach { rule ->
+                if (rule.position <= rule.plainRule.items.lastIndex) return@forEach
+                val ruleIndex = grammar.rules.indexOfFirst { it == rule.plainRule }
+                rule.lookahead.forEach { lookaheadToken ->
+                    when (rule.plainRule.name == grammar.options.start.name) {
+                        true -> {
+                            actionTable[stateIndex][lookaheadToken.ordinal] = AcceptAction(lookaheadToken)
+                        }
+                        false -> {
+                            actionTable[stateIndex][lookaheadToken.ordinal]?.let { foundAction ->
+                                when (foundAction) {
+                                    is ShiftAction -> throw RuntimeException("Shift-reduce conflict!")
+                                    is ReduceAction -> throw RuntimeException("Reduce-reduce conflict!")
+                                    else -> TODO()
+                                }
+                            }
+                            actionTable[stateIndex][lookaheadToken.ordinal] = ReduceAction(ruleIndex)
+                        }
+                    }
+
+                }
+            }
         }
-        val parseTable = ParseTable(actionTable, goToTable)
-        println(parseTable)
+        return ParseTable(actionTable, goToTable, nonTerminals)
     }
 }

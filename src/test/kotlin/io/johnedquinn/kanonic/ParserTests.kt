@@ -20,7 +20,8 @@ internal class ParserTests {
         val automaton = generator.generate(grammar)
         grammar.printInformation()
         automaton.printInfo()
-        TableGenerator(grammar, automaton).generate()
+        val table = TableGenerator(grammar, automaton).generate()
+        println(table.prettify())
     }
 
 
@@ -37,7 +38,7 @@ internal class ParserTests {
         val automaton = generator.generate(grammar)
         grammar.printInformation()
         automaton.printInfo()
-
-        TableGenerator(grammar, automaton).generate()
+        val table = TableGenerator(grammar, automaton).generate()
+        println(table.prettify())
     }
 }
