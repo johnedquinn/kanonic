@@ -39,14 +39,14 @@ internal class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
                     // Add GoTo
                     is RuleReference -> {
                         val nonTerminalIndex = namesToNonTerminalIndex[edgeSymbol.name]!!
-                        actionTable[stateIndex][nonTerminalIndex]?.let { foundAction ->
+                        goToTable[stateIndex][nonTerminalIndex]?.let { foundAction ->
                             when (foundAction) {
                                 is ShiftAction -> throw RuntimeException("Shift-shift conflict!")
                                 is ReduceAction -> throw RuntimeException("Shift-reduce conflict!")
                                 else -> TODO()
                             }
                         }
-                        actionTable[stateIndex][nonTerminalIndex] = ShiftAction(edgeTarget.targetState)
+                        goToTable[stateIndex][nonTerminalIndex] = ShiftAction(edgeTarget.targetState)
                     }
                 }
             }

@@ -3,6 +3,7 @@ package io.johnedquinn.kanonic
 import io.johnedquinn.kanonic.dsl.grammar
 import io.johnedquinn.kanonic.machine.AutomatonGenerator
 import io.johnedquinn.kanonic.machine.TableGenerator
+import io.johnedquinn.kanonic.parse.Parser
 import org.junit.jupiter.api.Test
 
 internal class ParserTests {
@@ -40,5 +41,14 @@ internal class ParserTests {
         automaton.printInfo()
         val table = TableGenerator(grammar, automaton).generate()
         println(table.prettify())
+
+        val parser = Parser(grammar, table)
+        val tokens = listOf(
+            Token(TokenType.IDENTIFIER),
+            Token(TokenType.PLUS),
+            Token(TokenType.IDENTIFIER),
+            Token(TokenType.EOF)
+        )
+        parser.parse(tokens)
     }
 }
