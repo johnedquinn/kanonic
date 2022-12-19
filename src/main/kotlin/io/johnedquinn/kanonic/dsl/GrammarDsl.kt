@@ -19,14 +19,20 @@ class GrammarDsl(private val name: String, private val start: String) {
         return rule
     }
 
-    fun add(name: String, def: TokenType): Rule {
-        val rule = Rule(name, listOf(TerminalReference(def)))
+    infix fun String.eq(other: List<SymbolReference>): Rule {
+        val rule = Rule(this, other)
         this@GrammarDsl.rules.add(rule)
         return rule
     }
 
-    fun add(name: String, def: String): Rule {
-        val rule = Rule(name, listOf(RuleReference(def)))
+    infix fun String.eq(other: String): Rule {
+        val rule = Rule(this, listOf(RuleReference(other)))
+        this@GrammarDsl.rules.add(rule)
+        return rule
+    }
+
+    infix fun String.eq(other: TokenType): Rule {
+        val rule = Rule(this, listOf(TerminalReference(other)))
         this@GrammarDsl.rules.add(rule)
         return rule
     }

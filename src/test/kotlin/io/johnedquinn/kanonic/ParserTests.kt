@@ -25,30 +25,46 @@ internal class ParserTests {
         println(table.prettify())
     }
 
-
     @Test
     fun generateAutomatonGrammar10() {
+        // Create Grammar
         val grammar = grammar("G10", "P") {
-            add("P") { + "E" }
-            add("E") { + "E" - TokenType.PLUS - "T" }
-            add("E") { + "T" }
-            add("T") { + TokenType.IDENTIFIER - TokenType.PAREN_LEFT - "E" - TokenType.PAREN_RIGHT }
-            add("T") { + TokenType.IDENTIFIER }
+            "P" eq "E"
+            "E" eq "E" - TokenType.PLUS - "T"
+            "E" eq "T"
+            "T" eq TokenType.IDENTIFIER - TokenType.PAREN_LEFT - "E" - TokenType.PAREN_RIGHT
+            "T" eq TokenType.IDENTIFIER
         }.toGrammar()
-        val generator = AutomatonGenerator()
-        val automaton = generator.generate(grammar)
-        grammar.printInformation()
-        automaton.printInfo()
-        val table = TableGenerator(grammar, automaton).generate()
-        println(table.prettify())
 
-        val parser = Parser(grammar, table)
+        // Create Query
         val tokens = listOf(
             Token(TokenType.IDENTIFIER),
             Token(TokenType.PLUS),
             Token(TokenType.IDENTIFIER),
+            Token(TokenType.PLUS),
+            Token(TokenType.IDENTIFIER),
+            Token(TokenType.PLUS),
+            Token(TokenType.IDENTIFIER),
+            Token(TokenType.PAREN_LEFT),
+            Token(TokenType.IDENTIFIER),
+            Token(TokenType.PLUS),
+            Token(TokenType.IDENTIFIER),
+            Token(TokenType.PAREN_RIGHT),
             Token(TokenType.EOF)
         )
+
+        // Create Parser
+        val generator = AutomatonGenerator()
+        val automaton = generator.generate(grammar)
+        val table = TableGenerator(grammar, automaton).generate()
+        val parser = Parser(grammar, table)
+
+        // Print Information
+        grammar.printInformation()
+        automaton.printInfo()
+        println(table.prettify())
+
+        // Parse
         parser.parse(tokens)
     }
 }
