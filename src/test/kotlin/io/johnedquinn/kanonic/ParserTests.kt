@@ -4,6 +4,7 @@ import io.johnedquinn.kanonic.dsl.grammar
 import io.johnedquinn.kanonic.machine.AutomatonGenerator
 import io.johnedquinn.kanonic.machine.TableGenerator
 import io.johnedquinn.kanonic.parse.Parser
+import io.johnedquinn.kanonic.utils.NodeFormatter
 import org.junit.jupiter.api.Test
 
 internal class ParserTests {
@@ -29,11 +30,11 @@ internal class ParserTests {
     fun generateAutomatonGrammar10() {
         // Create Grammar
         val grammar = grammar("G10", "P") {
-            "P" eq "E"
-            "E" eq "E" - TokenType.PLUS - "T"
-            "E" eq "T"
-            "T" eq TokenType.IDENTIFIER - TokenType.PAREN_LEFT - "E" - TokenType.PAREN_RIGHT
-            "T" eq TokenType.IDENTIFIER
+            "P" eq "E" alias "Root"
+            "E" eq "E" - TokenType.PLUS - "T" alias "ExprPlus"
+            "E" eq "T" alias "ExprFall"
+            "T" eq TokenType.IDENTIFIER - TokenType.PAREN_LEFT - "E" - TokenType.PAREN_RIGHT alias "Index"
+            "T" eq TokenType.IDENTIFIER alias "Ident"
         }.toGrammar()
 
         // Create Query
@@ -65,6 +66,7 @@ internal class ParserTests {
         println(table.prettify())
 
         // Parse
-        parser.parse(tokens)
+        val tree = parser.parse(tokens)
+        println(NodeFormatter.format(tree))
     }
 }

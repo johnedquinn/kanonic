@@ -31,6 +31,11 @@ class GrammarDsl(private val name: String, private val start: String) {
         return rule
     }
 
+    infix fun Rule.alias(other: String): Rule {
+        this.alias = other
+        return this
+    }
+
     infix fun String.eq(other: TokenType): Rule {
         val rule = Rule(this, listOf(TerminalReference(other)))
         this@GrammarDsl.rules.add(rule)

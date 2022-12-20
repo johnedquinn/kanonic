@@ -23,6 +23,7 @@ dependencies {
     // Main
     implementation(kotlin("stdlib"))
     implementation("de.m3y.kformat:kformat:0.9")
+    implementation("com.squareup:kotlinpoet:1.12.0")
 
     // Test
     testImplementation(Dependencies.kotlinTest)
