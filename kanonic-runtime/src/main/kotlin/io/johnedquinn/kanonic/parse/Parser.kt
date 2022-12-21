@@ -6,7 +6,6 @@ import io.johnedquinn.kanonic.machine.AcceptAction
 import io.johnedquinn.kanonic.machine.ParseTable
 import io.johnedquinn.kanonic.machine.ReduceAction
 import io.johnedquinn.kanonic.machine.ShiftAction
-import java.util.Locale
 import java.util.Stack
 
 /**
@@ -27,8 +26,7 @@ import java.util.Stack
  *   - Otherwise:
  *     - Halt with a parse error.
  */
-internal class Parser(private val grammar: Grammar, private val table: ParseTable) {
-
+internal class Parser(private val grammar: Grammar, private val table: ParseTable, private val info: ParserInfo) {
 
     internal fun parse(tokens: List<Token>): Node {
         // Add first state
@@ -37,7 +35,6 @@ internal class Parser(private val grammar: Grammar, private val table: ParseTabl
 
         var tokenIndex = 0
         while (true) {
-
             val currentState = stack.peek()
             val token = tokens[tokenIndex]
 
@@ -83,15 +80,7 @@ internal class Parser(private val grammar: Grammar, private val table: ParseTabl
             children.add(toAddNodes.pop())
         }
         val childrenReversed = children.reversed()
-        // TODO: Add this to the logic of the parse table
-        val newNode = when (rule.alias.lowercase(Locale.getDefault())) {
-            "root" -> ExampleAST.PNode.RootNode(currentState, childrenReversed, null)
-            "exprplus" -> ExampleAST.ENode.ExprPlusNode(currentState, childrenReversed, null)
-            "exprfall" -> ExampleAST.ENode.ExprFallNode(currentState, childrenReversed, null)
-            "index" -> ExampleAST.TNode.IndexNode(currentState, childrenReversed, null)
-            "ident" -> ExampleAST.TNode.IdentNode(currentState, childrenReversed, null)
-            else -> throw RuntimeException("No known alias!")
-        }.also { parent -> parent.children.forEach { it.parent = parent } }
+        val newNode = info.createRuleNode(action.rule, currentState, childrenReversed, null)
         toAddNodes.push(newNode)
         val topState = stack.peek()
         val ruleIndex = table.nonTerminals.indexOf(rule.name)
