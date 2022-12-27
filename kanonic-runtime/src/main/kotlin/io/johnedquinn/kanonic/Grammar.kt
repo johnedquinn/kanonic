@@ -6,7 +6,8 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
 
     data class Options(
         val grammarName: String,
-        var start: RuleReference
+        var start: RuleReference,
+        val packageName: String? = null,
     )
 
     fun getRules(ref: RuleReference) = rules.filter { rule ->
@@ -58,7 +59,7 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
                 }
 
                 // Loop through rule items
-                run itemsWrap@ {
+                run itemsWrap@{
                     rule.items.forEach { item ->
                         when (item) {
                             // Break on terminals
@@ -115,7 +116,7 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
                         true -> {
                             nextFirsts.remove(TokenType.EPSILON)
                             if (follows[item]!!.addAll(nextFirsts)) { changesMade = true }
-                            if (follows[item]!!.addAll(follows[RuleReference(rule.name)]!!)) { changesMade = true}
+                            if (follows[item]!!.addAll(follows[RuleReference(rule.name)]!!)) { changesMade = true }
                         }
                         false -> {
                             if (follows[item]!!.addAll(nextFirsts)) { changesMade = true }
@@ -147,8 +148,9 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
                     is RuleReference -> print(item.name)
                     is TerminalReference -> print(item.type)
                 }
-                if (itemIndex != rule.items.lastIndex)
+                if (itemIndex != rule.items.lastIndex) {
                     print(" - ")
+                }
             }
             println()
         }
@@ -167,5 +169,4 @@ data class Grammar(val rules: List<Rule>, val options: Options) {
             println("\t${entry.key} ---> ${entry.value}")
         }
     }
-
 }

@@ -1,6 +1,7 @@
 package io.johnedquinn.kanonic
 
 import io.johnedquinn.kanonic.dsl.grammar
+import io.johnedquinn.kanonic.example.G10Info
 import io.johnedquinn.kanonic.machine.AutomatonGenerator
 import io.johnedquinn.kanonic.machine.TableGenerator
 import io.johnedquinn.kanonic.parse.Parser
@@ -12,11 +13,11 @@ internal class ParserTests {
     @Test
     fun generateAutomatonGrammar11() {
         val grammar = grammar("G11", "S") {
-            add("S") { + "V" - TokenType.EQUALS - "E" }
-            add("S") { + TokenType.IDENTIFIER }
-            add("V") { + TokenType.IDENTIFIER }
-            add("V") { + TokenType.IDENTIFIER - TokenType.BRACKET_LEFT - "E" - TokenType.BRACKET_RIGHT }
-            add("E") { + "V" }
+            add("S") { +"V" - TokenType.EQUALS - "E" }
+            add("S") { +TokenType.IDENTIFIER }
+            add("V") { +TokenType.IDENTIFIER }
+            add("V") { +TokenType.IDENTIFIER - TokenType.BRACKET_LEFT - "E" - TokenType.BRACKET_RIGHT }
+            add("E") { +"V" }
         }.toGrammar()
         val generator = AutomatonGenerator()
         val automaton = generator.generate(grammar)
@@ -58,7 +59,7 @@ internal class ParserTests {
         val generator = AutomatonGenerator()
         val automaton = generator.generate(grammar)
         val table = TableGenerator(grammar, automaton).generate()
-        val parser = Parser(grammar, table)
+        val parser = Parser(grammar, table, G10Info())
 
         // Print Information
         grammar.printInformation()
