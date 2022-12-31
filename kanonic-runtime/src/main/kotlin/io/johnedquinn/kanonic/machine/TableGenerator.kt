@@ -5,7 +5,7 @@ import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.TokenType
 
-internal class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
+class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
 
     // Constants
     private val numberOfStates = automaton.states.size
@@ -20,7 +20,7 @@ internal class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
     val actionTable: List<MutableList<Action?>> = List(numberOfStates) { MutableList(numberOfTerminals) { null } }
     val goToTable: List<MutableList<Action?>> = List(numberOfStates) { MutableList(numberOfNonTerminals) { null } }
 
-    internal fun generate(): ParseTable {
+    fun generate(): ParseTable {
         automaton.states.forEachIndexed { stateIndex, state ->
             val edges = automaton.edges[state.index] ?: emptyList()
             edges.forEach { edgeTarget ->

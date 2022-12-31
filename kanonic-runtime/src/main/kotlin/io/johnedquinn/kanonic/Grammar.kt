@@ -1,6 +1,8 @@
 package io.johnedquinn.kanonic
 
-data class Grammar(val rules: List<Rule>, val options: Options) {
+import io.johnedquinn.kanonic.parse.TokenDefinition
+
+data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List<TokenDefinition>) {
     private val firstSet = computeFirstSet()
     private val followSet = computeFollowSet()
 

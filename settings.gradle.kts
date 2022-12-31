@@ -4,3 +4,4 @@ include(
     "kanonic-gen",
     "kanonic-runtime"
 )
+include("tests")

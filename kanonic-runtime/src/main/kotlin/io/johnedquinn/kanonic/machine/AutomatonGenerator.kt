@@ -2,13 +2,13 @@ package io.johnedquinn.kanonic.machine
 
 import io.johnedquinn.kanonic.*
 
-internal class AutomatonGenerator {
+class AutomatonGenerator {
 
     private val states = mutableMapOf<List<StateRule>, Int>()
     private val automatonStates = mutableListOf<State>()
     private val edges = mutableMapOf<Int, MutableList<Automaton.EdgeTarget>>()
 
-    internal fun generate(grammar: Grammar): Automaton {
+    fun generate(grammar: Grammar): Automaton {
 
         // Create Start State
         val stateIndex = 0

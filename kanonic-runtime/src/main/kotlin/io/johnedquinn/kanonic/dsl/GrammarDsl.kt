@@ -1,11 +1,18 @@
 package io.johnedquinn.kanonic.dsl
 
-import io.johnedquinn.kanonic.*
+import io.johnedquinn.kanonic.Grammar
+import io.johnedquinn.kanonic.Rule
+import io.johnedquinn.kanonic.RuleReference
+import io.johnedquinn.kanonic.SymbolReference
+import io.johnedquinn.kanonic.TerminalReference
+import io.johnedquinn.kanonic.TokenType
+import io.johnedquinn.kanonic.parse.TokenDefinition
 
 class GrammarDsl(private val name: String, private val start: String) {
     private val rules = mutableListOf<Rule>()
+    private var tokens: List<TokenDefinition> = emptyList()
 
-    fun toGrammar(): Grammar = Grammar(rules, Grammar.Options(name, RuleReference(start)))
+    fun toGrammar(): Grammar = Grammar(rules, Grammar.Options(name, RuleReference(start)), tokens)
 
     fun add(name: String, def: List<SymbolReference>): Rule {
         val rule = Rule(name, def)
@@ -81,10 +88,31 @@ class GrammarDsl(private val name: String, private val start: String) {
     operator fun String.unaryPlus(): List<SymbolReference> {
         return listOf(RuleReference(this))
     }
+
+    fun tokens(f: LexerDsl.() -> Unit): GrammarDsl {
+        val l = LexerDsl()
+        l.f()
+        tokens = l.build()
+        return this
+    }
 }
 
-fun grammar(name: String, start: String, f: GrammarDsl.() -> Unit): GrammarDsl {
+public fun grammar(name: String, start: String, f: GrammarDsl.() -> Unit): GrammarDsl {
     val grammar = GrammarDsl(name, start)
     grammar.f()
     return grammar
 }
+
+class LexerDsl {
+    private val tokens = mutableListOf<TokenDefinition>()
+    init {
+        tokens.add(TokenDefinition(tokens.size, "EOF", ""))
+    }
+    operator fun String.minus(other: String) {
+        val token = TokenDefinition(tokens.size, this, other)
+        tokens.add(token)
+    }
+
+    fun build() = tokens.toList()
+}
+

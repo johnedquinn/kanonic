@@ -4,7 +4,7 @@ import io.johnedquinn.kanonic.dsl.grammar
 import io.johnedquinn.kanonic.example.G10Info
 import io.johnedquinn.kanonic.machine.AutomatonGenerator
 import io.johnedquinn.kanonic.machine.TableGenerator
-import io.johnedquinn.kanonic.parse.Parser
+import io.johnedquinn.kanonic.parse.ParserInternal
 import io.johnedquinn.kanonic.utils.NodeFormatter
 import org.junit.jupiter.api.Test
 
@@ -59,7 +59,7 @@ internal class ParserTests {
         val generator = AutomatonGenerator()
         val automaton = generator.generate(grammar)
         val table = TableGenerator(grammar, automaton).generate()
-        val parser = Parser(grammar, table, G10Info())
+        val parser = ParserInternal(grammar, table, G10Info())
 
         // Print Information
         grammar.printInformation()
