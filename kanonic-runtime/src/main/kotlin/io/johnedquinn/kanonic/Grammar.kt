@@ -1,6 +1,7 @@
 package io.johnedquinn.kanonic
 
 import io.johnedquinn.kanonic.parse.TokenDefinition
+import io.johnedquinn.kanonic.parse.TokenLiteral
 
 data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List<TokenDefinition>) {
     private val firstSet = computeFirstSet()
@@ -26,12 +27,12 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
         run wrapper@{
             refs.forEachIndexed { refIndex, ref ->
                 val current = computeFirst(ref).toMutableSet()
-                if (current.contains(TerminalReference(TokenType.EPSILON)).not()) {
+                if (current.contains(TerminalReference(TokenLiteral.ReservedTypes.EPSILON)).not()) {
                     firsts.addAll(current)
                     return@wrapper
                 } else {
                     val toAdd = when (refIndex != refs.lastIndex) {
-                        true -> current - setOf(TerminalReference(TokenType.EPSILON))
+                        true -> current - setOf(TerminalReference(TokenLiteral.ReservedTypes.EPSILON))
                         false -> current
                     }
                     firsts.addAll(toAdd)
@@ -43,7 +44,7 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
 
     private fun computeFirstSet(): Map<SymbolReference, Set<TerminalReference>> {
         // Initialize first set
-        val firsts = mutableMapOf<SymbolReference, MutableSet<TokenType>>()
+        val firsts = mutableMapOf<SymbolReference, MutableSet<Int>>()
         rules.forEach { rule ->
             firsts[RuleReference(rule.name)] = mutableSetOf()
         }
@@ -53,11 +54,11 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
 
             rules.forEach ruleList@{ rule ->
                 val ruleRef = RuleReference(rule.name)
-                val firstsForRuleRef = mutableSetOf<TokenType>()
+                val firstsForRuleRef = mutableSetOf<Int>()
 
                 // Check for empty rule
-                if (rule.items.size == 1 && rule.items.first() == TerminalReference(TokenType.EPSILON)) {
-                    firstsForRuleRef.add(TokenType.EPSILON)
+                if (rule.items.size == 1 && rule.items.first() == TerminalReference(TokenLiteral.ReservedTypes.EPSILON)) {
+                    firstsForRuleRef.add(TokenLiteral.ReservedTypes.EPSILON)
                 }
 
                 // Loop through rule items
@@ -72,7 +73,7 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
                             // Check for empty states
                             // TODO: Do we add all of first from epsilon states? Or, do we just add the epsilon?
                             is RuleReference -> {
-                                when (firsts[item]?.contains(TokenType.EPSILON)) {
+                                when (firsts[item]?.contains(TokenLiteral.ReservedTypes.EPSILON)) {
                                     true -> firstsForRuleRef.addAll(firsts[item]!!)
                                     false -> {
                                         firstsForRuleRef.addAll(firsts[item]!!)
@@ -102,9 +103,9 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
 
     private fun computeFollowSet(): Map<SymbolReference, Set<TerminalReference>> {
         // Initialize follow set
-        val follows = mutableMapOf<RuleReference, MutableSet<TokenType>>()
+        val follows = mutableMapOf<RuleReference, MutableSet<Int>>()
         rules.forEach { rule -> follows[RuleReference(rule.name)] = mutableSetOf() }
-        follows[options.start]!!.add(TokenType.EOF)
+        follows[options.start]!!.add(TokenLiteral.ReservedTypes.EOF)
 
         while (true) {
             var changesMade = false
@@ -114,9 +115,9 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
                     val remaining = rule.items.subList(itemIndex + 1, rule.items.size)
                     val nextFirsts = computeFirst(remaining).map { it.type }.toMutableSet()
 
-                    when (remaining.isEmpty() || nextFirsts.contains(TokenType.EPSILON)) {
+                    when (remaining.isEmpty() || nextFirsts.contains(TokenLiteral.ReservedTypes.EPSILON)) {
                         true -> {
-                            nextFirsts.remove(TokenType.EPSILON)
+                            nextFirsts.remove(TokenLiteral.ReservedTypes.EPSILON)
                             if (follows[item]!!.addAll(nextFirsts)) { changesMade = true }
                             if (follows[item]!!.addAll(follows[RuleReference(rule.name)]!!)) { changesMade = true }
                         }
@@ -143,7 +144,7 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
 
     private fun printRules() {
         println("RULES:")
-        rules.forEachIndexed { index, rule ->
+        rules.forEachIndexed { _, rule ->
             print("\t${rule.name} --> ")
             rule.items.forEachIndexed { itemIndex, item ->
                 when (item) {

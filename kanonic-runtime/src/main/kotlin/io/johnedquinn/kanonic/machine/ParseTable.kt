@@ -1,7 +1,7 @@
 package io.johnedquinn.kanonic.machine
 
 import de.m3y.kformat.table
-import io.johnedquinn.kanonic.TokenType
+import io.johnedquinn.kanonic.Grammar
 import kotlin.text.StringBuilder
 
 data class ParseTable(
@@ -9,11 +9,11 @@ data class ParseTable(
     val goToTable: List<List<Action?>>,
     val nonTerminals: List<String>
 ) {
-    internal fun prettify(): String {
+    internal fun prettify(grammar: Grammar): String {
         val table = table {
             val headers = mutableListOf<String>()
             headers.add("STATE")
-            TokenType.values().forEach { type -> headers.add(type.name) }
+            grammar.tokens.forEach { token -> headers.add(token.name) }
             nonTerminals.forEach { nonTerminal -> headers.add(nonTerminal) }
             header(headers)
 

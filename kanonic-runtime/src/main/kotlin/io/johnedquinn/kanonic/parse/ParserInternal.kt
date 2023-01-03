@@ -1,7 +1,6 @@
 package io.johnedquinn.kanonic.parse
 
 import io.johnedquinn.kanonic.Grammar
-import io.johnedquinn.kanonic.Token
 import io.johnedquinn.kanonic.machine.AcceptAction
 import io.johnedquinn.kanonic.machine.ParseTable
 import io.johnedquinn.kanonic.machine.ReduceAction
@@ -28,7 +27,7 @@ import java.util.Stack
  */
 public class ParserInternal(private val grammar: Grammar, private val table: ParseTable, private val info: ParserInfo) {
 
-    public fun parse(tokens: List<Token>): Node {
+    public fun parse(tokens: List<TokenLiteral>): Node {
         // Add first state
         val stack = Stack<Int>().also { it.push(0) }
         val toAddNodes = Stack<Node>()
@@ -38,7 +37,7 @@ public class ParserInternal(private val grammar: Grammar, private val table: Par
             val currentState = stack.peek()
             val token = tokens[tokenIndex]
 
-            when (val action = table.actionTable[currentState][token.type.ordinal]) {
+            when (val action = table.actionTable[currentState][token.type]) {
                 is AcceptAction -> {
                     return ExampleAST.PNode.RootNode(
                         currentState,
@@ -52,6 +51,7 @@ public class ParserInternal(private val grammar: Grammar, private val table: Par
                 }
                 is ReduceAction -> reduce(action, stack, toAddNodes, currentState)
                 null -> {
+                    println("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
                     throw ParseFailureException()
                 }
             }

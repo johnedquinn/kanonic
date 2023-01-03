@@ -1,6 +1,7 @@
 package io.johnedquinn.kanonic.machine
 
 import io.johnedquinn.kanonic.*
+import io.johnedquinn.kanonic.parse.TokenLiteral
 
 class AutomatonGenerator {
 
@@ -9,7 +10,6 @@ class AutomatonGenerator {
     private val edges = mutableMapOf<Int, MutableList<Automaton.EdgeTarget>>()
 
     fun generate(grammar: Grammar): Automaton {
-
         // Create Start State
         val stateIndex = 0
         val kernel = createKernel(grammar, grammar.options.start)
@@ -28,7 +28,7 @@ class AutomatonGenerator {
         val kernelRules = grammar.rules.filter { rule ->
             rule.name == start.name
         }.map { rule ->
-            StateRule(rule, 0, mutableSetOf(TokenType.EOF))
+            StateRule(rule, 0, mutableSetOf(TokenLiteral.ReservedTypes.EOF))
         }.toMutableList()
         return State(states.size, kernelRules)
     }
@@ -41,7 +41,7 @@ class AutomatonGenerator {
         val ruleMap: MutableMap<SymbolReference, MutableList<StateRule>> = mutableMapOf()
         remainingRules.forEach { stateRule ->
             val symbol = stateRule.plainRule.items[stateRule.position]
-            val newLookahead = mutableSetOf<TokenType>().also { it.addAll(stateRule.lookahead) }
+            val newLookahead = mutableSetOf<Int>().also { it.addAll(stateRule.lookahead) }
             val newRule = StateRule(
                 plainRule = stateRule.plainRule,
                 position = stateRule.position + 1,
@@ -95,12 +95,11 @@ class AutomatonGenerator {
                 val symbolReference = getCurrentSymbol(stateRule)
                 if (symbolReference !is RuleReference || added.contains(symbolReference)) { return@forEach }
                 val rules = grammar.getRules(symbolReference)
-                val lookahead = mutableSetOf<TokenType>()
+                val lookahead = mutableSetOf<Int>()
                 val stateRules = rules.map { rule -> StateRule(rule, 0, lookahead) }
                 added.add(symbolReference)
                 toAddRules.addAll(stateRules)
                 hasModified = true
-
             }
             closureRules.addAll(toAddRules)
         }
@@ -125,12 +124,12 @@ class AutomatonGenerator {
                     remainingItems.isEmpty() -> stateRule.lookahead
                     // For an item like A → α.Bβ, with a lookahead of {L}, and If β CANNOT produce ε,
                     //  add new rules like B → .γ with a lookahead as follows: the lookahead is FIRST(β).
-                    remainingFirstSet.contains(TokenType.EPSILON).not() -> remainingFirstSet
+                    remainingFirstSet.contains(TokenLiteral.ReservedTypes.EPSILON).not() -> remainingFirstSet
                     // For an item like A → α.Bβ, with a lookahead of {L}, and if β CAN produce ε
                     //  add new rules like B → .γ with a lookahead as follows: the lookahead is FIRST(β) ∪{L}.
                     else -> remainingFirstSet.union(stateRule.lookahead).toMutableSet()
                 }
-                val lookahead = mutableSetOf<TokenType>().also { it.addAll(lookaheadAdder) }
+                val lookahead = mutableSetOf<Int>().also { it.addAll(lookaheadAdder) }
 
                 // Modify Relevant Rules
                 val toModifyRules = closureRules.filterIndexed { index, closureRule ->

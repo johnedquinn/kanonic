@@ -3,13 +3,12 @@ package io.johnedquinn.kanonic.machine
 import io.johnedquinn.kanonic.Grammar
 import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.TerminalReference
-import io.johnedquinn.kanonic.TokenType
 
 class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
 
     // Constants
     private val numberOfStates = automaton.states.size
-    private val numberOfTerminals = TokenType.values().size
+    private val numberOfTerminals = grammar.tokens.size
     private val nonTerminals = grammar.rules.map { it.name }.toSet().toList()
     private val numberOfNonTerminals = nonTerminals.size
     private val namesToNonTerminalIndex = nonTerminals.mapIndexed { index, ruleName ->
@@ -27,14 +26,14 @@ class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
                 when (val edgeSymbol = edgeTarget.edge) {
                     // Add Shifts
                     is TerminalReference -> {
-                        actionTable[stateIndex][edgeSymbol.type.ordinal]?.let { foundAction ->
+                        actionTable[stateIndex][edgeSymbol.type]?.let { foundAction ->
                             when (foundAction) {
                                 is ShiftAction -> throw RuntimeException("Shift-shift conflict!")
                                 is ReduceAction -> throw RuntimeException("Shift-reduce conflict!")
                                 else -> TODO()
                             }
                         }
-                        actionTable[stateIndex][edgeSymbol.type.ordinal] = ShiftAction(edgeTarget.targetState)
+                        actionTable[stateIndex][edgeSymbol.type] = ShiftAction(edgeTarget.targetState)
                     }
                     // Add GoTo
                     is RuleReference -> {
@@ -58,20 +57,19 @@ class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
                 rule.lookahead.forEach { lookaheadToken ->
                     when (rule.plainRule.name == grammar.options.start.name) {
                         true -> {
-                            actionTable[stateIndex][lookaheadToken.ordinal] = AcceptAction(lookaheadToken)
+                            actionTable[stateIndex][lookaheadToken] = AcceptAction(lookaheadToken)
                         }
                         false -> {
-                            actionTable[stateIndex][lookaheadToken.ordinal]?.let { foundAction ->
+                            actionTable[stateIndex][lookaheadToken]?.let { foundAction ->
                                 when (foundAction) {
                                     is ShiftAction -> throw RuntimeException("Shift-reduce conflict!")
                                     is ReduceAction -> throw RuntimeException("Reduce-reduce conflict!")
                                     else -> TODO()
                                 }
                             }
-                            actionTable[stateIndex][lookaheadToken.ordinal] = ReduceAction(ruleIndex)
+                            actionTable[stateIndex][lookaheadToken] = ReduceAction(ruleIndex)
                         }
                     }
-
                 }
             }
         }

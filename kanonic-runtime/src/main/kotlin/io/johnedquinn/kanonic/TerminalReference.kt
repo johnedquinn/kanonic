@@ -1,3 +1,3 @@
 package io.johnedquinn.kanonic
 
-data class TerminalReference(val type: TokenType) : SymbolReference()
+data class TerminalReference(val type: Int) : SymbolReference()

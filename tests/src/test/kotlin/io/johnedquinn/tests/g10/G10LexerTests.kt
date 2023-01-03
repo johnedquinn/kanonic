@@ -1,23 +1,22 @@
 package io.johnedquinn.tests.g10
 
-import io.johnedquinn.kanonic.TokenType
 import io.johnedquinn.kanonic.dsl.grammar
 import org.junit.jupiter.api.Test
 
 class G10LexerTests {
 
-    private val grammar = grammar("G10", "P") {
+    private val grammar = grammar("G10", "p") {
         tokens {
             "IDENTIFIER" - "[a-zA-Z]+"
             "PAREN_LEFT" - "\\("
             "PAREN_RIGHT" - "\\)"
             "PLUS" - "\\+"
         }
-        "P" eq "E" alias "Root"
-        "E" eq "E" - TokenType.PLUS - "T" alias "ExprPlus"
-        "E" eq "T" alias "ExprFall"
-        "T" eq TokenType.IDENTIFIER - TokenType.PAREN_LEFT - "E" - TokenType.PAREN_RIGHT alias "Index"
-        "T" eq TokenType.IDENTIFIER alias "Ident"
+        "p" eq "e" alias "Root"
+        "e" eq "e" - "PLUS" - "t" alias "ExprPlus"
+        "e" eq "t" alias "ExprFall"
+        "t" eq "IDENTIFIER" - "PAREN_LEFT" - "e" - "PAREN_RIGHT" alias "Index"
+        "t" eq "IDENTIFIER" alias "Ident"
     }.toGrammar()
 
     @Test

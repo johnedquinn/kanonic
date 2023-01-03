@@ -1,7 +1,5 @@
 package io.johnedquinn.tests.g10
 
-import io.johnedquinn.kanonic.TokenType
-import io.johnedquinn.kanonic.parse.TokenDefinition
 import io.johnedquinn.kanonic.dsl.grammar
 import io.johnedquinn.kanonic.machine.AutomatonGenerator
 import io.johnedquinn.kanonic.machine.ParseTable
@@ -11,6 +9,8 @@ import io.johnedquinn.kanonic.parse.Node
 import io.johnedquinn.kanonic.parse.Parser
 import io.johnedquinn.kanonic.parse.ParserInfo
 import io.johnedquinn.kanonic.parse.ParserInternal
+import io.johnedquinn.kanonic.parse.TokenDefinition
+import io.johnedquinn.kanonic.parse.TokenLiteral
 import kotlin.Int
 import kotlin.collections.List
 
@@ -21,15 +21,15 @@ public class G10Parser : Parser {
     override val grammar = grammar("G10", "P") {
         tokens {
             "IDENTIFIER" - "[a-zA-Z]+"
-            "PAREN_LEFT" - "("
-            "PAREN_RIGHT" - ")"
-            "PLUS" - "+"
+            "PAREN_LEFT" - "\\("
+            "PAREN_RIGHT" - "\\)"
+            "PLUS" - "\\+"
         }
-        "P" eq "E" alias "Root"
-        "E" eq "E" - TokenType.PLUS - "T" alias "ExprPlus"
-        "E" eq "T" alias "ExprFall"
-        "T" eq TokenType.IDENTIFIER - TokenType.PAREN_LEFT - "E" - TokenType.PAREN_RIGHT alias "Index"
-        "T" eq TokenType.IDENTIFIER alias "Ident"
+        "p" eq "e" alias "Root"
+        "e" eq "e" - "PLUS" - "t" alias "ExprPlus"
+        "e" eq "t" alias "ExprFall"
+        "t" eq "IDENTIFIER" - "PAREN_LEFT" - "e" - "PAREN_RIGHT" alias "Index"
+        "t" eq "IDENTIFIER" alias "Ident"
     }.toGrammar()
 
     private val generator = AutomatonGenerator()
@@ -42,15 +42,16 @@ public class G10Parser : Parser {
 
     override fun parse(input: String): Node {
         val parser = ParserInternal(grammar, table, info)
-        val tokens: List<TokenDefinition> = lexer.tokenize(input)
-        return TODO("parser.parse(tokens)")
+        val tokens = lexer.tokenize(input)
+        return parser.parse(tokens)
     }
 }
 
 internal class G10Lexer(private val definitions: List<TokenDefinition>) {
-    internal fun tokenize(input: String): List<TokenDefinition> {
-        val tokens = mutableListOf<TokenDefinition>()
+    internal fun tokenize(input: String): List<TokenLiteral> {
+        val tokens = mutableListOf<TokenLiteral>()
         var currentIndex = 0
+        var tokenStartIndex = 0
         var currentString = ""
         while (currentIndex < input.length) {
             currentString += input[currentIndex]
@@ -62,12 +63,19 @@ internal class G10Lexer(private val definitions: List<TokenDefinition>) {
             definitions.firstOrNull {
                 currentString.matches(it.def.toRegex())
             }?.let {
+                tokenStartIndex = currentIndex
                 while (currentString.matches(it.def.toRegex())) {
                     currentIndex++
                     if (currentIndex > input.lastIndex) { break }
                     currentString += input[currentIndex]
                 }
-                tokens.add(it)
+                // TODO: Adjust index
+                val actualString = when (currentIndex <= input.lastIndex) {
+                    true -> currentString.dropLast(1)
+                    false -> currentString
+                }
+                val tokenLiteral = TokenLiteral(it.index, tokenStartIndex.toLong(), actualString)
+                tokens.add(tokenLiteral)
                 currentIndex--
                 currentString = ""
             }
