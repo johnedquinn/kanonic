@@ -1,13 +1,13 @@
-package io.johnedquinn.kanonic.gen
+package io.johnedquinn.tests.simple
 
 import io.johnedquinn.kanonic.dsl.grammar
+import io.johnedquinn.kanonic.parse.KanonicParser
 import org.junit.jupiter.api.Test
 
-class KanonicGeneratorTests {
+class SimpleTests {
 
     @Test
-    fun test() {
-        // Create Grammar
+    public fun test() {
         val grammar = grammar("Simple", "p") {
             tokens {
                 "IDENTIFIER" - "[a-zA-Z]+"
@@ -22,12 +22,12 @@ class KanonicGeneratorTests {
             "t" eq "IDENTIFIER" - "PAREN_LEFT" - "e" - "PAREN_RIGHT" alias "Index"
             "t" eq "IDENTIFIER" alias "Ident"
         }.toGrammar()
-
-        // Generate Files
-        val files = KanonicGenerator.generate(grammar)
-        files.forEach {
-            println("NAME: ${it.name}")
-            it.writeTo(System.out)
-        }
+        val parser = KanonicParser.Builder
+            .standard()
+            .withMetadata(SimpleMetadata())
+            .withGrammar(grammar)
+            .build()
+        val ast = parser.parse("a + b")
+        println(ast)
     }
 }

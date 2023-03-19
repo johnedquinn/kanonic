@@ -1,7 +1,7 @@
 package io.johnedquinn.kanonic
 
 import io.johnedquinn.kanonic.dsl.grammar
-import io.johnedquinn.kanonic.example.G10Info
+import io.johnedquinn.kanonic.example.G10Metadata
 import io.johnedquinn.kanonic.machine.AutomatonGenerator
 import io.johnedquinn.kanonic.machine.TableGenerator
 import io.johnedquinn.kanonic.parse.ParserInternal
@@ -71,7 +71,7 @@ internal class ParserTests {
         val generator = AutomatonGenerator()
         val automaton = generator.generate(grammar)
         val table = TableGenerator(grammar, automaton).generate()
-        val parser = ParserInternal(grammar, table, G10Info())
+        val parser = ParserInternal(grammar, table, G10Metadata())
 
         // Print Information
         grammar.printInformation()

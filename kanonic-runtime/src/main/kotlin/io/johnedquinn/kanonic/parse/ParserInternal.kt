@@ -25,7 +25,7 @@ import java.util.Stack
  *   - Otherwise:
  *     - Halt with a parse error.
  */
-public class ParserInternal(private val grammar: Grammar, private val table: ParseTable, private val info: ParserInfo) {
+internal class ParserInternal(private val grammar: Grammar, private val table: ParseTable, private val info: ParserMetadata) {
 
     public fun parse(tokens: List<TokenLiteral>): Node {
         // Add first state
@@ -35,21 +35,27 @@ public class ParserInternal(private val grammar: Grammar, private val table: Par
         var tokenIndex = 0
         while (true) {
             val currentState = stack.peek()
+            println("CURRENT STATE: $currentState")
             val token = tokens[tokenIndex]
+            println("TOKEN: $token")
 
             when (val action = table.actionTable[currentState][token.type]) {
                 is AcceptAction -> {
-                    return ExampleAST.PNode.RootNode(
-                        currentState,
-                        toAddNodes.reversed(),
-                        null
-                    ).also { root -> root.children.forEach { it.parent = root } }
+                    println("ACCEPT!")
+                    val childrenReversed = toAddNodes.reversed()
+                    return info.createRuleNode(0, currentState, childrenReversed, null).also { root ->
+                        root.children.forEach { it.parent = root }
+                    }
                 }
                 is ShiftAction -> {
+                    println("SHIFT!")
                     shift(action, stack, toAddNodes, currentState)
                     tokenIndex++
                 }
-                is ReduceAction -> reduce(action, stack, toAddNodes, currentState)
+                is ReduceAction -> {
+                    println("REDUCE!")
+                    reduce(action, stack, toAddNodes, currentState)
+                }
                 null -> {
                     println("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
                     throw ParseFailureException()
@@ -81,6 +87,7 @@ public class ParserInternal(private val grammar: Grammar, private val table: Par
         }
         val childrenReversed = children.reversed()
         val newNode = info.createRuleNode(action.rule, currentState, childrenReversed, null)
+        println("FOUND NODE: $newNode")
         toAddNodes.push(newNode)
         val topState = stack.peek()
         val ruleIndex = table.nonTerminals.indexOf(rule.name)

@@ -11,10 +11,11 @@ import io.johnedquinn.kanonic.parse.TokenLiteral
 class GrammarDsl(private val name: String, private val start: String) {
     private val rules = mutableListOf<Rule>()
     private var tokens: List<TokenDefinition> = emptyList()
+    private var packageName: String? = null
 
     fun toGrammar(): Grammar {
         println(rules)
-        return Grammar(rules, Grammar.Options(name, RuleReference(start)), tokens)
+        return Grammar(rules, Grammar.Options(name, RuleReference(start), packageName), tokens)
     }
 
     fun add(name: String, def: List<SymbolReference>): Rule {
@@ -68,6 +69,10 @@ class GrammarDsl(private val name: String, private val start: String) {
         tokens = l.build()
         println(tokens)
         return this
+    }
+
+    fun packageName(name: String) {
+        this.packageName = name
     }
 
     private fun isRuleReference(str: String): Boolean {

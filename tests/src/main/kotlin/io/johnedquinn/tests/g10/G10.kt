@@ -7,7 +7,7 @@ import io.johnedquinn.kanonic.machine.TableGenerator
 import io.johnedquinn.kanonic.parse.CreateNode
 import io.johnedquinn.kanonic.parse.Node
 import io.johnedquinn.kanonic.parse.Parser
-import io.johnedquinn.kanonic.parse.ParserInfo
+import io.johnedquinn.kanonic.parse.ParserMetadata
 import io.johnedquinn.kanonic.parse.ParserInternal
 import io.johnedquinn.kanonic.parse.TokenDefinition
 import io.johnedquinn.kanonic.parse.TokenLiteral
@@ -16,7 +16,7 @@ import kotlin.collections.List
 
 public class G10Parser : Parser {
 
-    override val info: ParserInfo = G10Info()
+    override val info: ParserMetadata = G10Metadata()
 
     override val grammar = grammar("G10", "P") {
         tokens {
@@ -85,7 +85,7 @@ internal class G10Lexer(private val definitions: List<TokenDefinition>) {
     }
 }
 
-public class G10Info : ParserInfo {
+public class G10Metadata : ParserMetadata {
     private val nodeLambdaList: List<CreateNode> = initializeLambdas()
 
     private fun initializeLambdas(): List<CreateNode> = buildList {

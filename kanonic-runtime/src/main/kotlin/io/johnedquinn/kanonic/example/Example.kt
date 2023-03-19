@@ -2,11 +2,11 @@ package io.johnedquinn.kanonic.example
 
 import io.johnedquinn.kanonic.parse.CreateNode
 import io.johnedquinn.kanonic.parse.Node
-import io.johnedquinn.kanonic.parse.ParserInfo
+import io.johnedquinn.kanonic.parse.ParserMetadata
 import kotlin.Int
 import kotlin.collections.List
 
-public class G10Info : ParserInfo {
+public class G10Metadata : ParserMetadata {
     private val nodeLambdaList: List<CreateNode> = initializeLambdas()
 
     private fun initializeLambdas(): List<CreateNode> = buildList {
