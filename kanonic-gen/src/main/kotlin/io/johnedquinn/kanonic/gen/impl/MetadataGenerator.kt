@@ -8,10 +8,9 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import io.johnedquinn.kanonic.Grammar
-import io.johnedquinn.kanonic.gen.ClassNames
 import io.johnedquinn.kanonic.parse.Node
 
-internal object ParserInfoGenerator {
+internal object MetadataGenerator {
 
     /**
      * Generates the Parser File

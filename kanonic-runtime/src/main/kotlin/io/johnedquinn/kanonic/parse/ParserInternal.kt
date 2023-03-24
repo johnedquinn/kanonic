@@ -38,8 +38,16 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
             println("CURRENT STATE: $currentState")
             val token = tokens[tokenIndex]
             println("TOKEN: $token")
+            var updateToken = true
+            val action = when (val pre = table.actionTable[currentState][token.type]) {
+                null -> {
+                    updateToken = false
+                    table.actionTable[currentState][TokenLiteral.ReservedTypes.EPSILON]
+                }
+                else -> pre
+            }
 
-            when (val action = table.actionTable[currentState][token.type]) {
+            when (action) {
                 is AcceptAction -> {
                     println("ACCEPT!")
                     val childrenReversed = toAddNodes.reversed()
@@ -50,7 +58,9 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
                 is ShiftAction -> {
                     println("SHIFT!")
                     shift(action, stack, toAddNodes, currentState)
-                    tokenIndex++
+                    if (updateToken) {
+                        tokenIndex++
+                    }
                 }
                 is ReduceAction -> {
                     println("REDUCE!")

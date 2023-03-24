@@ -5,10 +5,10 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
 import io.johnedquinn.kanonic.Grammar
-import io.johnedquinn.kanonic.gen.ClassNames
 import io.johnedquinn.kanonic.parse.Node
 
 internal object NodeGenerator {
@@ -64,7 +64,8 @@ internal object NodeGenerator {
                 val typeSpecs = ruleVariants.map { variant ->
                     val variantClassName = GrammarUtils.getGeneratedClassName(variant.alias)
                     val variantSpec = TypeSpec.classBuilder(variantClassName)
-                    variantSpec.addModifiers(KModifier.INTERNAL)
+                    variantSpec.addModifiers(KModifier.DATA)
+                    variantSpec.addToString()
                     variantSpec.superclass(ruleClassReference)
                     variantSpec.addPrimaryConstructor()
                     variantSpec.build()
@@ -89,9 +90,38 @@ internal object NodeGenerator {
 
         private fun TypeSpec.Builder.addPrimaryConstructor() = this.apply {
             this.primaryConstructor(createPrimaryConstructor())
+            this.addProperty(PropertySpec.builder("state", Int::class, KModifier.OVERRIDE).initializer("state").build())
+            this.addProperty(
+                PropertySpec.builder("children", ClassNames.LIST_NODE, KModifier.OVERRIDE).initializer("children")
+                    .build()
+            )
+            this.addProperty(
+                PropertySpec.builder(
+                    "parent",
+                    Node::class.asTypeName().copy(nullable = true),
+                    KModifier.OVERRIDE
+                ).mutable(true).initializer("parent").build()
+            )
             this.addSuperclassConstructorParameter(CodeBlock.of("state"))
             this.addSuperclassConstructorParameter(CodeBlock.of("children"))
             this.addSuperclassConstructorParameter(CodeBlock.of("parent"))
+        }
+
+        private fun TypeSpec.Builder.addToString() = this.apply {
+            this.addFunction(
+                FunSpec.builder("toString")
+                    .addCode(
+                        CodeBlock.of(
+                            "return \"\"\"%L(state: %L, children: %L)\"\"\"",
+                            "\${this::class.simpleName}",
+                            "\$state",
+                            "\$children",
+                        )
+                    )
+                    .returns(String::class)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build()
+            )
         }
     }
 }

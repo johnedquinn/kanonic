@@ -1,7 +1,6 @@
 package io.johnedquinn.tests.g10
 
 import io.johnedquinn.kanonic.dsl.grammar
-import org.junit.jupiter.api.Test
 
 class G10LexerTests {
 
@@ -19,13 +18,4 @@ class G10LexerTests {
         "t" eq "IDENTIFIER" alias "Ident"
     }.toGrammar()
 
-    @Test
-    fun test() {
-        val query = "a + ab + ( )"
-        println("Grammar Tokens: ${grammar.tokens}")
-        val tokens = G10Lexer(grammar.tokens).tokenize(query)
-        tokens.forEach { token ->
-            println(token)
-        }
-    }
 }

@@ -1,7 +1,9 @@
 package io.johnedquinn.kanonic.gen
 
 import io.johnedquinn.kanonic.dsl.grammar
+import io.johnedquinn.kanonic.gen.impl.KanonicGrammar
 import org.junit.jupiter.api.Test
+import kotlin.io.path.Path
 
 class KanonicGeneratorTests {
 
@@ -28,6 +30,18 @@ class KanonicGeneratorTests {
         files.forEach {
             println("NAME: ${it.name}")
             it.writeTo(System.out)
+        }
+    }
+
+    @Test
+    fun kanonic() {
+        val grammar = KanonicGrammar.grammar
+        val files = KanonicGenerator.generate(grammar)
+        files.forEach {
+            val path = Path("build/generated-src")
+            println("NAME: ${it.name}")
+            println("PATH: ${path.toAbsolutePath()}")
+            it.writeTo(path)
         }
     }
 }

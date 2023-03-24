@@ -5,3 +5,4 @@ include(
     "kanonic-runtime"
 )
 include("tests")
+include("kanonic-tool")
