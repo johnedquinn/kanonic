@@ -1,6 +1,6 @@
 package io.johnedquinn.kanonic.parse
 
-internal data class TerminalNode(
+public data class TerminalNode(
     override val state: Int,
     override var parent: Node?
 ) : Node(state, emptyList(), parent) {

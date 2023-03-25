@@ -1,1 +1,29 @@
-IDENT_TOKEN::"[A-Z][A-Z_]*";
+/**
+ * File: Kanonic.knc
+ * Desc: The Kanonic grammar file
+ */
+
+kanonic::{
+  name: "Kanonic",
+  root: root
+};
+
+//
+//
+// TOKENS
+//
+//
+
+IDENT_TOKEN: "[A-Z][A-Z_]*";
+IDENT_RULE: "[a-z][a-zA-Z]*";
+
+//
+//
+// RULES
+//
+//
+
+root
+    : hello WORLD --> hello
+    |
+    ;

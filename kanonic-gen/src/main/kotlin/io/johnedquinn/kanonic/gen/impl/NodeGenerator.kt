@@ -36,7 +36,7 @@ internal object NodeGenerator {
             // Define the top-level grammar Node
             val className = GrammarUtils.getGeneratedClassName(grammar.options.grammarName)
             val type = TypeSpec.classBuilder(className)
-            type.addModifiers(KModifier.SEALED, KModifier.INTERNAL)
+            type.addModifiers(KModifier.SEALED)
             type.superclass(ClassNames.NODE)
             type.addSuperclassConstructorParameter(CodeBlock.of("state"))
             type.addSuperclassConstructorParameter(CodeBlock.of("children"))
@@ -74,7 +74,7 @@ internal object NodeGenerator {
                 // Create Top-Level Rule (Abstract Class)
                 val ruleSpec = TypeSpec.classBuilder(ruleClassName)
                 val grammarNodeReference = ClassNames.createGrammarNodeClass(packageName, grammar.options.grammarName)
-                ruleSpec.addModifiers(KModifier.SEALED, KModifier.INTERNAL)
+                ruleSpec.addModifiers(KModifier.SEALED)
                 ruleSpec.superclass(grammarNodeReference)
                 ruleSpec.addPrimaryConstructor()
                 ruleSpec.addTypes(typeSpecs)

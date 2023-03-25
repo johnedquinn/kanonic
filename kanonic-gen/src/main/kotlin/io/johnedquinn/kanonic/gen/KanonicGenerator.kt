@@ -1,9 +1,13 @@
 package io.johnedquinn.kanonic.gen
 
+import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import io.johnedquinn.kanonic.Grammar
-import io.johnedquinn.kanonic.gen.impl.NodeGenerator
+import io.johnedquinn.kanonic.gen.impl.BaseVisitorGenerator
+import io.johnedquinn.kanonic.gen.impl.GrammarUtils
 import io.johnedquinn.kanonic.gen.impl.MetadataGenerator
+import io.johnedquinn.kanonic.gen.impl.NodeGenerator
+import io.johnedquinn.kanonic.gen.impl.VisitorGenerator
 
 public object KanonicGenerator {
 
@@ -12,6 +16,32 @@ public object KanonicGenerator {
      */
     public fun generate(grammar: Grammar): List<FileSpec> = listOf(
         MetadataGenerator.generate(grammar),
-        NodeGenerator.generate(grammar)
+        NodeGenerator.generate(grammar),
+        VisitorGenerator.generate(grammar.toSpec()),
+        BaseVisitorGenerator.generate(grammar.toSpec())
     )
+
+    private fun Grammar.toSpec(): GrammarSpec {
+        val grammarNodeName = GrammarUtils.getGrammarNodeName(this)
+        val visitorName = GrammarUtils.getGeneratedVisitorName(this)
+        val topNodeClassName = ClassName(this.options.packageName!!, grammarNodeName)
+        val rules = this.rules.groupBy { it.name }.map { (rule, ruleVariants) ->
+            val ruleName = GrammarUtils.getGeneratedClassName(rule)
+            val ruleClassName = ClassName(topNodeClassName.canonicalName, ruleName)
+            val variants = ruleVariants.map { variant ->
+                val variantName = GrammarUtils.getGeneratedClassName(variant.alias)
+                val className = ClassName(ruleClassName.canonicalName, variantName)
+                VariantSpec(variantName, variant.items, className)
+            }
+            RuleSpec(ruleName, variants, ruleClassName)
+        }
+        return GrammarSpec(
+            this.options.grammarName,
+            visitorName,
+            GrammarUtils.getGeneratedBaseVisitorName(this),
+            this.options.packageName!!,
+            rules,
+            topNodeClassName
+        )
+    }
 }

@@ -12,12 +12,12 @@ public object KanonicGrammar {
             "COLON" - ":"
             "COLON_SEMI" - ";"
             "LINE_VERTICAL" - "|"
-            "LITERAL_STRING" - "\".*\""
-            "DOLLAR_SIGN" - "\".*\""
+            "LITERAL_STRING" - "\"((\\\")|[^\"])*\""
+            "DOLLAR_SIGN" - "\$"
         }
         "file" eq "expressions" alias "Root"
         "expressions" eq "EPSILON" alias "EmptyExpressions"
         "expressions" eq "expressions" - "expr" alias "Expressions"
-        "expr" eq "IDENT_TOKEN" - "COLON" - "COLON" alias "TokenDef"
+        "expr" eq "IDENT_TOKEN" - "COLON" - "LITERAL_STRING" alias "TokenDef"
     }.toGrammar()
 }
