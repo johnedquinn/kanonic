@@ -3,6 +3,7 @@ package io.johnedquinn.kanonic.gen.impl
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import io.johnedquinn.kanonic.gen.GrammarSpec
@@ -23,26 +24,17 @@ internal object VisitorGenerator {
     private object Private {
         fun generateType(grammar: GrammarSpec): TypeSpec {
             val type = TypeSpec.interfaceBuilder(grammar.visitorName)
+            type.addSuperinterface(ClassNames.NODE_VISITOR.parameterizedBy(TypeVariableName("R"), TypeVariableName("C")))
             type.addTypeVariable(TypeVariableName("R"))
             type.addTypeVariable(TypeVariableName("C"))
-            type.addVisit(grammar)
             type.addVisits(grammar)
             return type.build()
-        }
-
-        fun TypeSpec.Builder.addVisit(grammar: GrammarSpec) = this.apply {
-            val function = FunSpec.builder("visit")
-            function.returns(TypeVariableName("R"))
-            function.addParameter("node", grammar.className)
-            function.addParameter("ctx", TypeVariableName("C"))
-            function.addModifiers(KModifier.ABSTRACT)
-            this.addFunction(function.build())
         }
 
         fun TypeSpec.Builder.addVisits(grammar: GrammarSpec) = this.apply {
             grammar.rules.forEach { rule ->
                 rule.variants.forEach { variant ->
-                    val funcName = "visit${variant.name}"
+                    val funcName = variant.visitMethodName
                     val function = FunSpec.builder(funcName)
                     function.returns(TypeVariableName("R"))
                     function.addParameter("node", variant.className)
@@ -51,7 +43,7 @@ internal object VisitorGenerator {
                     this.addFunction(function.build())
                 }
 
-                val funcName = "visit${rule.name}"
+                val funcName = rule.visitMethodName
                 val function = FunSpec.builder(funcName)
                 function.returns(TypeVariableName("R"))
                 function.addParameter("node", rule.className)

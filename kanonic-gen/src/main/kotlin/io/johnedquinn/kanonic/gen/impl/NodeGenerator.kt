@@ -5,10 +5,14 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asTypeName
 import io.johnedquinn.kanonic.Grammar
+import io.johnedquinn.kanonic.gen.GrammarSpec
+import io.johnedquinn.kanonic.gen.VariantSpec
 import io.johnedquinn.kanonic.parse.Node
 
 internal object NodeGenerator {
@@ -17,9 +21,9 @@ internal object NodeGenerator {
      * Creates the [FileSpec] containing the Grammar Node and its variants (Rule Nodes and the
      * Rule Variant Nodes).
      */
-    public fun generate(grammar: Grammar): FileSpec {
+    public fun generate(grammar: Grammar, spec: GrammarSpec): FileSpec {
         val packageName = GrammarUtils.getPackageName(grammar)
-        val type = Private.createType(grammar)
+        val type = Private.createType(grammar, spec)
         val name = GrammarUtils.getGrammarNodeName(grammar)
         return FileSpec.builder(packageName, name).also { file ->
             file.addType(type)
@@ -32,7 +36,7 @@ internal object NodeGenerator {
          * Creates the Grammar Node and adds the Rule Nodes and the Rule Variant Nodes. Each variant should be a
          * top-level Rule (sealed class) containing Rule Variants (data classes).
          */
-        public fun createType(grammar: Grammar): TypeSpec {
+        public fun createType(grammar: Grammar, spec: GrammarSpec): TypeSpec {
             // Define the top-level grammar Node
             val className = GrammarUtils.getGeneratedClassName(grammar.options.grammarName)
             val type = TypeSpec.classBuilder(className)
@@ -44,7 +48,7 @@ internal object NodeGenerator {
             type.primaryConstructor(createPrimaryConstructor())
 
             // Add Variant Definitions
-            val ruleSpecs = createNodes(grammar)
+            val ruleSpecs = createNodes(grammar, spec)
             ruleSpecs.forEach { rule -> type.addType(rule) }
             return type.build()
         }
@@ -52,7 +56,7 @@ internal object NodeGenerator {
         /**
          * Creates the Rule Nodes and the Rule Variant Nodes
          */
-        private fun createNodes(grammar: Grammar): List<TypeSpec> {
+        private fun createNodes(grammar: Grammar, spec: GrammarSpec): List<TypeSpec> {
             return grammar.rules.groupBy { it.name }.map { (ruleName, ruleVariants) ->
                 // Shared Information
                 val ruleClassName = GrammarUtils.getGeneratedClassName(ruleName)
@@ -67,6 +71,11 @@ internal object NodeGenerator {
                     variantSpec.addModifiers(KModifier.DATA)
                     variantSpec.addToString()
                     variantSpec.superclass(ruleClassReference)
+                    // TODO: This is a work-around
+                    val variantSpecification = spec.rules.flatMap { it.variants }.firstOrNull {
+                        it.originalName == variant.alias
+                    } ?: error("Couldn't find variant ${variant.alias}")
+                    variantSpec.addApplyMethod(spec, variantSpecification)
                     variantSpec.addPrimaryConstructor()
                     variantSpec.build()
                 }
@@ -80,6 +89,24 @@ internal object NodeGenerator {
                 ruleSpec.addTypes(typeSpecs)
                 ruleSpec.build()
             }
+        }
+
+        private fun createAcceptFunction(grammar: GrammarSpec, variantSpec: VariantSpec) = FunSpec.builder("accept")
+            .addTypeVariable(TypeVariableName("R"))
+            .addTypeVariable(TypeVariableName("C"))
+            .addParameter("visitor", ClassNames.NODE_VISITOR.parameterizedBy(TypeVariableName("R"), TypeVariableName("C")))
+            .addParameter("ctx", TypeVariableName("C"))
+            .beginControlFlow("return when (visitor)")
+            .addStatement("is %T -> visitor.%L(this, ctx)", grammar.visitorClassName, variantSpec.visitMethodName)
+            .addStatement("else -> visitor.visit(this, ctx)")
+            .endControlFlow()
+            .addModifiers(KModifier.OVERRIDE)
+            .returns(TypeVariableName("R"))
+            .build()
+
+        private fun TypeSpec.Builder.addApplyMethod(grammarSpec: GrammarSpec, variantSpec: VariantSpec) = this.apply {
+            val accept = createAcceptFunction(grammarSpec, variantSpec)
+            addFunction(accept)
         }
 
         private fun createPrimaryConstructor() = FunSpec.constructorBuilder()

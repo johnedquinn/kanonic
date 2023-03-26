@@ -2,7 +2,7 @@ package io.johnedquinn.kanonic.tool.pico
 
 import io.johnedquinn.kanonic.gen.KanonicGenerator
 import io.johnedquinn.kanonic.gen.impl.KanonicGrammar
-import io.johnedquinn.kanonic.generated.KanonicMetadata
+import io.johnedquinn.kanonic.runtime.generated.KanonicMetadata
 import io.johnedquinn.kanonic.parse.KanonicParser
 import picocli.CommandLine
 import java.io.File

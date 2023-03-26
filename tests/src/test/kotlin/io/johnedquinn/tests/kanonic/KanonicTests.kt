@@ -1,6 +1,5 @@
 package io.johnedquinn.tests.simple
 
-import io.johnedquinn.kanonic.dsl.grammar
 import io.johnedquinn.kanonic.gen.impl.KanonicGrammar
 import io.johnedquinn.kanonic.generated.KanonicMetadata
 import io.johnedquinn.kanonic.generated.KanonicNode
@@ -24,7 +23,7 @@ class KanonicTests {
             AB:"b"
         """
         val ast = parser.parse(document)
-        println(KanonicNodeFormatter().format(ast as KanonicNode))
+        println(KanonicNodeFormatter().format(ast))
         println(ast)
     }
 }

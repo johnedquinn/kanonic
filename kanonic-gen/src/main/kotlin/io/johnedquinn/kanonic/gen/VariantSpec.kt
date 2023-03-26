@@ -4,7 +4,9 @@ import com.squareup.kotlinpoet.ClassName
 import io.johnedquinn.kanonic.SymbolReference
 
 class VariantSpec(
+    val originalName: String,
     val name: String,
+    val visitMethodName: String,
     val items: List<SymbolReference>,
     val className: ClassName
 )

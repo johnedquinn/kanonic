@@ -8,5 +8,6 @@ public class GrammarSpec(
     val baseVisitorName: String,
     val packageName: String,
     val rules: List<RuleSpec>,
-    val className: ClassName
+    val className: ClassName,
+    val visitorClassName: ClassName
 )

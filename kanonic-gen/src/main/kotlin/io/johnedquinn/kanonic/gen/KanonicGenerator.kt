@@ -14,12 +14,15 @@ public object KanonicGenerator {
     /**
      * Generates all files
      */
-    public fun generate(grammar: Grammar): List<FileSpec> = listOf(
-        MetadataGenerator.generate(grammar),
-        NodeGenerator.generate(grammar),
-        VisitorGenerator.generate(grammar.toSpec()),
-        BaseVisitorGenerator.generate(grammar.toSpec())
-    )
+    public fun generate(grammar: Grammar): List<FileSpec> {
+        val spec = grammar.toSpec()
+        return listOf(
+            MetadataGenerator.generate(grammar),
+            NodeGenerator.generate(grammar, spec),
+            VisitorGenerator.generate(spec),
+            BaseVisitorGenerator.generate(spec)
+        )
+    }
 
     private fun Grammar.toSpec(): GrammarSpec {
         val grammarNodeName = GrammarUtils.getGrammarNodeName(this)
@@ -31,17 +34,19 @@ public object KanonicGenerator {
             val variants = ruleVariants.map { variant ->
                 val variantName = GrammarUtils.getGeneratedClassName(variant.alias)
                 val className = ClassName(ruleClassName.canonicalName, variantName)
-                VariantSpec(variantName, variant.items, className)
+                VariantSpec(variant.alias, variantName, "visit${variant.alias}", variant.items, className)
             }
-            RuleSpec(ruleName, variants, ruleClassName)
+            RuleSpec(ruleName, "visit$rule", variants, ruleClassName)
         }
+        val visitorClassName = ClassName(this.options.packageName!!, "${this.options.grammarName}Visitor")
         return GrammarSpec(
             this.options.grammarName,
             visitorName,
             GrammarUtils.getGeneratedBaseVisitorName(this),
             this.options.packageName!!,
             rules,
-            topNodeClassName
+            topNodeClassName,
+            visitorClassName
         )
     }
 }
