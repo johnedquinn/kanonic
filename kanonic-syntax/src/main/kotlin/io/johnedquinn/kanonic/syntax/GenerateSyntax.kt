@@ -21,8 +21,6 @@ internal class GenerateSyntax : Runnable {
         val files = KanonicGenerator.generate(grammar)
         files.forEach {
             val path = Path("kanonic-runtime/build/generated-src")
-            println("NAME: ${it.name}")
-            println("PATH: ${path.toAbsolutePath()}")
             it.writeTo(path)
         }
     }

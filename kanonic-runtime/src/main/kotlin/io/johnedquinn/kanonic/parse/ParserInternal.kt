@@ -71,6 +71,7 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
                     reduce(action, stack, toAddNodes, currentState)
                 }
                 null -> {
+                    // TODO: Add expected tokens
                     println("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
                     throw ParseFailureException()
                 }
@@ -100,6 +101,7 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
             children.add(toAddNodes.pop())
         }
         val childrenReversed = children.reversed()
+        println("REDUCE USING ACTION $action")
         val newNode = info.createRuleNode(action.rule, currentState, childrenReversed, null)
         println("FOUND NODE: $newNode")
         toAddNodes.push(newNode)

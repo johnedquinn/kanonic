@@ -1,0 +1,21 @@
+kanonic:{
+  name: calculator;
+};
+
+IDENT: "[a-zA-Z][a-zA-Z_]*";
+PLUS: "+";
+MINUS: "-";
+
+root
+    : expr --> rootExpr
+    ;
+
+expr
+    : expr PLUS expr --> exprPlus
+    | expr MINUS expr --> exprMinus
+    | atom --> exprFall
+    ;
+
+atom
+    : IDENT --> atomIdent
+    ;

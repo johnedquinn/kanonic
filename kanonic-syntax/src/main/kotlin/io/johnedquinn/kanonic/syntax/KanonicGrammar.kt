@@ -15,7 +15,8 @@ public object KanonicGrammar {
     private const val CURLY_BRACE_RIGHT = "CURLY_BRACE_RIGHT"
     private const val LINE_VERTICAL = "LINE_VERTICAL"
     private const val LITERAL_STRING = "LITERAL_STRING"
-    private const val DOLLAR_SIGN = "DOLLAR_SIGN"
+    private const val DASH = "DASH"
+    private const val CARROT_RIGHT = "CARROT_RIGHT"
 
     // RULE NAMES
     private const val file = "file"
@@ -27,9 +28,10 @@ public object KanonicGrammar {
     private const val expressions = "expressions"
     private const val ruleItems = "ruleItems"
     private const val ruleItem = "ruleItem"
+    private const val ruleVariant = "ruleVariant"
+    private const val ruleVariants = "ruleVariants"
 
     public val grammar = grammar("Kanonic", "file") {
-
         packageName("io.johnedquinn.kanonic.runtime.generated")
         tokens {
             IDENT_UPPER_CASE - "[A-Z][A-Z_]*"
@@ -40,9 +42,11 @@ public object KanonicGrammar {
             CURLY_BRACE_RIGHT - "\\}"
             LINE_VERTICAL - "\\|"
             LITERAL_STRING - "\"((\\\")|[^\"])*\""
-            DOLLAR_SIGN - "\\$"
+            DASH - "-"
+            CARROT_RIGHT - ">"
         }
-        // Top Node
+
+        // TOP RULE
         file eq config - expressions alias "Root"
 
         // CONFIG
@@ -61,7 +65,14 @@ public object KanonicGrammar {
         tokenDef eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - COLON_SEMI alias "Token"
 
         // RULE
-        ruleDef eq IDENT_CAMEL_CASE - COLON - ruleItems - COLON_SEMI alias "Rule"
+        ruleDef eq IDENT_CAMEL_CASE - COLON - ruleVariants - COLON_SEMI alias "Rule"
+
+        // VARIANTS
+        ruleVariants eq ruleVariant alias "SingleVariant"
+        ruleVariants eq ruleVariants - ruleVariant alias "MultipleVariants"
+
+        // VARIANT
+        ruleVariant eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_CAMEL_CASE alias "Variant"
 
         // ITEMS
         ruleItems eq ruleItem alias "SingleRule"
