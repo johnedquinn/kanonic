@@ -3,14 +3,19 @@
 Kanonic is an SLR (Simple LR) parser operating on the JVM.
 
 ## Action Items
-- [ ] Finalize Grammar
+
+- [x] Finalize Grammar
 - [ ] Add Grammar (serialized) to ParserMetadata
 - [ ] Add optionality, repeating groups, etc
 - [ ] Add pre-build task to generate for some grammars into the test directory.
+  - [x] Add function to generate Kanonic syntax parse
 - [ ] Add Gradle task
 - [ ] Make sure all tests pass. Clean up.
-- [ ] Simplify project structure
+- [ ] Add build step to generate syntax parser
+- [x] Simplify project structure
 - [ ] Make token definitions dynamic (might be done).
+- [ ] Figure out how to consolidate generated aliases
+- [ ] Figure out how to create helper function to look through children
 
 ## Grammar
 

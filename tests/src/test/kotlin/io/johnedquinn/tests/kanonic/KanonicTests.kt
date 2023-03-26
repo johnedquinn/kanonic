@@ -1,8 +1,8 @@
-package io.johnedquinn.tests.simple
+package io.johnedquinn.tests.kanonic
 
-import io.johnedquinn.kanonic.syntax.KanonicGrammar
-import io.johnedquinn.kanonic.generated.KanonicMetadata
 import io.johnedquinn.kanonic.parse.KanonicParser
+import io.johnedquinn.kanonic.runtime.generated.KanonicMetadata
+import io.johnedquinn.kanonic.syntax.KanonicGrammar
 import io.johnedquinn.kanonic.utils.KanonicNodeFormatter
 import org.junit.jupiter.api.Test
 
@@ -17,12 +17,15 @@ class KanonicTests {
             .withGrammar(grammar)
             .build()
         val document = """
-            CD:"h"
-            TOKEN:"a"
-            AB:"b"
+            kanonic:{
+                hello: world;
+            };
+            AB:"1";
+            CD:"2";
+            EF:"3";
         """
         val ast = parser.parse(document)
-        println(KanonicNodeFormatter().format(ast))
+        println(KanonicNodeFormatter.format(ast))
         println(ast)
     }
 }

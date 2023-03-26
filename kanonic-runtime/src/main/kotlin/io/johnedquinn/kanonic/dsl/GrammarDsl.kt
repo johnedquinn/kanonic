@@ -76,7 +76,7 @@ class GrammarDsl(private val name: String, private val start: String) {
     }
 
     private fun isRuleReference(str: String): Boolean {
-        return str.lowercase().equals(str)
+        return str.uppercase().equals(str).not()
     }
 
     private fun getTerminalReference(ref: String) = tokens.firstOrNull {

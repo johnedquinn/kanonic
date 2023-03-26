@@ -50,7 +50,7 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
             when (action) {
                 is AcceptAction -> {
                     println("ACCEPT!")
-                    val childrenReversed = toAddNodes.reversed()
+                    val childrenReversed = toAddNodes
                     return info.createRuleNode(0, currentState, childrenReversed, null).also { root ->
                         root.children.forEach { it.parent = root }
                     }
