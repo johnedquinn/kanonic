@@ -20,8 +20,9 @@ object Dependencies {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(project(":kanonic-runtime"))
     implementation(project(":kanonic-gen"))
+    implementation(project(":kanonic-runtime"))
+    implementation(project(":kanonic-syntax"))
 
     // Test
     testImplementation(Dependencies.kotlinTest)

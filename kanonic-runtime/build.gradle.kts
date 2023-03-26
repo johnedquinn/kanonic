@@ -31,6 +31,20 @@ dependencies {
     testRuntimeOnly(Dependencies.junitEngine)
 }
 
+val generatedSrc = "$buildDir/generated-src"
+
+sourceSets {
+    main {
+        java.srcDir(generatedSrc)
+    }
+}
+
+kotlin.sourceSets {
+    main {
+        kotlin.srcDir(generatedSrc)
+    }
+}
+
 tasks.test {
     useJUnitPlatform()
 }

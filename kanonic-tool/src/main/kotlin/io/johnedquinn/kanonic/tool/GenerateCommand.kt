@@ -1,9 +1,9 @@
-package io.johnedquinn.kanonic.tool.pico
+package io.johnedquinn.kanonic.tool
 
 import io.johnedquinn.kanonic.gen.KanonicGenerator
-import io.johnedquinn.kanonic.gen.impl.KanonicGrammar
-import io.johnedquinn.kanonic.runtime.generated.KanonicMetadata
 import io.johnedquinn.kanonic.parse.KanonicParser
+import io.johnedquinn.kanonic.runtime.generated.KanonicMetadata
+import io.johnedquinn.kanonic.syntax.KanonicGrammar
 import picocli.CommandLine
 import java.io.File
 
@@ -32,6 +32,5 @@ internal class GenerateCommand : Runnable {
             .build()
         val ast = parser.parse(fileContent)
         println("AST: $ast")
-        val grammar = KanonicGenerator.generate(TODO())
     }
 }

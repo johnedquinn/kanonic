@@ -57,10 +57,14 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
                 }
                 is ShiftAction -> {
                     println("SHIFT!")
-                    shift(action, stack, toAddNodes, currentState)
-                    if (updateToken) {
-                        tokenIndex++
+                    val foundToken = when (updateToken) {
+                        true -> {
+                            tokenIndex++
+                            token
+                        }
+                        else -> TokenLiteral(TokenLiteral.ReservedTypes.EPSILON, token.index, "<epsilon>")
                     }
+                    shift(action, stack, toAddNodes, currentState, foundToken)
                 }
                 is ReduceAction -> {
                     println("REDUCE!")
@@ -77,10 +81,10 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
     /**
      * Adds another state to the stack and add the token to the list of building nodes
      */
-    private fun shift(action: ShiftAction, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int) {
+    private fun shift(action: ShiftAction, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int, token: TokenLiteral) {
         stack.push(action.state)
         toAddNodes.push(
-            TerminalNode(currentState, null)
+            TerminalNode(currentState, null, token)
         )
     }
 

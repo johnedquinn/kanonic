@@ -1,11 +1,11 @@
-package io.johnedquinn.kanonic.gen.impl
+package io.johnedquinn.kanonic.syntax
 
 import io.johnedquinn.kanonic.dsl.grammar
 
 // TODO: Make internal once grammar is serialized
 public object KanonicGrammar {
     public val grammar = grammar("Kanonic", "file") {
-        packageName("io.johnedquinn.kanonic.generated")
+        packageName("io.johnedquinn.kanonic.runtime.generated")
         tokens {
             "IDENT_TOKEN" - "[A-Z][A-Z_]*"
             "IDENT_CAMEL_CASE" - "[a-z][a-zA-Z]*"

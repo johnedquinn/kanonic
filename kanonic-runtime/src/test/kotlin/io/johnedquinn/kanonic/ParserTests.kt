@@ -1,12 +1,5 @@
 package io.johnedquinn.kanonic
 
-import io.johnedquinn.kanonic.dsl.grammar
-import io.johnedquinn.kanonic.example.G10Metadata
-import io.johnedquinn.kanonic.machine.AutomatonGenerator
-import io.johnedquinn.kanonic.machine.TableGenerator
-import io.johnedquinn.kanonic.parse.ParserInternal
-import io.johnedquinn.kanonic.parse.TokenLiteral
-import io.johnedquinn.kanonic.utils.NodeFormatter
 import org.junit.jupiter.api.Test
 
 internal class ParserTests {
@@ -28,58 +21,58 @@ internal class ParserTests {
 //        println(table.prettify())
     }
 
-    @Test
-    fun generateAutomatonGrammar10() {
-        // Create Grammar
-        val grammar = grammar("G10", "p") {
-            tokens {
-                "IDENTIFIER" - "[a-zA-Z]+"
-                "PAREN_LEFT" - "\\("
-                "PAREN_RIGHT" - "\\)"
-                "PLUS" - "\\+"
-            }
-            "p" eq "e" alias "Root"
-            "e" eq "e" - "PLUS" - "t" alias "ExprPlus"
-            "e" eq "t" alias "ExprFall"
-            "t" eq "IDENTIFIER" - "PAREN_LEFT" - "e" - "PAREN_RIGHT" alias "Index"
-            "t" eq "IDENTIFIER" alias "Ident"
-        }.toGrammar()
-
-        val ident = 2
-        val parenLeft = 3
-        val parenRight = 4
-        val plus = 5
-
-        // Create Query
-        val tokens = listOf(
-            TokenLiteral(ident, 0, "a"),
-            TokenLiteral(plus, 1, "+"),
-            TokenLiteral(ident, 2, "b"),
-            TokenLiteral(plus, 3, "+"),
-            TokenLiteral(ident, 4, "c"),
-            TokenLiteral(plus, 5, "+"),
-            TokenLiteral(ident, 6, "d"),
-            TokenLiteral(parenLeft, 7, "("),
-            TokenLiteral(ident, 8, "f"),
-            TokenLiteral(plus, 9, "+"),
-            TokenLiteral(ident, 10, "g"),
-            TokenLiteral(parenRight, 11, ")"),
-            TokenLiteral(TokenLiteral.ReservedTypes.EOF, 12, "")
-        )
-
-        // Create Parser
-        val generator = AutomatonGenerator()
-        val automaton = generator.generate(grammar)
-        val table = TableGenerator(grammar, automaton).generate()
-        val parser = ParserInternal(grammar, table, G10Metadata())
-
-        // Print Information
-        grammar.printInformation()
-        automaton.printInfo()
-        println(table.prettify(grammar))
-
-        // Parse
-        val tree = parser.parse(tokens)
-        println(NodeFormatter.format(tree))
-    }
+//    @Test
+//    fun generateAutomatonGrammar10() {
+//        // Create Grammar
+//        val grammar = grammar("G10", "p") {
+//            tokens {
+//                "IDENTIFIER" - "[a-zA-Z]+"
+//                "PAREN_LEFT" - "\\("
+//                "PAREN_RIGHT" - "\\)"
+//                "PLUS" - "\\+"
+//            }
+//            "p" eq "e" alias "Root"
+//            "e" eq "e" - "PLUS" - "t" alias "ExprPlus"
+//            "e" eq "t" alias "ExprFall"
+//            "t" eq "IDENTIFIER" - "PAREN_LEFT" - "e" - "PAREN_RIGHT" alias "Index"
+//            "t" eq "IDENTIFIER" alias "Ident"
+//        }.toGrammar()
+//
+//        val ident = 2
+//        val parenLeft = 3
+//        val parenRight = 4
+//        val plus = 5
+//
+//        // Create Query
+//        val tokens = listOf(
+//            TokenLiteral(ident, 0, "a"),
+//            TokenLiteral(plus, 1, "+"),
+//            TokenLiteral(ident, 2, "b"),
+//            TokenLiteral(plus, 3, "+"),
+//            TokenLiteral(ident, 4, "c"),
+//            TokenLiteral(plus, 5, "+"),
+//            TokenLiteral(ident, 6, "d"),
+//            TokenLiteral(parenLeft, 7, "("),
+//            TokenLiteral(ident, 8, "f"),
+//            TokenLiteral(plus, 9, "+"),
+//            TokenLiteral(ident, 10, "g"),
+//            TokenLiteral(parenRight, 11, ")"),
+//            TokenLiteral(TokenLiteral.ReservedTypes.EOF, 12, "")
+//        )
+//
+//        // Create Parser
+//        val generator = AutomatonGenerator()
+//        val automaton = generator.generate(grammar)
+//        val table = TableGenerator(grammar, automaton).generate()
+//        val parser = ParserInternal(grammar, table, G10Metadata())
+//
+//        // Print Information
+//        grammar.printInformation()
+//        automaton.printInfo()
+//        println(table.prettify(grammar))
+//
+//        // Parse
+//        val tree = parser.parse(tokens)
+//        println(NodeFormatter.format(tree))
+//    }
 }

@@ -27,13 +27,12 @@ class KanonicNodeFormatter : KanonicBaseVisitor<Unit, KanonicNodeFormatter.Conte
     }
 
     override fun defaultVisit(node: KanonicNode, ctx: Context) {
-        val top = defaultReturn(node, ctx)
+        defaultReturn(node, ctx)
         for (child in node.children) {
             ctx.level++
             child.accept(this, ctx)
             ctx.level--
         }
-        return top
     }
 
     override fun defaultReturn(node: KanonicNode, ctx: Context) {
@@ -42,7 +41,7 @@ class KanonicNodeFormatter : KanonicBaseVisitor<Unit, KanonicNodeFormatter.Conte
     }
 
     override fun visitTerminal(node: TerminalNode, ctx: Context) {
-        val content = "${getPrefix(ctx.level)}${node::class.simpleName}"
+        val content = "${getPrefix(ctx.level)}TOKEN: ${node.token.content}"
         ctx.builder.appendLine(content)
     }
 }
