@@ -7,6 +7,7 @@ import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.parse.TokenDefinition
 import io.johnedquinn.kanonic.parse.TokenLiteral
+import io.johnedquinn.kanonic.utils.Logger
 
 class GrammarDsl(private val name: String, private val start: String) {
     private val rules = mutableListOf<Rule>()
@@ -14,7 +15,7 @@ class GrammarDsl(private val name: String, private val start: String) {
     private var packageName: String? = null
 
     fun toGrammar(): Grammar {
-        println(rules)
+        Logger.debug(rules.toString())
         return Grammar(rules, Grammar.Options(name, RuleReference(start), packageName), tokens)
     }
 
@@ -67,7 +68,7 @@ class GrammarDsl(private val name: String, private val start: String) {
         val l = LexerDsl()
         l.f()
         tokens = l.build()
-        println(tokens)
+        Logger.debug(tokens.toString())
         return this
     }
 

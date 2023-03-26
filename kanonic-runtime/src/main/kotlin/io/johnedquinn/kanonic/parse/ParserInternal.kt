@@ -5,6 +5,7 @@ import io.johnedquinn.kanonic.machine.AcceptAction
 import io.johnedquinn.kanonic.machine.ParseTable
 import io.johnedquinn.kanonic.machine.ReduceAction
 import io.johnedquinn.kanonic.machine.ShiftAction
+import io.johnedquinn.kanonic.utils.Logger
 import java.util.Stack
 
 /**
@@ -35,9 +36,9 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
         var tokenIndex = 0
         while (true) {
             val currentState = stack.peek()
-            println("CURRENT STATE: $currentState")
+            Logger.debug("CURRENT STATE: $currentState")
             val token = tokens[tokenIndex]
-            println("TOKEN: $token")
+            Logger.debug("TOKEN: $token")
             var updateToken = true
             val action = when (val pre = table.actionTable[currentState][token.type]) {
                 null -> {
@@ -49,14 +50,14 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
 
             when (action) {
                 is AcceptAction -> {
-                    println("ACCEPT!")
+                    Logger.debug("ACCEPT!")
                     val childrenReversed = toAddNodes
                     return info.createRuleNode(0, currentState, childrenReversed, null).also { root ->
                         root.children.forEach { it.parent = root }
                     }
                 }
                 is ShiftAction -> {
-                    println("SHIFT!")
+                    Logger.debug("SHIFT!")
                     val foundToken = when (updateToken) {
                         true -> {
                             tokenIndex++
@@ -67,12 +68,23 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
                     shift(action, stack, toAddNodes, currentState, foundToken)
                 }
                 is ReduceAction -> {
-                    println("REDUCE!")
+                    Logger.debug("REDUCE!")
                     reduce(action, stack, toAddNodes, currentState)
                 }
                 null -> {
                     // TODO: Add expected tokens
-                    println("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
+                    val possible = mutableSetOf<Int>()
+                    table.actionTable[currentState].forEachIndexed { index, act ->
+                        if (act != null) { possible.add(index) }
+                    }
+                    table.goToTable[currentState].forEachIndexed { index, act ->
+                        if (act != null) { possible.add(index) }
+                    }
+                    val tokenNames = possible.map { tokenIndex ->
+                        grammar.tokens[tokenIndex].name
+                    }
+                    Logger.error("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
+                    Logger.error("Received $token, but expected token type of: $tokenNames")
                     throw ParseFailureException()
                 }
             }
@@ -101,9 +113,9 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
             children.add(toAddNodes.pop())
         }
         val childrenReversed = children.reversed()
-        println("REDUCE USING ACTION $action")
+        Logger.debug("REDUCE USING ACTION $action")
         val newNode = info.createRuleNode(action.rule, currentState, childrenReversed, null)
-        println("FOUND NODE: $newNode")
+        Logger.debug("FOUND NODE: $newNode")
         toAddNodes.push(newNode)
         val topState = stack.peek()
         val ruleIndex = table.nonTerminals.indexOf(rule.name)

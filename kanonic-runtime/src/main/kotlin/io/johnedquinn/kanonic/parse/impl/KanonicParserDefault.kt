@@ -10,6 +10,7 @@ import io.johnedquinn.kanonic.parse.KanonicParser
 import io.johnedquinn.kanonic.parse.Node
 import io.johnedquinn.kanonic.parse.ParserInternal
 import io.johnedquinn.kanonic.parse.ParserMetadata
+import io.johnedquinn.kanonic.utils.Logger
 
 internal class KanonicParserDefault(
     private val grammar: Grammar,
@@ -22,13 +23,13 @@ internal class KanonicParserDefault(
     private val table: ParseTable = TableGenerator(grammar, automaton).generate()
 
     init {
-        println(table.prettify(grammar))
+        Logger.debug(table.prettify(grammar))
     }
 
     override fun parse(input: String): Node {
         val parser = ParserInternal(grammar, table, info)
         val tokens = lexer.tokenize(input)
-        println("TOKENS: $tokens")
+        Logger.debug("TOKENS: $tokens")
         return parser.parse(tokens)
     }
 

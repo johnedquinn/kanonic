@@ -3,6 +3,7 @@ package io.johnedquinn.kanonic.machine
 import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
+import io.johnedquinn.kanonic.utils.Logger
 
 data class Automaton(val states: List<State>, val edges: Map<Int, List<EdgeTarget>>) {
 
@@ -31,7 +32,7 @@ data class Automaton(val states: List<State>, val edges: Map<Int, List<EdgeTarge
     }
 
     private fun printStateRule(stateRule: StateRule) {
-        print("${stateRule.plainRule.name} ---> ")
+        println("${stateRule.plainRule.name} ---> ")
         stateRule.plainRule.items.forEachIndexed { index, item ->
             if (stateRule.position == index) {
                 print("⚬")
