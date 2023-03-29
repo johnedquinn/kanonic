@@ -6,6 +6,8 @@ While Java is understood to be the language of the software industry, there hasn
 operating on the JVM that accomplishes one of the main pre-requisites for companies: speed. This project aims to tackle
 this problem by leveraging the speed and expressiveness of LR(1) grammars.
 
+*This project is a work-in-progress and should be considered experimental.*
+
 ## Grammar
 
 To illustrate the Kanonic syntax, see the following example:
@@ -18,7 +20,8 @@ To illustrate the Kanonic syntax, see the following example:
 
 kanonic: {
   name: "SimpleLang";
-  top_rule: atomic;
+  root: expr;
+  package: "io.johnedquinn.simple";
 };
 
 /** TOKENS -- this is a comment **/
@@ -46,18 +49,22 @@ atomic
 Each Kanonic file (`*.knc`) contains a configuration object named `kanonic`. See the below
 allowable attributes:
 
+- `name`: the name of the language
+- `root`: the root rule to use when parsing
+- `package`: the package where the generated code will be placed
+
 ```text
 name: String | Symbol
-top_rule: String | Symbol
+root: String | Symbol
 ```
 
 ### Tokens
 
-Each token name has the syntax of "[A-Z][A-Z_]+". Its values are regular expressions in the form of Strings.
+Each token name has the syntax of "[A-Z][A-Z_]+". Its values are regular expressions in the form of strings.
 
 ### Rules
 
-Each top-level rule holds variants of that rule. For example:
+Each top-level rule holds named variants of that rule. For example:
 ```knc
 atomic
   : IDENTIFIER --> ident
@@ -132,17 +139,3 @@ Given the LR(1) automaton, the Kanonic tool creates an LR(1) Parse Table using t
   - `KanonicParser`: given a generated metadata, parses the input string into the generated nodes (AST)
 - `kanonic-syntax`: generates Kanonic's parser and places the source in `kanonic-runtime`
 - `kanonic-tool`: generates a parser for a user's input Kanonic file
-
-## Action Items
-
-- [x] Finalize Grammar
-- [ ] Add Grammar (serialized) to ParserMetadata
-- [ ] Add optionality, repeating groups, etc
-- [ ] Add pre-build task to generate for some grammars into the test directory.
-  - [x] Add function to generate Kanonic syntax parse
-- [ ] Add Gradle task
-- [ ] Make sure all tests pass. Clean up.
-- [ ] Add build step to generate syntax parser
-- [x] Simplify project structure
-- [ ] Figure out how to consolidate generated aliases
-- [ ] Figure out how to create helper function to look through children
