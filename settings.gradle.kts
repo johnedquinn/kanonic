@@ -7,3 +7,4 @@ include(
 include("tests")
 include("kanonic-tool")
 include("kanonic-syntax")
+include("kanonic-parser")

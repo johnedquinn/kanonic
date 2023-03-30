@@ -80,8 +80,8 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
                     table.goToTable[currentState].forEachIndexed { index, act ->
                         if (act != null) { possible.add(index) }
                     }
-                    val tokenNames = possible.map { tokenIndex ->
-                        grammar.tokens[tokenIndex].name
+                    val tokenNames = possible.map { tokenInd ->
+                        grammar.tokens[tokenInd].name
                     }
                     Logger.error("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
                     Logger.error("Received $token, but expected token type of: $tokenNames")

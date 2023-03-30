@@ -1,6 +1,5 @@
 package io.johnedquinn.kanonic.tool
 
-import io.johnedquinn.kanonic.gen.KanonicGenerator
 import io.johnedquinn.kanonic.parse.KanonicParser
 import io.johnedquinn.kanonic.runtime.generated.KanonicMetadata
 import io.johnedquinn.kanonic.syntax.KanonicGrammar

@@ -7,7 +7,7 @@ import io.johnedquinn.kanonic.runtime.generated.KanonicNode
 
 object KanonicNodeFormatter : KanonicBaseVisitor<Unit, KanonicNodeFormatter.Context>() {
 
-    val EOL = System.lineSeparator()
+    private val EOL: String = System.lineSeparator()
     private const val INDENTS = "   "
     private const val INDENT_ROOT = "⚬"
     private const val INDENT_PIPE = "──"
@@ -21,19 +21,7 @@ object KanonicNodeFormatter : KanonicBaseVisitor<Unit, KanonicNodeFormatter.Cont
     )
 
     public fun format(node: Node): String {
-        val ctx = Context()
         return formatSupport(node)
-        // visit(node, ctx)
-        // return ctx.builder.toString()
-    }
-
-    private fun getPrefix(level: Int): String {
-        return buildString {
-            for (i in 0..level) {
-                append("-")
-            }
-            append(" ")
-        }
     }
 
     override fun defaultVisit(node: KanonicNode, ctx: Context) {
@@ -57,7 +45,7 @@ object KanonicNodeFormatter : KanonicBaseVisitor<Unit, KanonicNodeFormatter.Cont
 
     private data class PropertyInfo(val item: Any?, val param: String? = null)
 
-    internal fun formatSupport(
+    private fun formatSupport(
         input: Any?,
         level: Int = 0,
         levels: Set<Int> = emptySet(),

@@ -20,7 +20,7 @@ internal class GenerateSyntax : Runnable {
         val grammar = KanonicGrammar.grammar
         val files = KanonicGenerator.generate(grammar)
         files.forEach {
-            val path = Path("kanonic-runtime/build/generated-src")
+            val path = Path("kanonic-parser/build/generated-src")
             it.writeTo(path)
         }
     }

@@ -1,6 +1,6 @@
 package io.johnedquinn.kanonic.machine
 
-import io.johnedquinn.kanonic.*
+import io.johnedquinn.kanonic.* // ktlint-disable no-wildcard-imports // TODO: Remove
 import io.johnedquinn.kanonic.parse.TokenLiteral
 
 class AutomatonGenerator {
@@ -148,9 +148,11 @@ class AutomatonGenerator {
         addEdge(srcIndex, child)
     }
 
-    private fun addEdge(srcIndex: Int, target: Automaton.EdgeTarget) = when (edges.contains(srcIndex)) {
-        true -> edges[srcIndex]!!.add(target)
-        false -> edges[srcIndex] = mutableListOf(target)
+    private fun addEdge(srcIndex: Int, target: Automaton.EdgeTarget) {
+        when (edges.contains(srcIndex)) {
+            true -> edges[srcIndex]!!.add(target)
+            false -> edges[srcIndex] = mutableListOf(target)
+        }
     }
 
     private fun hasMoreItems(stateRule: StateRule): Boolean = stateRule.position <= stateRule.plainRule.items.lastIndex

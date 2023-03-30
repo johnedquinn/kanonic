@@ -8,7 +8,7 @@ internal class KanonicLexerDefault(private val definitions: List<TokenDefinition
     public override fun tokenize(input: String): List<TokenLiteral> {
         val tokens = mutableListOf<TokenLiteral>()
         var currentIndex = 0
-        var tokenStartIndex = 0
+        var tokenStartIndex: Int
         var currentString = ""
         while (currentIndex < input.length) {
             currentString += input[currentIndex]

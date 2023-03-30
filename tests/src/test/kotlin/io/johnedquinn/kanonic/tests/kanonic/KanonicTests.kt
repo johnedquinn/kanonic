@@ -3,7 +3,6 @@ package io.johnedquinn.kanonic.tests.kanonic
 import io.johnedquinn.kanonic.parse.KanonicParser
 import io.johnedquinn.kanonic.runtime.generated.KanonicMetadata
 import io.johnedquinn.kanonic.syntax.KanonicGrammar
-import io.johnedquinn.kanonic.tests.kanonic.GrammarProvider
 import io.johnedquinn.kanonic.utils.KanonicNodeFormatter
 import org.junit.jupiter.api.Test
 
