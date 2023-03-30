@@ -23,6 +23,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":kanonic-gen"))
+    implementation(project(":kanonic-parser"))
     implementation(project(":kanonic-runtime"))
     implementation(project(":kanonic-syntax"))
     implementation("info.picocli:picocli:4.7.0")
