@@ -14,7 +14,7 @@ dependencies {
     implementation(project(":kanonic-syntax"))
 }
 
-val generatedSrc = "$buildDir/generated-src"
+val generatedSrc = "$buildDir/generated-src/main/kotlin"
 
 sourceSets {
     main {
@@ -31,7 +31,7 @@ kotlin.sourceSets {
 val generate = tasks.register<Exec>("generate") {
     dependsOn(":kanonic-syntax:install")
     workingDir("$projectDir/..")
-    commandLine("kanonic-syntax/build/install/kanonic-generate/bin/kanonic-generate")
+    commandLine("kanonic-syntax/build/install/kanonic-generate/bin/kanonic-generate", "kanonic-parser/build/generated-src/main/kotlin")
 }
 
 tasks.compileKotlin {
