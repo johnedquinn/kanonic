@@ -2,7 +2,7 @@ package io.johnedquinn.kanonic.syntax
 
 import io.johnedquinn.kanonic.gen.KanonicGenerator
 import picocli.CommandLine
-import kotlin.io.path.Path
+import java.nio.file.Path
 
 @CommandLine.Command(
     name = "kanonic-generate",
@@ -16,12 +16,14 @@ import kotlin.io.path.Path
 )
 internal class GenerateSyntax : Runnable {
 
+    @CommandLine.Parameters(arity = "0..1", index = "0..1", description = ["The output directory"], paramLabel = "<directory>")
+    lateinit var output: Path
+
     override fun run() {
         val grammar = KanonicGrammar.grammar
         val files = KanonicGenerator.generate(grammar)
         files.forEach {
-            val path = Path("kanonic-parser/build/generated-src")
-            it.writeTo(path)
+            it.writeTo(output)
         }
     }
 }
