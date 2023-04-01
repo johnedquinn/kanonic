@@ -1,6 +1,5 @@
 package io.johnedquinn.kanonic
 
-import io.johnedquinn.kanonic.dsl.grammar
 import org.junit.jupiter.api.Test
 
 class GrammarTest {

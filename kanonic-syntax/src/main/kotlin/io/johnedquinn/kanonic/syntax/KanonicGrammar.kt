@@ -1,6 +1,6 @@
 package io.johnedquinn.kanonic.syntax
 
-import io.johnedquinn.kanonic.dsl.grammar
+import io.johnedquinn.kanonic.dsl.GrammarBuilder.Companion.buildGrammar
 
 // TODO: Make internal once grammar is serialized
 public object KanonicGrammar {
@@ -31,7 +31,7 @@ public object KanonicGrammar {
     private const val ruleVariant = "ruleVariant"
     private const val ruleVariants = "ruleVariants"
 
-    public val grammar = grammar("Kanonic", "file") {
+    public val grammar = buildGrammar("Kanonic", "file") {
         packageName("io.johnedquinn.kanonic.runtime.generated")
         tokens {
             IDENT_UPPER_CASE - "[A-Z][A-Z_]*"
@@ -82,5 +82,5 @@ public object KanonicGrammar {
         ruleItem eq IDENT_CAMEL_CASE alias "RuleReference"
         ruleItem eq IDENT_UPPER_CASE alias "TokenReference"
         ruleItem eq LINE_VERTICAL alias "LineReference" // TODO
-    }.toGrammar()
+    }
 }

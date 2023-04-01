@@ -4,7 +4,7 @@
  */
 
 kanonic::{
-  name: kanonic;
+  name: calculator;
   root: root;
 };
 
@@ -14,8 +14,8 @@ kanonic::{
 //
 //
 
-IDENT_TOKEN: "[A-Z][A-Z_]*";
-IDENT_RULE: "[a-z][a-zA-Z]*";
+INTEGER: "[0-9]+";
+PLUS: "\+";
 
 //
 //
@@ -24,6 +24,14 @@ IDENT_RULE: "[a-z][a-zA-Z]*";
 //
 
 root
-    : hello WORLD --> hello
+    : expr --> rootExpr
     |
     ;
+
+expr
+  : expr PLUS atomic --> plus
+  ;
+
+atomic
+  : INTEGER --> int
+  ;

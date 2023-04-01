@@ -6,40 +6,48 @@ import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.parse.TokenDefinition
-import io.johnedquinn.kanonic.parse.TokenLiteral
 import io.johnedquinn.kanonic.utils.Logger
 
-class GrammarDsl(private val name: String, private val start: String) {
+class GrammarBuilder(private val name: String, private val start: String) {
     private val rules = mutableListOf<Rule>()
     private var tokens: List<TokenDefinition> = emptyList()
     private var packageName: String? = null
 
-    fun toGrammar(): Grammar {
+    companion object {
+        @JvmStatic
+        public fun buildGrammar(name: String, start: String, f: GrammarBuilder.() -> Unit): Grammar {
+            val grammar = GrammarBuilder(name, start)
+            grammar.f()
+            return grammar.toGrammar()
+        }
+    }
+
+    internal fun toGrammar(): Grammar {
         Logger.debug(rules.toString())
         return Grammar(rules, Grammar.Options(name, RuleReference(start), packageName), tokens)
     }
 
     fun add(name: String, def: List<SymbolReference>): Rule {
         val rule = Rule(name, def)
-        this@GrammarDsl.rules.add(rule)
+        this@GrammarBuilder.rules.add(rule)
         return rule
     }
 
-    fun add(name: String, f: GrammarDsl.() -> List<SymbolReference>): Rule {
+    fun add(name: String, f: GrammarBuilder.() -> List<SymbolReference>): Rule {
         val rule = Rule(name, this.f())
-        this@GrammarDsl.rules.add(rule)
+        this@GrammarBuilder.rules.add(rule)
         return rule
     }
 
     infix fun String.eq(other: List<SymbolReference>): Rule {
         val rule = Rule(this, other)
-        this@GrammarDsl.rules.add(rule)
+        this@GrammarBuilder.rules.add(rule)
         return rule
     }
 
     infix fun String.eq(other: String): Rule {
         val rule = Rule(this, listOf(getReference(other)))
-        this@GrammarDsl.rules.add(rule)
+        this@GrammarBuilder.rules.add(rule)
         return rule
     }
 
@@ -64,8 +72,8 @@ class GrammarDsl(private val name: String, private val start: String) {
         return listOf(RuleReference(this))
     }
 
-    fun tokens(f: LexerDsl.() -> Unit): GrammarDsl {
-        val l = LexerDsl()
+    fun tokens(f: LexerBuilder.() -> Unit): GrammarBuilder {
+        val l = LexerBuilder()
         l.f()
         tokens = l.build()
         Logger.debug(tokens.toString())
@@ -88,25 +96,5 @@ class GrammarDsl(private val name: String, private val start: String) {
         true -> RuleReference(ref)
         false -> getTerminalReference(ref)
     }
-}
-
-public fun grammar(name: String, start: String, f: GrammarDsl.() -> Unit): GrammarDsl {
-    val grammar = GrammarDsl(name, start)
-    grammar.f()
-    return grammar
-}
-
-class LexerDsl {
-    private val tokens = mutableListOf<TokenDefinition>()
-    init {
-        tokens.add(TokenDefinition(TokenLiteral.ReservedTypes.EOF, "EOF", ""))
-        tokens.add(TokenDefinition(TokenLiteral.ReservedTypes.EPSILON, "EPSILON", ""))
-    }
-    operator fun String.minus(other: String) {
-        val token = TokenDefinition(tokens.size, this, other)
-        tokens.add(token)
-    }
-
-    fun build() = tokens.toList()
 }
 
