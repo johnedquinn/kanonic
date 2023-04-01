@@ -17,7 +17,7 @@ public object KanonicGenerator {
     public fun generate(grammar: Grammar): List<FileSpec> {
         val spec = grammar.toSpec()
         return listOf(
-            MetadataGenerator.generate(grammar),
+            MetadataGenerator.generate(grammar, spec),
             NodeGenerator.generate(grammar, spec),
             VisitorGenerator.generate(spec),
             BaseVisitorGenerator.generate(spec)
@@ -36,7 +36,7 @@ public object KanonicGenerator {
                 val className = ClassName(ruleClassName.canonicalName, variantName)
                 VariantSpec(variant.alias, variantName, "visit${variant.alias}", variant.items, className)
             }
-            RuleSpec(ruleName, "visit$rule", variants, ruleClassName)
+            RuleSpec(rule, ruleName, "visit$rule", variants, ruleClassName)
         }
         val visitorClassName = ClassName(this.options.packageName!!, "${this.options.grammarName}Visitor")
         return GrammarSpec(

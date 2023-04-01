@@ -26,10 +26,13 @@ internal class GenerateCommand : Runnable {
         println(fileContent)
         val parser = KanonicParser.Builder
             .standard()
-            .withGrammar(KanonicGrammar.grammar)
             .withMetadata(KanonicMetadata())
             .build()
         val ast = parser.parse(fileContent)
-        println("AST: $ast")
+        println(KanonicNodeFormatter.format(ast))
+
+        // TODO: Convert the Kanonic AST --> Grammar
+
+        // TODO: KanonicGenerator.generate(grammar) with output directory
     }
 }

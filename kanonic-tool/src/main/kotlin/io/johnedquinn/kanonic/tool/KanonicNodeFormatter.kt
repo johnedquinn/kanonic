@@ -1,4 +1,4 @@
-package io.johnedquinn.kanonic.utils
+package io.johnedquinn.kanonic.tool
 
 import io.johnedquinn.kanonic.parse.Node
 import io.johnedquinn.kanonic.parse.TerminalNode

@@ -1,31 +1,13 @@
-/**
- * File: Kanonic.knc
- * Desc: The Kanonic grammar file
- */
-
-kanonic::{
+kanonic: {
   name: calculator;
   root: root;
 };
 
-//
-//
-// TOKENS
-//
-//
-
 INTEGER: "[0-9]+";
 PLUS: "\+";
 
-//
-//
-// RULES
-//
-//
-
 root
     : expr --> rootExpr
-    |
     ;
 
 expr

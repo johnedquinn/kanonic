@@ -1,7 +1,5 @@
 package io.johnedquinn.kanonic.parse.impl
 
-import io.johnedquinn.kanonic.Grammar
-import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.machine.AutomatonGenerator
 import io.johnedquinn.kanonic.machine.ParseTable
 import io.johnedquinn.kanonic.machine.TableGenerator
@@ -13,10 +11,11 @@ import io.johnedquinn.kanonic.parse.ParserMetadata
 import io.johnedquinn.kanonic.utils.Logger
 
 internal class KanonicParserDefault(
-    private val grammar: Grammar,
     private val info: ParserMetadata,
     private val lexer: KanonicLexer
 ) : KanonicParser {
+
+    private val grammar = info.grammar
 
     private val generator = AutomatonGenerator()
     private val automaton = generator.generate(grammar)
@@ -36,7 +35,6 @@ internal class KanonicParserDefault(
     class Builder : KanonicParser.Builder {
         lateinit var metadata: ParserMetadata
         lateinit var lexer: KanonicLexer
-        lateinit var grammar: Grammar
 
         override fun withMetadata(metadata: ParserMetadata): KanonicParser.Builder = this.apply {
             this.metadata = metadata
@@ -46,15 +44,11 @@ internal class KanonicParserDefault(
             this.lexer = lexer
         }
 
-        override fun withGrammar(grammar: Grammar): KanonicParser.Builder = this.apply {
-            this.grammar = grammar
-        }
-
         override fun build(): KanonicParser {
             if (this::lexer.isInitialized.not()) {
-                lexer = KanonicLexerDefault(grammar.tokens)
+                lexer = KanonicLexerDefault(metadata.grammar.tokens)
             }
-            return KanonicParserDefault(grammar, metadata, lexer)
+            return KanonicParserDefault(metadata, lexer)
         }
     }
 }

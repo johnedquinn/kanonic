@@ -24,6 +24,7 @@ dependencies {
     implementation(project(":kanonic-parser"))
     implementation(project(":kanonic-runtime"))
     implementation(project(":kanonic-syntax"))
+    implementation(project(":kanonic-tool"))
 
     // Test
     testImplementation(Dependencies.kotlinTest)
