@@ -1,17 +1,5 @@
 plugins {
     kotlin("jvm") version "1.6.21"
-    id("org.gradle.application")
-}
-
-application {
-    applicationName = "kanonic-generate"
-    mainClass.set("io.johnedquinn.kanonic.syntax.Main")
-}
-
-distributions {
-    main {
-        distributionBaseName.set("kanonic-generate")
-    }
 }
 
 version = "unspecified"
@@ -22,20 +10,33 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation(project(":kanonic-gen"))
     implementation(project(":kanonic-runtime"))
-    implementation("info.picocli:picocli:4.7.0")
-    implementation("com.squareup:kotlinpoet:1.12.0")
+    implementation(project(":kanonic-syntax-gen"))
 }
 
-tasks.named<Tar>("distTar") {
-    compression = Compression.GZIP
+val generatedSrc = "$buildDir/generated-src/main/kotlin"
+
+sourceSets {
+    main {
+        java.srcDir(generatedSrc)
+    }
 }
 
-tasks.named<JavaExec>("run") {
-    standardInput = System.`in`
+kotlin.sourceSets {
+    main {
+        kotlin.srcDir(generatedSrc)
+    }
 }
 
-tasks.register<GradleBuild>("install") {
-    tasks = listOf("assembleDist", "distZip", "installDist")
+val generate = tasks.register<Exec>("generate") {
+    dependsOn(":kanonic-syntax-gen:install")
+    workingDir(projectDir)
+    commandLine(
+        "../kanonic-syntax-gen/build/install/kanonic-generate/bin/kanonic-generate",
+        "build/generated-src/main/kotlin"
+    )
+}
+
+tasks.compileKotlin {
+    dependsOn(generate)
 }

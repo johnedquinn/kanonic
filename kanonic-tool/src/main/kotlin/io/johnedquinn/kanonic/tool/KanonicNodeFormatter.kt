@@ -2,8 +2,8 @@ package io.johnedquinn.kanonic.tool
 
 import io.johnedquinn.kanonic.parse.Node
 import io.johnedquinn.kanonic.parse.TerminalNode
-import io.johnedquinn.kanonic.runtime.generated.KanonicBaseVisitor
-import io.johnedquinn.kanonic.runtime.generated.KanonicNode
+import io.johnedquinn.kanonic.syntax.generated.KanonicBaseVisitor
+import io.johnedquinn.kanonic.syntax.generated.KanonicNode
 
 object KanonicNodeFormatter : KanonicBaseVisitor<Unit, KanonicNodeFormatter.Context>() {
 

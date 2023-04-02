@@ -32,7 +32,7 @@ public object KanonicGrammar {
     private const val ruleVariants = "ruleVariants"
 
     public val grammar = buildGrammar("Kanonic", "file") {
-        packageName("io.johnedquinn.kanonic.runtime.generated")
+        packageName("io.johnedquinn.kanonic.syntax.generated")
         tokens {
             IDENT_UPPER_CASE - "[A-Z][A-Z_]*"
             IDENT_CAMEL_CASE - "[a-z][a-zA-Z]*"

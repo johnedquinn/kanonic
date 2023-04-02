@@ -21,9 +21,9 @@ object Dependencies {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(project(":kanonic-gen"))
-    implementation(project(":kanonic-parser"))
     implementation(project(":kanonic-runtime"))
     implementation(project(":kanonic-syntax"))
+    implementation(project(":kanonic-syntax-gen"))
     implementation(project(":kanonic-tool"))
 
     // Test
