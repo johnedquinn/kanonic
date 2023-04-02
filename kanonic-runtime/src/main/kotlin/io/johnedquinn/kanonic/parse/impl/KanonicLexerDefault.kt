@@ -34,7 +34,9 @@ internal class KanonicLexerDefault(private val definitions: List<TokenDefinition
                     false -> currentString
                 }
                 val tokenLiteral = TokenLiteral(it.index, tokenStartIndex.toLong(), actualString)
-                tokens.add(tokenLiteral)
+                if (it.hidden.not()) {
+                    tokens.add(tokenLiteral)
+                }
                 currentIndex--
                 currentString = ""
             }

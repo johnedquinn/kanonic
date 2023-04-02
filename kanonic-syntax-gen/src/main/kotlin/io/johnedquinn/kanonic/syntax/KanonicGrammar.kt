@@ -17,6 +17,8 @@ public object KanonicGrammar {
     private const val LITERAL_STRING = "LITERAL_STRING"
     private const val DASH = "DASH"
     private const val CARROT_RIGHT = "CARROT_RIGHT"
+    private const val COMMENT_SINGLE = "COMMENT_SINGLE"
+    private const val COMMENT_BLOCK = "COMMENT_BLOCK"
 
     // RULE NAMES
     private const val file = "file"
@@ -44,6 +46,8 @@ public object KanonicGrammar {
             LITERAL_STRING - "\"((\\\")|[^\"])*\""
             DASH - "-"
             CARROT_RIGHT - ">"
+            COMMENT_SINGLE - ("//[^\\r\\n]*?\\r?\\n?" channel "hidden")
+            COMMENT_BLOCK - ("/\\*(?s).*?\\*/" channel "hidden")
         }
 
         // TOP RULE
