@@ -2,9 +2,9 @@ rootProject.name = "kanonic"
 
 include(
     "kanonic-gen",
-    "kanonic-runtime"
+    "kanonic-runtime",
+    "kanonic-syntax",
+    "kanonic-syntax-gen",
+    "kanonic-tool",
+    "tests"
 )
-include("tests")
-include("kanonic-tool")
-include("kanonic-syntax")
-include("kanonic-parser")

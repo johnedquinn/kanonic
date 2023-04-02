@@ -1,12 +1,12 @@
 # Kanonic
 
+*This project is a work-in-progress and should be considered experimental.*
+
 Kanonic is a fast LR(1) parser generator operating on the JVM.
 
 While Java is understood to be the language of the software industry, there hasn't been an adequate parser generator
 operating on the JVM that accomplishes one of the main pre-requisites for companies: speed. This project aims to tackle
 this problem by leveraging the speed and expressiveness of LR(1) grammars.
-
-*This project is a work-in-progress and should be considered experimental.*
 
 ## Grammar
 
@@ -52,11 +52,6 @@ allowable attributes:
 - `name`: the name of the language
 - `root`: the root rule to use when parsing
 - `package`: the package where the generated code will be placed
-
-```text
-name: String | Symbol
-root: String | Symbol
-```
 
 ### Tokens
 
@@ -131,11 +126,21 @@ Given the LR(1) automaton, the Kanonic tool creates an LR(1) Parse Table using t
 >
 > **Introduction to Compilers and Language Design**, *Douglas Thain*
 
-## Project Structure
+## Project Structure & Flow
 
+For most users, the only project relevant to them will be `kanonic-tool`.
+- `kanonic-tool`: generates a parser for a user's input Kanonic file
+  - Internally parses an input Kanonic file into a Kanonic AST using `:kanonic-syntax`'s parser
+  - Converts the Kanonic AST into a Grammar
+  - Generates the appropriate files using the parsed Grammar and `:kanonic-gen`
+
+For developers, below are descriptions for the remaining sub-projects.
 - `kanonic-gen`
   - `KanonicGenerator`: given a grammar, generates the Nodes, Visitors, and Metadata
 - `kanonic-runtime`
   - `KanonicParser`: given a generated metadata, parses the input string into the generated nodes (AST)
-- `kanonic-syntax`: generates Kanonic's parser and places the source in `kanonic-runtime`
-- `kanonic-tool`: generates a parser for a user's input Kanonic file
+- `kanonic-syntax`: holds the official, generated Kanonic Parser/Metadata
+  - Internally calls `kanonic-syntax-gen`'s application to generate the source code and place within the Kotlin source set
+- `kanonic-syntax-gen`: generates Kanonic's parser and places the source in `kanonic-syntax`
+  - Holds Kanonic's official grammar in Kotlin form
+  - Very similar to `kanonic-tool`, but it solely used for internal purposes

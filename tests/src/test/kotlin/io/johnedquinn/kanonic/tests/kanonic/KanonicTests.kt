@@ -1,7 +1,7 @@
 package io.johnedquinn.kanonic.tests.kanonic
 
 import io.johnedquinn.kanonic.parse.KanonicParser
-import io.johnedquinn.kanonic.runtime.generated.KanonicMetadata
+import io.johnedquinn.kanonic.syntax.generated.KanonicMetadata
 import io.johnedquinn.kanonic.tool.KanonicNodeFormatter
 import org.junit.jupiter.api.Test
 

@@ -1,8 +1,7 @@
 package io.johnedquinn.kanonic.tool
 
 import io.johnedquinn.kanonic.parse.KanonicParser
-import io.johnedquinn.kanonic.runtime.generated.KanonicMetadata
-import io.johnedquinn.kanonic.syntax.KanonicGrammar
+import io.johnedquinn.kanonic.syntax.generated.KanonicMetadata
 import picocli.CommandLine
 import java.io.File
 
