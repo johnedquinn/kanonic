@@ -11,6 +11,9 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asTypeName
 import io.johnedquinn.kanonic.Grammar
+import io.johnedquinn.kanonic.RuleReference
+import io.johnedquinn.kanonic.SymbolReference
+import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.gen.GrammarSpec
 import io.johnedquinn.kanonic.gen.VariantSpec
 import io.johnedquinn.kanonic.parse.Node
@@ -75,6 +78,7 @@ internal object NodeGenerator {
                     val variantSpecification = spec.rules.flatMap { it.variants }.firstOrNull {
                         it.originalName == variant.alias
                     } ?: error("Couldn't find variant ${variant.alias}")
+                    variantSpec.addChildrenFunctions(variantSpecification, grammar, spec)
                     variantSpec.addApplyMethod(spec, variantSpecification)
                     variantSpec.addPrimaryConstructor()
                     variantSpec.build()
@@ -89,6 +93,50 @@ internal object NodeGenerator {
                 ruleSpec.addTypes(typeSpecs)
                 ruleSpec.build()
             }
+        }
+
+        private fun TypeSpec.Builder.addChildrenFunctions(variant: VariantSpec, grammar: Grammar, spec: GrammarSpec) {
+            val itemCounts = variant.items.groupingBy { it }.eachCount()
+            itemCounts.entries.forEach { entry ->
+                when (entry.value) {
+                    1 -> this.addChildrenFunctionSingle(entry.key, grammar, spec)
+                    else -> this.addChildrenFunctionMultiple(entry.key, grammar, spec)
+                }
+            }
+        }
+
+        private fun TypeSpec.Builder.addChildrenFunctionSingle(symbol: SymbolReference, grammar: Grammar, spec: GrammarSpec) {
+            val name = getName(symbol, grammar)
+            val function = FunSpec.builder(name)
+            spec.rules.firstOrNull { it.name == name }?.className?.let {
+                function.returns(it)
+                function.addStatement("return this.children.filterIsInstance<%L>().first()", it)
+            } ?: grammar.tokens.firstOrNull { it.name == name }?.let {
+                function.returns(ClassNames.TERMINAL_NODE)
+                function.beginControlFlow("return this.children.filterIsInstance<%L>().first", ClassNames.TERMINAL_NODE)
+                function.addStatement("it.token.type == %L", it.index)
+                function.endControlFlow()
+            } ?: error("Unable to find rule/token reference")
+            this.addFunction(function.build())
+        }
+        private fun TypeSpec.Builder.addChildrenFunctionMultiple(symbol: SymbolReference, grammar: Grammar, spec: GrammarSpec) {
+            val name = getName(symbol, grammar)
+            val function = FunSpec.builder(name)
+            spec.rules.firstOrNull { it.name == name }?.className?.let {
+                function.returns(ClassNames.LIST.parameterizedBy(it))
+                function.addStatement("return this.children.filterIsInstance<%L>()", it)
+            } ?: grammar.tokens.firstOrNull { it.name == name }?.let {
+                function.returns(ClassNames.LIST_TERMINAL_NODE)
+                function.beginControlFlow("return this.children.filterIsInstance<%L>().filter", ClassNames.TERMINAL_NODE)
+                function.addStatement("it.token.type == %L", it.index)
+                function.endControlFlow()
+            } ?: error("Unable to find rule/token reference")
+            this.addFunction(function.build())
+        }
+
+        private fun getName(symbol: SymbolReference, grammar: Grammar) = when (symbol) {
+            is RuleReference -> symbol.name
+            is TerminalReference -> grammar.tokens[symbol.type].name
         }
 
         private fun createAcceptFunction(grammar: GrammarSpec, variantSpec: VariantSpec) = FunSpec.builder("accept")
