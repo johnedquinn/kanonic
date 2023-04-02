@@ -1,10 +1,25 @@
-kanonic: {
+// File: calculator.knc
+// Author: Kanonic
+// Description: Example Kanonic file
+
+/**
+ * CONFIG
+ * name: symbol representing grammar name
+ * root: symbol of root rule
+ * package: string of target package name
+ **/
+kanonic : {
   name: calculator;
   root: root;
+  package: ioName; // TODO: Make this a string
 };
+
+/** TOKENS **/
 
 INTEGER: "[0-9]+";
 PLUS: "\+";
+
+/** RULES **/
 
 root
     : expr --> rootExpr

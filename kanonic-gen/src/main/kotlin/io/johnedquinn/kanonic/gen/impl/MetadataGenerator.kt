@@ -51,7 +51,11 @@ internal object MetadataGenerator {
             grammar.tokens.forEach { token ->
                 // TODO: Re-escape everything
                 val escapedDef = token.def.replace("\\", "\\\\").replace("\"", "\\\"")
-                block.addStatement("\"${token.name}\" - \"$escapedDef\"")
+                val def = when (token.hidden) {
+                    true -> "(\"$escapedDef\" channel \"hidden\")"
+                    false -> "\"$escapedDef\""
+                }
+                block.addStatement("\"${token.name}\" - $def")
             }
             block.endControlFlow()
             grammarSpec.rules.forEach { rule ->
