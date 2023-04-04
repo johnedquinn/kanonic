@@ -96,10 +96,10 @@ internal object NodeGenerator {
         }
 
         private fun TypeSpec.Builder.addChildrenFunctions(variant: VariantSpec, grammar: Grammar, spec: GrammarSpec) {
-            val itemCounts = variant.items.groupingBy { it }.eachCount()
+            val itemCounts = variant.implicitItems.groupingBy { it }.eachCount()
             itemCounts.entries.forEach { entry ->
                 when (entry.value) {
-                    1 -> this.addChildrenFunctionSingle(entry.key, grammar, spec)
+                    0 -> this.addChildrenFunctionSingle(entry.key, grammar, spec)
                     else -> this.addChildrenFunctionMultiple(entry.key, grammar, spec)
                 }
             }

@@ -3,6 +3,8 @@ package io.johnedquinn.kanonic.gen
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import io.johnedquinn.kanonic.Grammar
+import io.johnedquinn.kanonic.SymbolReference
+import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.gen.impl.BaseVisitorGenerator
 import io.johnedquinn.kanonic.gen.impl.GrammarUtils
 import io.johnedquinn.kanonic.gen.impl.MetadataGenerator
@@ -34,7 +36,35 @@ public object KanonicGenerator {
             val variants = ruleVariants.map { variant ->
                 val variantName = GrammarUtils.getGeneratedClassName(variant.alias)
                 val className = ClassName(ruleClassName.canonicalName, variantName)
-                VariantSpec(variant.alias, variantName, "visit${variant.alias}", variant.items, className)
+                val allItems = mutableSetOf<SymbolReference>()
+                allItems.addAll(variant.items)
+                var remaining = true
+                while (remaining) {
+                    remaining = false
+                    val toAdd = mutableSetOf<SymbolReference>()
+                    allItems.forEach { item ->
+                        if (item is TerminalReference) return@forEach
+                        val referencedRule = this.rules.find {
+                            it.name == item.getName(this)
+                        } ?: error("Could not find rule.")
+                        if (referencedRule.generated) {
+                            toAdd.addAll(referencedRule.items)
+                        }
+                    }
+                    val added = allItems.addAll(toAdd)
+                    if (added) {
+                        remaining = true
+                    }
+                }
+                VariantSpec(
+                    variant.alias,
+                    variantName,
+                    "visit${variant.alias}",
+                    variant.items,
+                    allItems.toList(),
+                    className,
+                    variant.generated
+                )
             }
             RuleSpec(rule, ruleName, "visit$rule", variants, ruleClassName)
         }

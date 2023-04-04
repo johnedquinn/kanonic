@@ -56,14 +56,15 @@ public object KanonicGrammar {
         // CONFIG
         config eq IDENT_CAMEL_CASE - COLON - CURLY_BRACE_LEFT - configDefs - CURLY_BRACE_RIGHT - COLON_SEMI alias "ConfigStruct"
 
-        configDefs eq EPSILON alias "EmptyConfigDefinition"
-        configDefs eq configDefs - configDef alias "MultipleConfigDefinitions"
+        configDefs eq EPSILON alias "EmptyConfigDefinition" generated true
+        configDefs eq configDefs - configDef alias "MultipleConfigDefinitions" generated true
+
         configDef eq IDENT_CAMEL_CASE - COLON - IDENT_CAMEL_CASE - COLON_SEMI alias "ConfigDefinition"
 
         // EXPRESSIONS
-        expressions eq EPSILON alias "EmptyExpressions"
-        expressions eq expressions - tokenDef alias "TokenAdded"
-        expressions eq expressions - ruleDef alias "RuleAdded"
+        expressions eq EPSILON alias "EmptyExpressions" generated true
+        expressions eq expressions - tokenDef alias "TokenAdded" generated true
+        expressions eq expressions - ruleDef alias "RuleAdded" generated true
 
         // TOKENS
         tokenDef eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - COLON_SEMI alias "Token"
@@ -72,15 +73,15 @@ public object KanonicGrammar {
         ruleDef eq IDENT_CAMEL_CASE - COLON - ruleVariants - COLON_SEMI alias "Rule"
 
         // VARIANTS
-        ruleVariants eq ruleVariant alias "SingleVariant"
-        ruleVariants eq ruleVariants - ruleVariant alias "MultipleVariants"
+        ruleVariants eq ruleVariant alias "SingleVariant" generated true
+        ruleVariants eq ruleVariants - ruleVariant alias "MultipleVariants" generated true
 
         // VARIANT
         ruleVariant eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_CAMEL_CASE alias "Variant"
 
         // ITEMS
-        ruleItems eq ruleItem alias "SingleRule"
-        ruleItems eq ruleItems - ruleItem alias "MultipleRules"
+        ruleItems eq ruleItem alias "SingleRule" generated true
+        ruleItems eq ruleItems - ruleItem alias "MultipleRules" generated true
 
         // ITEM
         ruleItem eq IDENT_CAMEL_CASE alias "RuleReference"
