@@ -26,6 +26,7 @@ dependencies {
     implementation(project(":kanonic-runtime"))
     implementation(project(":kanonic-syntax"))
     implementation(project(":kanonic-syntax-gen"))
+    implementation("com.squareup:kotlinpoet:1.12.0")
     implementation("info.picocli:picocli:4.7.0")
 }
 

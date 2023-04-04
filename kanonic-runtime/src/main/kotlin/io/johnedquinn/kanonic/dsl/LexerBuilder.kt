@@ -1,15 +1,10 @@
 package io.johnedquinn.kanonic.dsl
 
 import io.johnedquinn.kanonic.parse.TokenDefinition
-import io.johnedquinn.kanonic.parse.TokenLiteral
 import java.util.Locale
 
 class LexerBuilder {
     private val tokens = mutableListOf<TokenDefinition>()
-    init {
-        tokens.add(TokenDefinition(TokenLiteral.ReservedTypes.EOF, "EOF", "", false))
-        tokens.add(TokenDefinition(TokenLiteral.ReservedTypes.EPSILON, "EPSILON", "", false))
-    }
     operator fun String.minus(other: String) {
         val token = TokenDefinition(tokens.size, this, other, false)
         tokens.add(token)
@@ -31,5 +26,5 @@ class LexerBuilder {
 
     class TokenMeta(val def: String, val channel: String)
 
-    fun build() = tokens.toList()
+    fun build() = tokens
 }

@@ -8,5 +8,7 @@ class VariantSpec(
     val name: String,
     val visitMethodName: String,
     val items: List<SymbolReference>,
-    val className: ClassName
+    val implicitItems: List<SymbolReference>,
+    val className: ClassName,
+    val generated: Boolean
 )

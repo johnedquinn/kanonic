@@ -48,7 +48,8 @@ internal object MetadataGenerator {
             block.beginControlFlow("buildGrammar(%L, %L)", "\"${grammarSpec.nodeName}\"", "\"${grammar.options.start.name}\"")
             block.addStatement("packageName(%L)", "\"${grammarSpec.packageName}\"")
             block.beginControlFlow("tokens")
-            grammar.tokens.forEach { token ->
+            // Skip EOF and EPSILON
+            grammar.tokens.subList(2, grammar.tokens.size).forEach { token ->
                 // TODO: Re-escape everything
                 val escapedDef = token.def.replace("\\", "\\\\").replace("\"", "\\\"")
                 val def = when (token.hidden) {
@@ -63,9 +64,9 @@ internal object MetadataGenerator {
                     val itemsList = variant.items.map { item ->
                         "\"${item.getName(grammar)}\""
                     }
-                    val itemsSubStr = itemsList.joinToString(" - ")
+                    val itemsSubStr = itemsList.joinToString("·-·")
                     // ruleName" eq "ruleRef" - "TOKEN" - "TOKEN" - "someOtherRef" --> alias
-                    block.addStatement("\"%L\" eq %L alias \"%L\"", rule.name, itemsSubStr, variant.originalName)
+                    block.addStatement("\"%L\"·eq·%L·alias·\"%L\"·generated·%L", rule.name, itemsSubStr, variant.originalName, variant.generated)
                 }
             }
             block.endControlFlow()
@@ -94,12 +95,15 @@ internal object MetadataGenerator {
             funSpec.beginControlFlow("return buildList")
             grammar.rules.groupBy { it.name }.map { (rule, ruleVariants) ->
                 ruleVariants.forEach { variant ->
-                    val ruleSpec = ClassName(
-                        packageName,
-                        grammarNodeName,
-                        GrammarUtils.getGeneratedClassName(rule),
-                        GrammarUtils.getGeneratedClassName(variant.alias)
-                    )
+                    val ruleSpec = when (variant.generated) {
+                        true -> ClassNames.GENERATED_NODE
+                        false -> ClassName(
+                            packageName,
+                            grammarNodeName,
+                            GrammarUtils.getGeneratedClassName(rule),
+                            GrammarUtils.getGeneratedClassName(variant.alias)
+                        )
+                    }
                     funSpec.addStatement(
                         "add(CreateNode·{·state,·children,·parent·->·%T(state,·children,·parent)·})",
                         ruleSpec

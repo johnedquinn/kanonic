@@ -2,10 +2,11 @@ package io.johnedquinn.kanonic
 
 import io.johnedquinn.kanonic.parse.TokenDefinition
 import io.johnedquinn.kanonic.parse.TokenLiteral
+import java.util.logging.Logger
 
 data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List<TokenDefinition>) {
-    private val firstSet = computeFirstSet()
-    private val followSet = computeFollowSet()
+    private val firstSet by lazy { computeFirstSet() }
+    private val followSet by lazy { computeFollowSet() }
 
     data class Options(
         val grammarName: String,

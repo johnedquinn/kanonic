@@ -1,5 +1,7 @@
 package io.johnedquinn.kanonic.tool
 
+import io.johnedquinn.kanonic.dsl.GrammarBuilder
+import io.johnedquinn.kanonic.gen.KanonicGenerator
 import io.johnedquinn.kanonic.parse.KanonicParser
 import io.johnedquinn.kanonic.syntax.generated.KanonicMetadata
 import io.johnedquinn.kanonic.utils.Logger
@@ -37,8 +39,20 @@ internal class GenerateCommand : Runnable {
         println("Parsed Kanonic File into AST:")
         println(KanonicNodeFormatter.format(ast))
 
-        // TODO: Convert the Kanonic AST --> Grammar
+        // Convert the Kanonic AST --> Grammar
+        val grammarBuilder = GrammarBuilder("Placeholder", "root")
+        AstConverter.visit(ast, grammarBuilder)
+        val grammar = grammarBuilder.build()
+        println("NAME: ${grammar.options.grammarName}")
+        println("ROOT: ${grammar.options.start}")
+        println("PACKAGE: ${grammar.options.packageName}")
+        println("TOKENS: ${grammar.tokens}")
+        println("RULES: ${grammar.rules}")
 
-        // TODO: KanonicGenerator.generate(grammar) with output directory
+        // Generate Files
+        val files = KanonicGenerator.generate(grammar)
+        files.forEach {
+            it.writeTo(System.out)
+        }
     }
 }

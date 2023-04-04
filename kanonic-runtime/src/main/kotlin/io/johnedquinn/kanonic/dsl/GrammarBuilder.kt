@@ -6,23 +6,29 @@ import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.parse.TokenDefinition
+import io.johnedquinn.kanonic.parse.TokenLiteral
 import io.johnedquinn.kanonic.utils.Logger
 
-class GrammarBuilder(private val name: String, private val start: String) {
+class GrammarBuilder(var name: String, var start: String) {
     private val rules = mutableListOf<Rule>()
-    private var tokens: List<TokenDefinition> = emptyList()
+    public var tokens: MutableList<TokenDefinition> = mutableListOf()
     private var packageName: String? = null
+
+    init {
+        tokens.add(TokenDefinition(TokenLiteral.ReservedTypes.EOF, "EOF", "", false))
+        tokens.add(TokenDefinition(TokenLiteral.ReservedTypes.EPSILON, "EPSILON", "", false))
+    }
 
     companion object {
         @JvmStatic
         public fun buildGrammar(name: String, start: String, f: GrammarBuilder.() -> Unit): Grammar {
             val grammar = GrammarBuilder(name, start)
             grammar.f()
-            return grammar.toGrammar()
+            return grammar.build()
         }
     }
 
-    internal fun toGrammar(): Grammar {
+    public fun build(): Grammar {
         Logger.debug(rules.toString())
         return Grammar(rules, Grammar.Options(name, RuleReference(start), packageName), tokens)
     }
@@ -31,6 +37,10 @@ class GrammarBuilder(private val name: String, private val start: String) {
         val rule = Rule(name, def)
         this@GrammarBuilder.rules.add(rule)
         return rule
+    }
+
+    fun add(rule: Rule) = this.apply {
+        this.rules.add(rule)
     }
 
     fun add(name: String, f: GrammarBuilder.() -> List<SymbolReference>): Rule {
@@ -56,6 +66,11 @@ class GrammarBuilder(private val name: String, private val start: String) {
         return this
     }
 
+    infix fun Rule.generated(other: Boolean): Rule {
+        this.generated = other
+        return this
+    }
+
     operator fun String.minus(other: String): List<SymbolReference> {
         return listOf(getReference(this), getReference(other))
     }
@@ -72,10 +87,17 @@ class GrammarBuilder(private val name: String, private val start: String) {
         return listOf(RuleReference(this))
     }
 
+    fun addToken(name: String, def: String, hidden: Boolean): GrammarBuilder = this.apply {
+        tokens.add(TokenDefinition(tokens.size, name, def, hidden))
+    }
+
     fun tokens(f: LexerBuilder.() -> Unit): GrammarBuilder {
         val l = LexerBuilder()
         l.f()
-        tokens = l.build()
+        l.build().forEach {
+            val toAdd = TokenDefinition(tokens.size, it.name, it.def, it.hidden)
+            tokens.add(toAdd)
+        }
         Logger.debug(tokens.toString())
         return this
     }

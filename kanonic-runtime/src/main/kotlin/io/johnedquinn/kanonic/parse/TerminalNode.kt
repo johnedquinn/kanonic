@@ -10,6 +10,6 @@ public data class TerminalNode(
     }
 
     override fun toString(): String {
-        return "${this::class.simpleName}(state: $state)"
+        return "${this::class.simpleName}(state: $state, token: $token)"
     }
 }

@@ -51,7 +51,9 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
             when (action) {
                 is AcceptAction -> {
                     Logger.debug("ACCEPT!")
-                    val childrenReversed = toAddNodes
+                    val childrenReversed = toAddNodes.toList().flatMap {
+                        getChildren(it)
+                    }
                     return info.createRuleNode(0, currentState, childrenReversed, null).also { root ->
                         root.children.forEach { it.parent = root }
                     }
@@ -110,7 +112,8 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
         val children = mutableListOf<Node>()
         repeat(rule.items.size) {
             stack.pop()
-            children.add(toAddNodes.pop())
+            val node = toAddNodes.pop()
+            children.addAll(getChildren(node).reversed())
         }
         val childrenReversed = children.reversed()
         Logger.debug("REDUCE USING ACTION $action")
@@ -121,6 +124,15 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
         val ruleIndex = table.nonTerminals.indexOf(rule.name)
         val goToState = table.goToTable[topState][ruleIndex] as ShiftAction
         stack.push(goToState.state)
+    }
+
+    private fun getChildren(node: Node): List<Node> = when (node) {
+        is GeneratedNode -> node.children.filterNot {
+            it is TerminalNode && it.token.type == TokenLiteral.ReservedTypes.EPSILON
+        }.flatMap {
+            getChildren(it)
+        }
+        else -> listOf(node)
     }
 
     internal class ParseFailureException : RuntimeException()
