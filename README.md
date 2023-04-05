@@ -30,7 +30,7 @@ First, you'll need to install the `kanonic` command:
 
 Then, run the command on a Kanonic file:
 ```shell
-./kanonic-tool/build/install/kanonic-tool/bin/kanonic kanonic.knc
+./kanonic-tool/build/install/kanonic-tool/bin/kanonic ./examples/calculator.knc
 ```
 
 Please see the [documentation](https://github.com/johnedquinn/kanonic/wiki) for more information!
