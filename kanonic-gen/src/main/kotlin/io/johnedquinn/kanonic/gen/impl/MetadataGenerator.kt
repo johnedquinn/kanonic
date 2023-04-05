@@ -26,6 +26,10 @@ internal object MetadataGenerator {
         val infoName = GrammarUtils.getMetadataName(grammar)
         return FileSpec.builder(packageName, infoName).also { file ->
             file.addImport(ClassNames.GRAMMAR_BUILDER_COMPANION, "buildGrammar")
+            file.addImport(ClassNames.RULE_BUILDER_COMPANION, "buildRule")
+            if (grammar.rules.any { it.generated }) {
+                file.addImport(ClassNames.RULE_BUILDER_COMPANION, "buildGeneratedRule")
+            }
             file.addType(infoClass)
         }.build()
     }
@@ -60,14 +64,20 @@ internal object MetadataGenerator {
             }
             block.endControlFlow()
             grammarSpec.rules.forEach { rule ->
+                val function = when (rule.generated) {
+                    true -> "buildGeneratedRule"
+                    false -> "buildRule"
+                }
+                block.beginControlFlow("\"%L\"·eq·%L(this,·\"%L\")", rule.name, function, rule.name)
                 rule.variants.forEach { variant ->
                     val itemsList = variant.items.map { item ->
                         "\"${item.getName(grammar)}\""
                     }
                     val itemsSubStr = itemsList.joinToString("·-·")
                     // ruleName" eq "ruleRef" - "TOKEN" - "TOKEN" - "someOtherRef" --> alias
-                    block.addStatement("\"%L\"·eq·%L·alias·\"%L\"·generated·%L", rule.name, itemsSubStr, variant.originalName, variant.generated)
+                    block.addStatement("\"%L\"·eq·%L", variant.name, itemsSubStr)
                 }
+                block.endControlFlow()
             }
             block.endControlFlow()
             return PropertySpec.builder("grammar", ClassNames.GRAMMAR).addModifiers(KModifier.OVERRIDE).initializer(block.build()).build()
@@ -93,15 +103,15 @@ internal object MetadataGenerator {
             funSpec.addModifiers(KModifier.PRIVATE)
             funSpec.returns(ClassNames.LIST_CREATE_NODE)
             funSpec.beginControlFlow("return buildList")
-            grammar.rules.groupBy { it.name }.map { (rule, ruleVariants) ->
-                ruleVariants.forEach { variant ->
-                    val ruleSpec = when (variant.generated) {
+            grammar.rules.map { rule ->
+                rule.variants.forEach { variant ->
+                    val ruleSpec = when (rule.generated) {
                         true -> ClassNames.GENERATED_NODE
                         false -> ClassName(
                             packageName,
                             grammarNodeName,
-                            GrammarUtils.getGeneratedClassName(rule),
-                            GrammarUtils.getGeneratedClassName(variant.alias)
+                            GrammarUtils.getGeneratedClassName(rule.name),
+                            GrammarUtils.getGeneratedClassName(variant.name)
                         )
                     }
                     funSpec.addStatement(

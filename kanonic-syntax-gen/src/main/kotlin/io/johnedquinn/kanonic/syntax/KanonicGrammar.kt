@@ -1,6 +1,8 @@
 package io.johnedquinn.kanonic.syntax
 
 import io.johnedquinn.kanonic.dsl.GrammarBuilder.Companion.buildGrammar
+import io.johnedquinn.kanonic.dsl.RuleBuilder.Companion.buildGeneratedRule
+import io.johnedquinn.kanonic.dsl.RuleBuilder.Companion.buildRule
 
 // TODO: Make internal once grammar is serialized
 public object KanonicGrammar {
@@ -51,41 +53,63 @@ public object KanonicGrammar {
         }
 
         // TOP RULE
-        file eq config - expressions alias "Root"
+        file eq buildRule(this, file) {
+            "Root" eq config - expressions
+        }
 
         // CONFIG
-        config eq IDENT_CAMEL_CASE - COLON - CURLY_BRACE_LEFT - configDefs - CURLY_BRACE_RIGHT - COLON_SEMI alias "ConfigStruct"
+        config eq buildRule(this, config) {
+            "ConfigStruct" eq IDENT_CAMEL_CASE - COLON - CURLY_BRACE_LEFT - configDefs - CURLY_BRACE_RIGHT - COLON_SEMI
+        }
 
-        configDefs eq EPSILON alias "EmptyConfigDefinition" generated true
-        configDefs eq configDefs - configDef alias "MultipleConfigDefinitions" generated true
+        configDefs eq buildGeneratedRule(this, configDefs) {
+            "EmptyConfigDefinition" eq EPSILON
+            "MultipleConfigDefinitions" eq configDefs - configDef
+        }
 
-        configDef eq IDENT_CAMEL_CASE - COLON - IDENT_CAMEL_CASE - COLON_SEMI alias "ConfigDefinition"
+        configDef eq buildRule(this, configDef) {
+            "ConfigDefinition" eq IDENT_CAMEL_CASE - COLON - IDENT_CAMEL_CASE - COLON_SEMI
+        }
 
         // EXPRESSIONS
-        expressions eq EPSILON alias "EmptyExpressions" generated true
-        expressions eq expressions - tokenDef alias "TokenAdded" generated true
-        expressions eq expressions - ruleDef alias "RuleAdded" generated true
+        expressions eq buildGeneratedRule(this, expressions) {
+            "EmptyExpressions" eq EPSILON
+            "TokenAdded" eq expressions - tokenDef
+            "RuleAdded" eq expressions - ruleDef
+        }
 
         // TOKENS
-        tokenDef eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - COLON_SEMI alias "Token"
+        tokenDef eq buildRule(this, tokenDef) {
+            "Token" eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - COLON_SEMI
+        }
 
         // RULE
-        ruleDef eq IDENT_CAMEL_CASE - COLON - ruleVariants - COLON_SEMI alias "Rule"
+        ruleDef eq buildRule(this, ruleDef) {
+            "Rule" eq IDENT_CAMEL_CASE - COLON - ruleVariants - COLON_SEMI
+        }
 
         // VARIANTS
-        ruleVariants eq ruleVariant alias "SingleVariant" generated true
-        ruleVariants eq ruleVariants - ruleVariant alias "MultipleVariants" generated true
+        ruleVariants eq buildGeneratedRule(this, ruleVariants) {
+            "SingleVariant" eq ruleVariant
+            "MultipleVariants" eq ruleVariants - ruleVariant
+        }
 
         // VARIANT
-        ruleVariant eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_CAMEL_CASE alias "Variant"
+        ruleVariant eq buildRule(this, ruleVariant) {
+            "Variant" eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_CAMEL_CASE
+        }
 
         // ITEMS
-        ruleItems eq ruleItem alias "SingleRule" generated true
-        ruleItems eq ruleItems - ruleItem alias "MultipleRules" generated true
+        ruleItems eq buildGeneratedRule(this, ruleItems) {
+            "SingleRule" eq ruleItem
+            "MultipleRules" eq ruleItems - ruleItem
+        }
 
         // ITEM
-        ruleItem eq IDENT_CAMEL_CASE alias "RuleReference"
-        ruleItem eq IDENT_UPPER_CASE alias "TokenReference"
-        ruleItem eq LINE_VERTICAL alias "LineReference" // TODO
+        ruleItem eq buildRule(this, ruleItem) {
+            "RuleReference" eq IDENT_CAMEL_CASE
+            "TokenReference" eq IDENT_UPPER_CASE
+            "LineReference" eq LINE_VERTICAL // TODO
+        }
     }
 }

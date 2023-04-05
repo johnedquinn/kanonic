@@ -6,6 +6,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 internal object ClassNames {
     val GRAMMAR = ClassName("io.johnedquinn.kanonic", "Grammar")
     val GRAMMAR_BUILDER_COMPANION = ClassName("io.johnedquinn.kanonic.dsl.GrammarBuilder", "Companion")
+    val RULE_BUILDER_COMPANION = ClassName("io.johnedquinn.kanonic.dsl.RuleBuilder", "Companion")
     val NODE = ClassName("io.johnedquinn.kanonic.parse", "Node")
     val GENERATED_NODE = ClassName("io.johnedquinn.kanonic.parse", "GeneratedNode")
     val TERMINAL_NODE = ClassName("io.johnedquinn.kanonic.parse", "TerminalNode")

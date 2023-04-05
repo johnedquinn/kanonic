@@ -1,5 +1,6 @@
 package io.johnedquinn.kanonic.tool
 
+import io.johnedquinn.kanonic.Validator
 import io.johnedquinn.kanonic.dsl.GrammarBuilder
 import io.johnedquinn.kanonic.gen.KanonicGenerator
 import io.johnedquinn.kanonic.parse.KanonicParser
@@ -48,6 +49,9 @@ internal class GenerateCommand : Runnable {
         println("PACKAGE: ${grammar.options.packageName}")
         println("TOKENS: ${grammar.tokens}")
         println("RULES: ${grammar.rules}")
+
+        // Validate
+        Validator.validate(grammar)
 
         // Generate Files
         val files = KanonicGenerator.generate(grammar)

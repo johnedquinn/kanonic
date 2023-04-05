@@ -108,7 +108,7 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
      * building nodes as the children of the reduction node.
      */
     private fun reduce(action: ReduceAction, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int) {
-        val rule = grammar.rules[action.rule]
+        val rule = grammar.rules.flatMap { it.variants }[action.rule]
         val children = mutableListOf<Node>()
         repeat(rule.items.size) {
             stack.pop()
@@ -121,7 +121,7 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
         Logger.debug("FOUND NODE: $newNode")
         toAddNodes.push(newNode)
         val topState = stack.peek()
-        val ruleIndex = table.nonTerminals.indexOf(rule.name)
+        val ruleIndex = table.nonTerminals.indexOf(rule.parentName)
         val goToState = table.goToTable[topState][ruleIndex] as ShiftAction
         stack.push(goToState.state)
     }

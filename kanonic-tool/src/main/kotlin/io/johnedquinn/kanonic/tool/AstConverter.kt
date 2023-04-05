@@ -2,6 +2,7 @@ package io.johnedquinn.kanonic.tool
 
 import io.johnedquinn.kanonic.Rule
 import io.johnedquinn.kanonic.RuleReference
+import io.johnedquinn.kanonic.RuleVariant
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.dsl.GrammarBuilder
@@ -31,15 +32,16 @@ internal object AstConverter : KanonicBaseVisitor<Any, GrammarBuilder>() {
 
     override fun visitRule(node: KanonicNode.ruleDefNode.RuleNode, ctx: GrammarBuilder) {
         val name = node.IDENT_CAMEL_CASE()[0].token.content
-        node.ruleVariant().forEach {
+        val items = node.ruleVariant().map {
             it as KanonicNode.ruleVariantNode.VariantNode
             val items = it.ruleItem().map { item ->
                 visitruleItem(item, ctx)
             }
-            val alias = it.IDENT_CAMEL_CASE()[0].token.content
-            val rule = Rule(name, items, alias)
-            ctx.add(rule = rule)
+            val alias = node.IDENT_CAMEL_CASE()[0].token.content
+            RuleVariant(alias, name, items)
         }
+        val rule = Rule(name, items, false)
+        ctx.add(rule = rule)
         super.visitRule(node, ctx)
     }
 
