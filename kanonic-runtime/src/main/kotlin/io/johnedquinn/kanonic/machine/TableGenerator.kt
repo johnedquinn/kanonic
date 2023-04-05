@@ -53,9 +53,9 @@ class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
             // Add Reduce and Accept
             state.rules.forEach { rule ->
                 if (rule.position <= rule.plainRule.items.lastIndex) return@forEach
-                val ruleIndex = grammar.rules.indexOfFirst { it == rule.plainRule }
+                val ruleIndex = grammar.rules.flatMap { it.variants }.indexOfFirst { it == rule.plainRule }
                 rule.lookahead.forEach { lookaheadToken ->
-                    when (rule.plainRule.name == grammar.options.start.name) {
+                    when (rule.plainRule.parentName == grammar.options.start.name) {
                         true -> {
                             actionTable[stateIndex][lookaheadToken] = AcceptAction(lookaheadToken)
                         }

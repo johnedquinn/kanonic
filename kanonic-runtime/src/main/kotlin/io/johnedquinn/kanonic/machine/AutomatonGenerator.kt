@@ -25,8 +25,8 @@ class AutomatonGenerator {
     }
 
     private fun createKernel(grammar: Grammar, start: RuleReference): State {
-        val kernelRules = grammar.rules.filter { rule ->
-            rule.name == start.name
+        val kernelRules = grammar.rules.flatMap { it.variants }.filter { rule ->
+            rule.parentName == start.name
         }.map { rule ->
             StateRule(rule, 0, mutableSetOf(TokenLiteral.ReservedTypes.EOF))
         }.toMutableList()
@@ -96,7 +96,7 @@ class AutomatonGenerator {
                 if (symbolReference !is RuleReference || added.contains(symbolReference)) { return@forEach }
                 val rules = grammar.getRules(symbolReference)
                 val lookahead = mutableSetOf<Int>()
-                val stateRules = rules.map { rule -> StateRule(rule, 0, lookahead) }
+                val stateRules = rules.flatMap { it.variants }.map { rule -> StateRule(rule, 0, lookahead) }
                 added.add(symbolReference)
                 toAddRules.addAll(stateRules)
                 hasModified = true
@@ -133,7 +133,7 @@ class AutomatonGenerator {
 
                 // Modify Relevant Rules
                 val toModifyRules = closureRules.filterIndexed { index, closureRule ->
-                    closureRule.plainRule.name == symbolReference.name && index > kernelRuleLastIndex
+                    closureRule.plainRule.parentName == symbolReference.name && index > kernelRuleLastIndex
                 }
                 toModifyRules.forEach { toModifyRule ->
                     if (toModifyRule.lookahead.addAll(lookahead)) hasModified = true

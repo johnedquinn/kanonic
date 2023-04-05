@@ -7,5 +7,6 @@ class RuleSpec(
     val nodeName: String,
     val visitMethodName: String,
     val variants: List<VariantSpec>,
-    val className: ClassName
+    val className: ClassName,
+    val generated: Boolean
 )

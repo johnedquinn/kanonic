@@ -1,5 +1,5 @@
 package io.johnedquinn.kanonic.machine
 
-import io.johnedquinn.kanonic.Rule
+import io.johnedquinn.kanonic.RuleVariant
 
-data class StateRule(val plainRule: Rule, val position: Int, val lookahead: MutableSet<Int>)
+data class StateRule(val plainRule: RuleVariant, val position: Int, val lookahead: MutableSet<Int>)

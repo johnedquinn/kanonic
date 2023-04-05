@@ -2,7 +2,6 @@ package io.johnedquinn.kanonic
 
 import io.johnedquinn.kanonic.parse.TokenDefinition
 import io.johnedquinn.kanonic.parse.TokenLiteral
-import java.util.logging.Logger
 
 data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List<TokenDefinition>) {
     private val firstSet by lazy { computeFirstSet() }
@@ -53,8 +52,8 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
         while (true) {
             var changesMade = false
 
-            rules.forEach ruleList@{ rule ->
-                val ruleRef = RuleReference(rule.name)
+            rules.flatMap { it.variants }.forEach ruleList@{ rule ->
+                val ruleRef = RuleReference(rule.parentName)
                 val firstsForRuleRef = mutableSetOf<Int>()
 
                 // Check for empty rule
@@ -110,7 +109,7 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
 
         while (true) {
             var changesMade = false
-            rules.forEach ruleList@{ rule ->
+            rules.flatMap { it.variants }.forEach ruleList@{ rule ->
                 rule.items.forEachIndexed { itemIndex, item ->
                     if (item is TerminalReference) { return@forEachIndexed }
                     val remaining = rule.items.subList(itemIndex + 1, rule.items.size)
@@ -120,7 +119,7 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
                         true -> {
                             nextFirsts.remove(TokenLiteral.ReservedTypes.EPSILON)
                             if (follows[item]!!.addAll(nextFirsts)) { changesMade = true }
-                            if (follows[item]!!.addAll(follows[RuleReference(rule.name)]!!)) { changesMade = true }
+                            if (follows[item]!!.addAll(follows[RuleReference(rule.parentName)]!!)) { changesMade = true }
                         }
                         false -> {
                             if (follows[item]!!.addAll(nextFirsts)) { changesMade = true }
@@ -138,25 +137,28 @@ data class Grammar(val rules: List<Rule>, val options: Options, val tokens: List
 
     fun printInformation() {
         println("GRAMMAR (name: ${options.grammarName}, start: ${options.start.name})")
-        printRules()
+        println(getRulesString())
         printFirst()
         printFollow()
     }
 
-    private fun printRules() {
-        println("RULES:")
-        rules.forEachIndexed { _, rule ->
-            print("\t${rule.name} --> ")
-            rule.items.forEachIndexed { itemIndex, item ->
-                when (item) {
-                    is RuleReference -> print(item.name)
-                    is TerminalReference -> print(item.type)
+    private fun getRulesString() = buildString {
+        appendLine("RULES:")
+        rules.map { rule ->
+            appendLine("\t${rule.name}")
+            rule.variants.forEachIndexed { _, variant ->
+                append("\t\t${variant.name} --> ")
+                variant.items.forEachIndexed { itemIndex, item ->
+                    when (item) {
+                        is RuleReference -> append(item.name)
+                        is TerminalReference -> append(item.type)
+                    }
+                    if (itemIndex != variant.items.lastIndex) {
+                        append(" - ")
+                    }
                 }
-                if (itemIndex != rule.items.lastIndex) {
-                    print(" - ")
-                }
+                appendLine()
             }
-            println()
         }
     }
 

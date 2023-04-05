@@ -27,14 +27,15 @@ public object KanonicGenerator {
     }
 
     private fun Grammar.toSpec(): GrammarSpec {
+        this.printInformation()
         val grammarNodeName = GrammarUtils.getGrammarNodeName(this)
         val visitorName = GrammarUtils.getGeneratedVisitorName(this)
         val topNodeClassName = ClassName(this.options.packageName!!, grammarNodeName)
-        val rules = this.rules.groupBy { it.name }.map { (rule, ruleVariants) ->
-            val ruleName = GrammarUtils.getGeneratedClassName(rule)
+        val rules = this.rules.map { rule ->
+            val ruleName = GrammarUtils.getGeneratedClassName(rule.name)
             val ruleClassName = ClassName(topNodeClassName.canonicalName, ruleName)
-            val variants = ruleVariants.map { variant ->
-                val variantName = GrammarUtils.getGeneratedClassName(variant.alias)
+            val variants = rule.variants.map { variant ->
+                val variantName = GrammarUtils.getGeneratedClassName(variant.name)
                 val className = ClassName(ruleClassName.canonicalName, variantName)
                 val allItems = mutableSetOf<SymbolReference>()
                 allItems.addAll(variant.items)
@@ -46,9 +47,11 @@ public object KanonicGenerator {
                         if (item is TerminalReference) return@forEach
                         val referencedRule = this.rules.find {
                             it.name == item.getName(this)
-                        } ?: error("Could not find rule.")
+                        } ?: error("Could not find rule $item")
                         if (referencedRule.generated) {
-                            toAdd.addAll(referencedRule.items)
+                            referencedRule.variants.forEach {
+                                toAdd.addAll(it.items)
+                            }
                         }
                     }
                     val added = allItems.addAll(toAdd)
@@ -57,16 +60,16 @@ public object KanonicGenerator {
                     }
                 }
                 VariantSpec(
-                    variant.alias,
+                    variant.name,
                     variantName,
-                    "visit${variant.alias}",
+                    "visit${variant.name}",
                     variant.items,
                     allItems.toList(),
                     className,
-                    variant.generated
+                    rule.generated
                 )
             }
-            RuleSpec(rule, ruleName, "visit$rule", variants, ruleClassName)
+            RuleSpec(rule.name, ruleName, "visit${rule.name}", variants, ruleClassName, rule.generated)
         }
         val visitorClassName = ClassName(this.options.packageName!!, "${this.options.grammarName}Visitor")
         return GrammarSpec(

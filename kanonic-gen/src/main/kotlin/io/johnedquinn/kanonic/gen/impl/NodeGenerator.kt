@@ -60,24 +60,24 @@ internal object NodeGenerator {
          * Creates the Rule Nodes and the Rule Variant Nodes
          */
         private fun createNodes(grammar: Grammar, spec: GrammarSpec): List<TypeSpec> {
-            return grammar.rules.groupBy { it.name }.map { (ruleName, ruleVariants) ->
+            return grammar.rules.map { rule ->
                 // Shared Information
-                val ruleClassName = GrammarUtils.getGeneratedClassName(ruleName)
+                val ruleClassName = GrammarUtils.getGeneratedClassName(rule.name)
                 val packageName = GrammarUtils.getPackageName(grammar)
                 val grammarNodeName = GrammarUtils.getGrammarNodeName(grammar)
 
                 // Create Rule Variants (Data Classes)
                 val ruleClassReference = ClassName(packageName, grammarNodeName, ruleClassName)
-                val typeSpecs = ruleVariants.map { variant ->
-                    val variantClassName = GrammarUtils.getGeneratedClassName(variant.alias)
+                val typeSpecs = rule.variants.map { variant ->
+                    val variantClassName = GrammarUtils.getGeneratedClassName(variant.name)
                     val variantSpec = TypeSpec.classBuilder(variantClassName)
                     variantSpec.addModifiers(KModifier.DATA)
                     variantSpec.addToString()
                     variantSpec.superclass(ruleClassReference)
                     // TODO: This is a work-around
                     val variantSpecification = spec.rules.flatMap { it.variants }.firstOrNull {
-                        it.originalName == variant.alias
-                    } ?: error("Couldn't find variant ${variant.alias}")
+                        it.originalName == variant.name
+                    } ?: error("Couldn't find variant ${variant.name}")
                     variantSpec.addChildrenFunctions(variantSpecification, grammar, spec)
                     variantSpec.addApplyMethod(spec, variantSpecification)
                     variantSpec.addPrimaryConstructor()
@@ -99,7 +99,8 @@ internal object NodeGenerator {
             val itemCounts = variant.implicitItems.groupingBy { it }.eachCount()
             itemCounts.entries.forEach { entry ->
                 when (entry.value) {
-                    0 -> this.addChildrenFunctionSingle(entry.key, grammar, spec)
+                    // 0 -> this.addChildrenFunctionSingle(entry.key, grammar, spec)
+                    0 -> this.addChildrenFunctionMultiple(entry.key, grammar, spec)
                     else -> this.addChildrenFunctionMultiple(entry.key, grammar, spec)
                 }
             }

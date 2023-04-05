@@ -3,7 +3,6 @@ package io.johnedquinn.kanonic.machine
 import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
-import io.johnedquinn.kanonic.utils.Logger
 
 data class Automaton(val states: List<State>, val edges: Map<Int, List<EdgeTarget>>) {
 
