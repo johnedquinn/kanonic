@@ -26,14 +26,16 @@ public object KanonicGrammar {
     private const val file = "file"
     private const val config = "config"
     private const val configDef = "configDef"
-    private const val configDefs = "configDefs"
     private const val tokenDef = "tokenDef"
     private const val ruleDef = "ruleDef"
-    private const val expressions = "expressions"
-    private const val ruleItems = "ruleItems"
     private const val ruleItem = "ruleItem"
     private const val ruleVariant = "ruleVariant"
-    private const val ruleVariants = "ruleVariants"
+
+    // GENERATED RULE NAMES
+    private const val configDefs = "_0"
+    private const val expressions = "_1"
+    private const val ruleItems = "_2"
+    private const val ruleVariants = "_3"
 
     public val grammar = buildGrammar("Kanonic", "file") {
         packageName("io.johnedquinn.kanonic.syntax.generated")
@@ -57,18 +59,60 @@ public object KanonicGrammar {
             "Root" eq config - expressions
         }
 
-        // CONFIG
+        // config
+        //   : IDENT_CAMEL_CASE ":" "{" configDef* "}" ";"
+        //   ;
         config eq buildRule(this, config) {
             "ConfigStruct" eq IDENT_CAMEL_CASE - COLON - CURLY_BRACE_LEFT - configDefs - CURLY_BRACE_RIGHT - COLON_SEMI
         }
 
+        // configDef
+        //  : IDENT_CAMEL_CASE COLON IDENT_CAMEL_CASE COLON_SEMI
+        //  ;
+        configDef eq buildRule(this, configDef) {
+            "ConfigDefinition" eq IDENT_CAMEL_CASE - COLON - IDENT_CAMEL_CASE - COLON_SEMI
+        }
+
+        // token
+        //  : IDENT_UPPER_CASE COLON LITERAL_STRING COLON_SEMI --> tokenDef
+        //  ;
+        tokenDef eq buildRule(this, tokenDef) {
+            "Token" eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - COLON_SEMI
+        }
+
+        // rule
+        //   : IDENT_CAMEL_CASE COLON variant (LINE_VERTICAL variant)* COLON_SEMI --> Rule
+        //   ;
+        ruleDef eq buildRule(this, ruleDef) {
+            "Rule" eq IDENT_CAMEL_CASE - COLON - ruleVariants - COLON_SEMI
+        }
+
+        // variant
+        //   : item+ "-->" IDENT_CAMEL_CASE --> Variant
+        //   ;
+        ruleVariant eq buildRule(this, ruleVariant) {
+            "Variant" eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_CAMEL_CASE
+        }
+
+        // item
+        //   : IDENT_CAMEL_CASE --> RuleReference
+        //   | IDENT_UPPER_CASE --> TokenReference
+        //   ;
+        ruleItem eq buildRule(this, ruleItem) {
+            "RuleReference" eq IDENT_CAMEL_CASE
+            "TokenReference" eq IDENT_UPPER_CASE
+            "LineReference" eq LINE_VERTICAL // TODO
+        }
+
+        //
+        //
+        // GENERATED
+        //
+        //
+
         configDefs eq buildGeneratedRule(this, configDefs) {
             "EmptyConfigDefinition" eq EPSILON
             "MultipleConfigDefinitions" eq configDefs - configDef
-        }
-
-        configDef eq buildRule(this, configDef) {
-            "ConfigDefinition" eq IDENT_CAMEL_CASE - COLON - IDENT_CAMEL_CASE - COLON_SEMI
         }
 
         // EXPRESSIONS
@@ -78,38 +122,16 @@ public object KanonicGrammar {
             "RuleAdded" eq expressions - ruleDef
         }
 
-        // TOKENS
-        tokenDef eq buildRule(this, tokenDef) {
-            "Token" eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - COLON_SEMI
-        }
-
-        // RULE
-        ruleDef eq buildRule(this, ruleDef) {
-            "Rule" eq IDENT_CAMEL_CASE - COLON - ruleVariants - COLON_SEMI
-        }
-
         // VARIANTS
         ruleVariants eq buildGeneratedRule(this, ruleVariants) {
             "SingleVariant" eq ruleVariant
             "MultipleVariants" eq ruleVariants - ruleVariant
         }
 
-        // VARIANT
-        ruleVariant eq buildRule(this, ruleVariant) {
-            "Variant" eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_CAMEL_CASE
-        }
-
         // ITEMS
         ruleItems eq buildGeneratedRule(this, ruleItems) {
             "SingleRule" eq ruleItem
             "MultipleRules" eq ruleItems - ruleItem
-        }
-
-        // ITEM
-        ruleItem eq buildRule(this, ruleItem) {
-            "RuleReference" eq IDENT_CAMEL_CASE
-            "TokenReference" eq IDENT_UPPER_CASE
-            "LineReference" eq LINE_VERTICAL // TODO
         }
     }
 }

@@ -3,6 +3,7 @@ package io.johnedquinn.kanonic.gen
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import io.johnedquinn.kanonic.Grammar
+import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.gen.impl.BaseVisitorGenerator
@@ -10,6 +11,7 @@ import io.johnedquinn.kanonic.gen.impl.GrammarUtils
 import io.johnedquinn.kanonic.gen.impl.MetadataGenerator
 import io.johnedquinn.kanonic.gen.impl.NodeGenerator
 import io.johnedquinn.kanonic.gen.impl.VisitorGenerator
+import io.johnedquinn.kanonic.parse.TokenLiteral
 
 public object KanonicGenerator {
 
@@ -59,12 +61,20 @@ public object KanonicGenerator {
                         remaining = true
                     }
                 }
+                val implicitItems = allItems.filter {
+                    when (it) {
+                        is TerminalReference -> it.type != TokenLiteral.ReservedTypes.EPSILON
+                        is RuleReference -> {
+                            rules.find { rule -> rule.name == it.name }?.generated?.not() ?: false
+                        }
+                    }
+                }
                 VariantSpec(
                     variant.name,
                     variantName,
                     "visit${variant.name}",
                     variant.items,
-                    allItems.toList(),
+                    implicitItems,
                     className,
                     rule.generated
                 )

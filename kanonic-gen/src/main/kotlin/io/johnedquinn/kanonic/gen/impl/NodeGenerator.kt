@@ -60,7 +60,10 @@ internal object NodeGenerator {
          * Creates the Rule Nodes and the Rule Variant Nodes
          */
         private fun createNodes(grammar: Grammar, spec: GrammarSpec): List<TypeSpec> {
-            return grammar.rules.map { rule ->
+            return grammar.rules.mapNotNull { rule ->
+                if (rule.generated) {
+                    return@mapNotNull null
+                }
                 // Shared Information
                 val ruleClassName = GrammarUtils.getGeneratedClassName(rule.name)
                 val packageName = GrammarUtils.getPackageName(grammar)

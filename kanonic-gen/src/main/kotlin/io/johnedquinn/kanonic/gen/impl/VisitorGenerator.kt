@@ -33,6 +33,9 @@ internal object VisitorGenerator {
 
         fun TypeSpec.Builder.addVisits(grammar: GrammarSpec) = this.apply {
             grammar.rules.forEach { rule ->
+                if (rule.generated) {
+                    return@forEach
+                }
                 rule.variants.forEach { variant ->
                     val funcName = variant.visitMethodName
                     val function = FunSpec.builder(funcName)

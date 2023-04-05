@@ -77,10 +77,7 @@ class RuleBuilder(var grammarBuilder: GrammarBuilder, var ruleName: String, var 
 
     private fun getTerminalReference(ref: String) = grammarBuilder.tokens.firstOrNull {
         it.name == ref
-    }?.let { TerminalReference(it.index) } ?: error("Unable to find token reference for $ref.")
+    }?.let { TerminalReference(it.index) }
 
-    private fun getReference(ref: String) = when (isRuleReference(ref)) {
-        true -> RuleReference(ref)
-        false -> getTerminalReference(ref)
-    }
+    private fun getReference(ref: String) = getTerminalReference(ref) ?: RuleReference(ref)
 }
