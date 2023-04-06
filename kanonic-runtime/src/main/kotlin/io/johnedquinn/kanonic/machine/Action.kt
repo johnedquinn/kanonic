@@ -5,6 +5,5 @@ sealed class Action {
         is ShiftAction -> "S${this.state}"
         is ReduceAction -> "R${this.rule}"
         is AcceptAction -> "ACCEPT"
-//        else -> error("None found")
     }
 }

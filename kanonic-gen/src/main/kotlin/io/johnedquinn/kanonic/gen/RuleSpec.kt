@@ -9,5 +9,4 @@ class RuleSpec(
     val variants: List<VariantSpec>,
     val className: ClassName,
     val generated: Boolean,
-    var alias: String = "None"
 )
