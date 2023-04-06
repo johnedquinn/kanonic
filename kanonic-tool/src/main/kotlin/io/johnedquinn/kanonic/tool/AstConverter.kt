@@ -31,9 +31,9 @@ internal object AstConverter : KanonicBaseVisitor<Any, GrammarBuilder>() {
 
     override fun visitRule(node: KanonicNode.RuleDefNode.RuleNode, ctx: GrammarBuilder) {
         val name = node.IDENT_CAMEL_CASE()[0].token.content
-        val items = node.rule_variant().map {
+        val items = node.ruleVariant().map {
             it as KanonicNode.RuleVariantNode.VariantNode
-            val items = it.rule_item().map { item ->
+            val items = it.ruleItem().map { item ->
                 visitRuleItem(item, ctx)
             }
             val alias = node.IDENT_CAMEL_CASE()[0].token.content

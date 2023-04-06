@@ -125,7 +125,8 @@ internal object NodeGenerator {
         }
         private fun TypeSpec.Builder.addChildrenFunctionMultiple(symbol: SymbolReference, grammar: Grammar, spec: GrammarSpec) {
             val name = getName(symbol, grammar)
-            val function = FunSpec.builder(name)
+            val normalizedName = GrammarUtils.getNormalizedCamelCaseName(name)
+            val function = FunSpec.builder(normalizedName)
             spec.rules.firstOrNull { it.name == name }?.className?.let {
                 function.returns(ClassNames.LIST.parameterizedBy(it))
                 function.addStatement("return this.children.filterIsInstance<%L>()", it)

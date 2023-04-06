@@ -17,6 +17,11 @@ internal object GrammarUtils {
             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
     }
 
+    public fun getNormalizedCamelCaseName(prefix: String): String {
+        val pattern = "_[a-z]".toRegex()
+        return prefix.replace(pattern) { it.value.last().uppercase() }
+    }
+
     public fun getGeneratedClassName(prefix: String): String {
         return "${getNormalizedName(prefix)}Node"
     }
