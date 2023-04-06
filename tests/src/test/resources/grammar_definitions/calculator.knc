@@ -7,15 +7,15 @@ PLUS: "+";
 MINUS: "-";
 
 root
-    : expr --> rootExpr
+    : expr --> root_expr
     ;
 
 expr
-    : expr PLUS expr --> exprPlus
-    | expr MINUS expr --> exprMinus
-    | atom --> exprFall
+    : expr PLUS expr --> expr_plus
+    | expr MINUS expr --> expr_minus
+    | atom --> expr_fall
     ;
 
 atom
-    : IDENT --> atomIdent
+    : IDENT --> atom_ident
     ;

@@ -11,7 +11,7 @@
 kanonic : {
   name: calculator;
   root: root;
-  package: ioName; // TODO: Make this a string
+  package: io_name; // TODO: Make this a string
 };
 
 /** TOKENS **/
@@ -22,7 +22,7 @@ PLUS: "\+";
 /** RULES **/
 
 root
-    : expr --> rootExpr
+    : expr --> root_expr
     ;
 
 expr

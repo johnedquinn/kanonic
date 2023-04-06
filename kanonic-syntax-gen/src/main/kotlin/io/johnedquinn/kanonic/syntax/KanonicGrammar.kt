@@ -4,12 +4,11 @@ import io.johnedquinn.kanonic.dsl.GrammarBuilder.Companion.buildGrammar
 import io.johnedquinn.kanonic.dsl.RuleBuilder.Companion.buildGeneratedRule
 import io.johnedquinn.kanonic.dsl.RuleBuilder.Companion.buildRule
 
-// TODO: Make internal once grammar is serialized
 public object KanonicGrammar {
 
     // TOKEN NAMES
     private const val IDENT_UPPER_CASE = "IDENT_UPPER_CASE"
-    private const val IDENT_CAMEL_CASE = "IDENT_CAMEL_CASE"
+    private const val IDENT_LOWER_CASE = "IDENT_CAMEL_CASE"
     private const val EPSILON = "EPSILON"
     private const val COLON = "COLON"
     private const val COLON_SEMI = "COLON_SEMI"
@@ -25,11 +24,11 @@ public object KanonicGrammar {
     // RULE NAMES
     private const val file = "file"
     private const val config = "config"
-    private const val configDef = "configDef"
-    private const val tokenDef = "tokenDef"
-    private const val ruleDef = "ruleDef"
-    private const val ruleItem = "ruleItem"
-    private const val ruleVariant = "ruleVariant"
+    private const val configDef = "config_def"
+    private const val tokenDef = "token_def"
+    private const val ruleDef = "rule_def"
+    private const val ruleItem = "rule_item"
+    private const val ruleVariant = "rule_variant"
 
     // GENERATED RULE NAMES
     private const val configDefs = "_0"
@@ -41,7 +40,7 @@ public object KanonicGrammar {
         packageName("io.johnedquinn.kanonic.syntax.generated")
         tokens {
             IDENT_UPPER_CASE - "[A-Z][A-Z_]*"
-            IDENT_CAMEL_CASE - "[a-z][a-zA-Z]*"
+            IDENT_LOWER_CASE - "[a-z][a-z_]*"
             COLON - ":"
             COLON_SEMI - ";"
             CURLY_BRACE_LEFT - "\\{"
@@ -56,42 +55,42 @@ public object KanonicGrammar {
 
         // TOP RULE
         file eq buildRule(this, file) {
-            "Root" eq config - expressions
+            "root" eq config - expressions
         }
 
         // config
         //   : IDENT_CAMEL_CASE ":" "{" configDef* "}" ";"
         //   ;
         config eq buildRule(this, config) {
-            "ConfigStruct" eq IDENT_CAMEL_CASE - COLON - CURLY_BRACE_LEFT - configDefs - CURLY_BRACE_RIGHT - COLON_SEMI
+            "config_struct" eq IDENT_LOWER_CASE - COLON - CURLY_BRACE_LEFT - configDefs - CURLY_BRACE_RIGHT - COLON_SEMI
         }
 
         // configDef
         //  : IDENT_CAMEL_CASE COLON IDENT_CAMEL_CASE COLON_SEMI
         //  ;
         configDef eq buildRule(this, configDef) {
-            "ConfigDefinition" eq IDENT_CAMEL_CASE - COLON - IDENT_CAMEL_CASE - COLON_SEMI
+            "config_definition" eq IDENT_LOWER_CASE - COLON - IDENT_LOWER_CASE - COLON_SEMI
         }
 
         // token
         //  : IDENT_UPPER_CASE COLON LITERAL_STRING COLON_SEMI --> tokenDef
         //  ;
         tokenDef eq buildRule(this, tokenDef) {
-            "Token" eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - COLON_SEMI
+            "token" eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - COLON_SEMI
         }
 
         // rule
         //   : IDENT_CAMEL_CASE COLON variant (LINE_VERTICAL variant)* COLON_SEMI --> Rule
         //   ;
         ruleDef eq buildRule(this, ruleDef) {
-            "Rule" eq IDENT_CAMEL_CASE - COLON - ruleVariants - COLON_SEMI
+            "rule" eq IDENT_LOWER_CASE - COLON - ruleVariants - COLON_SEMI
         }
 
         // variant
         //   : item+ "-->" IDENT_CAMEL_CASE --> Variant
         //   ;
         ruleVariant eq buildRule(this, ruleVariant) {
-            "Variant" eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_CAMEL_CASE
+            "variant" eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_LOWER_CASE
         }
 
         // item
@@ -99,9 +98,9 @@ public object KanonicGrammar {
         //   | IDENT_UPPER_CASE --> TokenReference
         //   ;
         ruleItem eq buildRule(this, ruleItem) {
-            "RuleReference" eq IDENT_CAMEL_CASE
-            "TokenReference" eq IDENT_UPPER_CASE
-            "LineReference" eq LINE_VERTICAL // TODO
+            "rule_reference" eq IDENT_LOWER_CASE
+            "token_reference" eq IDENT_UPPER_CASE
+            "line_reference" eq LINE_VERTICAL // TODO
         }
 
         //

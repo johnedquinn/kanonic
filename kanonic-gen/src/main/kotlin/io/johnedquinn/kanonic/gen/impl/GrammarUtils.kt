@@ -2,6 +2,7 @@ package io.johnedquinn.kanonic.gen.impl
 
 import com.squareup.kotlinpoet.ClassName
 import io.johnedquinn.kanonic.Grammar
+import java.util.Locale
 
 internal object GrammarUtils {
 
@@ -9,7 +10,16 @@ internal object GrammarUtils {
 
     public fun getMetadataName(grammar: Grammar): String = "${grammar.options.grammarName}Metadata"
 
-    public fun getGeneratedClassName(prefix: String) = "${prefix}Node"
+    // Converts snake_case to UpperCamelCase
+    public fun getNormalizedName(prefix: String): String {
+        val pattern = "_[a-z]".toRegex()
+        return prefix.replace(pattern) { it.value.last().uppercase() }
+            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+    }
+
+    public fun getGeneratedClassName(prefix: String): String {
+        return "${getNormalizedName(prefix)}Node"
+    }
 
     public fun getGeneratedVisitorName(grammar: Grammar) = "${grammar.options.grammarName}Visitor"
 

@@ -72,14 +72,21 @@ public object KanonicGenerator {
                 VariantSpec(
                     variant.name,
                     variantName,
-                    "visit${variant.name}",
+                    "visit${GrammarUtils.getNormalizedName(variant.name)}",
                     variant.items,
                     implicitItems,
                     className,
                     rule.generated
                 )
             }
-            RuleSpec(rule.name, ruleName, "visit${rule.name}", variants, ruleClassName, rule.generated)
+            RuleSpec(
+                rule.name,
+                ruleName,
+                "visit${GrammarUtils.getNormalizedName(rule.name)}",
+                variants,
+                ruleClassName,
+                rule.generated
+            )
         }
         val visitorClassName = ClassName(this.options.packageName!!, "${this.options.grammarName}Visitor")
         return GrammarSpec(
