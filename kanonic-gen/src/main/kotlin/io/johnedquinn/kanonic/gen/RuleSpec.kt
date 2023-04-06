@@ -8,5 +8,5 @@ class RuleSpec(
     val visitMethodName: String,
     val variants: List<VariantSpec>,
     val className: ClassName,
-    val generated: Boolean,
+    val generated: Boolean
 )
