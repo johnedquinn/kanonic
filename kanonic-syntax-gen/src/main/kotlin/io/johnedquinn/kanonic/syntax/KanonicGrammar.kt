@@ -1,8 +1,8 @@
 package io.johnedquinn.kanonic.syntax
 
-import io.johnedquinn.kanonic.dsl.GrammarBuilder.Companion.buildGrammar
-import io.johnedquinn.kanonic.dsl.RuleBuilder.Companion.buildGeneratedRule
-import io.johnedquinn.kanonic.dsl.RuleBuilder.Companion.buildRule
+import io.johnedquinn.kanonic.runtime.grammar.GrammarBuilder.Companion.buildGrammar
+import io.johnedquinn.kanonic.runtime.grammar.RuleBuilder.Companion.buildGeneratedRule
+import io.johnedquinn.kanonic.runtime.grammar.RuleBuilder.Companion.buildRule
 
 public object KanonicGrammar {
 

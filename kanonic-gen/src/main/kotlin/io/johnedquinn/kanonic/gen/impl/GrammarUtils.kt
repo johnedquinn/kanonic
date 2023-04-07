@@ -1,14 +1,14 @@
 package io.johnedquinn.kanonic.gen.impl
 
 import com.squareup.kotlinpoet.ClassName
-import io.johnedquinn.kanonic.Grammar
+import io.johnedquinn.kanonic.runtime.grammar.Grammar
 import java.util.Locale
 
 internal object GrammarUtils {
 
     public fun getPackageName(grammar: Grammar): String = grammar.options.packageName ?: "io.johnedquinn.kanonic.example"
 
-    public fun getMetadataName(grammar: Grammar): String = "${grammar.options.grammarName}Metadata"
+    public fun getMetadataName(grammar: Grammar): String = "${grammar.options.grammarName}Specification"
 
     // Converts snake_case to UpperCamelCase
     public fun getNormalizedName(prefix: String): String {

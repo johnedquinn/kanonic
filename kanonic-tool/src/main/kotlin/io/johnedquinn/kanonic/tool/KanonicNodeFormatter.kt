@@ -1,7 +1,7 @@
 package io.johnedquinn.kanonic.tool
 
-import io.johnedquinn.kanonic.parse.Node
-import io.johnedquinn.kanonic.parse.TerminalNode
+import io.johnedquinn.kanonic.runtime.ast.Node
+import io.johnedquinn.kanonic.runtime.ast.TerminalNode
 import io.johnedquinn.kanonic.syntax.generated.KanonicBaseVisitor
 import io.johnedquinn.kanonic.syntax.generated.KanonicNode
 

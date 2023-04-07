@@ -1,12 +1,12 @@
 package io.johnedquinn.kanonic.tool
 
-import io.johnedquinn.kanonic.Rule
-import io.johnedquinn.kanonic.RuleReference
-import io.johnedquinn.kanonic.RuleVariant
-import io.johnedquinn.kanonic.SymbolReference
-import io.johnedquinn.kanonic.TerminalReference
-import io.johnedquinn.kanonic.dsl.GrammarBuilder
-import io.johnedquinn.kanonic.parse.TerminalNode
+import io.johnedquinn.kanonic.runtime.grammar.Rule
+import io.johnedquinn.kanonic.runtime.grammar.RuleReference
+import io.johnedquinn.kanonic.runtime.grammar.RuleVariant
+import io.johnedquinn.kanonic.runtime.grammar.SymbolReference
+import io.johnedquinn.kanonic.runtime.grammar.TerminalReference
+import io.johnedquinn.kanonic.runtime.grammar.GrammarBuilder
+import io.johnedquinn.kanonic.runtime.ast.TerminalNode
 import io.johnedquinn.kanonic.syntax.generated.KanonicBaseVisitor
 import io.johnedquinn.kanonic.syntax.generated.KanonicNode
 

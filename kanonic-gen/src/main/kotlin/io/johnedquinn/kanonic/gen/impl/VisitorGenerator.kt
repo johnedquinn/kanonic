@@ -6,7 +6,6 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
-import io.johnedquinn.kanonic.gen.GrammarSpec
 
 internal object VisitorGenerator {
 

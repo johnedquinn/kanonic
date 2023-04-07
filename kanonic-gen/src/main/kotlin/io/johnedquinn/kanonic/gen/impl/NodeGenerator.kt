@@ -10,12 +10,10 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asTypeName
-import io.johnedquinn.kanonic.RuleReference
-import io.johnedquinn.kanonic.SymbolReference
-import io.johnedquinn.kanonic.TerminalReference
-import io.johnedquinn.kanonic.gen.GrammarSpec
-import io.johnedquinn.kanonic.gen.VariantSpec
-import io.johnedquinn.kanonic.parse.Node
+import io.johnedquinn.kanonic.runtime.grammar.RuleReference
+import io.johnedquinn.kanonic.runtime.grammar.SymbolReference
+import io.johnedquinn.kanonic.runtime.grammar.TerminalReference
+import io.johnedquinn.kanonic.runtime.ast.Node
 
 internal object NodeGenerator {
 

@@ -8,12 +8,11 @@ import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.asTypeName
-import io.johnedquinn.kanonic.RuleReference
-import io.johnedquinn.kanonic.SymbolReference
-import io.johnedquinn.kanonic.TerminalReference
-import io.johnedquinn.kanonic.gen.GrammarSpec
-import io.johnedquinn.kanonic.machine.ParseTableSerializer
-import io.johnedquinn.kanonic.parse.Node
+import io.johnedquinn.kanonic.runtime.ast.Node
+import io.johnedquinn.kanonic.runtime.grammar.RuleReference
+import io.johnedquinn.kanonic.runtime.grammar.SymbolReference
+import io.johnedquinn.kanonic.runtime.grammar.TerminalReference
+import io.johnedquinn.kanonic.runtime.parse.ParseTableSerializer
 
 internal object MetadataGenerator {
 
@@ -38,7 +37,7 @@ internal object MetadataGenerator {
 
         public fun createParserInfoClass(grammarSpec: GrammarSpec): TypeSpec {
             val parserInfoName = grammarSpec.metadataName
-            val infoSpec = TypeSpec.classBuilder(parserInfoName)
+            val infoSpec = TypeSpec.objectBuilder(parserInfoName)
             infoSpec.addSuperinterface(ClassNames.PARSER_INFO)
             infoSpec.addProperty(createGrammarVariable(grammarSpec))
             infoSpec.addFunction(createTableFunction(grammarSpec))
@@ -125,7 +124,7 @@ internal object MetadataGenerator {
                         )
                     }
                     funSpec.addStatement(
-                        "add(CreateNode·{·state,·children,·parent·->·%T(state,·children,·parent)·})",
+                        "add(NodeCreator·{·state,·children,·parent·->·%T(state,·children,·parent)·})",
                         ruleSpec
                     )
                 }
