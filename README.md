@@ -33,4 +33,9 @@ Then, run the command on a Kanonic file:
 ./kanonic-tool/build/install/kanonic-tool/bin/kanonic ./examples/calculator.knc
 ```
 
+Or, see more options:
+```shell
+./kanonic-tool/build/install/kanonic-tool/bin/kanonic --help
+```
+
 Please see the [documentation](https://github.com/johnedquinn/kanonic/wiki) for more information!

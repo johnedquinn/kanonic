@@ -23,6 +23,9 @@ internal class GenerateCommand : Runnable {
     @CommandLine.Option(names = ["-d", "--debug"], description = ["Prints debug statements"])
     var debug: Boolean = false
 
+    @CommandLine.Option(names = ["-o", "--output"], description = ["Output directory to place generated packages."], paramLabel = "<directory>")
+    var output: File? = null
+
     @CommandLine.Parameters(arity = "1", index = "0", description = ["The Kanonic grammar file."], paramLabel = "KANONIC_FILE")
     var file: File? = null
 
@@ -36,8 +39,8 @@ internal class GenerateCommand : Runnable {
             .build()
         val ast = parser.parse(fileContent)
 
-        println("Parsed Kanonic File into AST:")
-        println(KanonicNodeFormatter.format(ast))
+        Logger.debug("Parsed Kanonic File into AST:")
+        Logger.debug(KanonicNodeFormatter.format(ast))
 
         // Convert the Kanonic AST --> Grammar
         val grammarBuilder = GrammarBuilder("Placeholder", "root")
@@ -46,8 +49,9 @@ internal class GenerateCommand : Runnable {
 
         // Generate Files
         val files = KanonicGenerator.generate(grammar)
-        files.forEach {
-            it.writeTo(System.out)
+        when (output) {
+            null -> files.forEach { it.writeTo(System.out) }
+            else -> files.forEach { it.writeTo(output!!) }
         }
     }
 }
