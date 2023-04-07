@@ -10,7 +10,6 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asTypeName
-import io.johnedquinn.kanonic.Grammar
 import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
@@ -133,83 +132,85 @@ internal object NodeGenerator {
                 function.addStatement("return this.children.filterIsInstance<%L>()", it)
             } ?: spec.tokens.firstOrNull { it.name == name }?.let {
                 function.returns(ClassNames.LIST_TERMINAL_NODE)
-                function.beginControlFlow("return this.children.filterIsInstance<%L>().filter", ClassNames.TERMINAL_NODE)
+                function.beginControlFlow(
+                    "return this.children.filterIsInstance<%L>().filter",
+                    ClassNames.TERMINAL_NODE
+                )
                 function.addStatement("it.token.type == %L", it.index)
                 function.endControlFlow()
             } ?: error("Unable to find rule/token reference")
             this.addFunction(function.build())
         }
 
-            private fun getName(symbol: SymbolReference, spec: GrammarSpec) = when (symbol) {
-                is RuleReference -> symbol.name
-                is TerminalReference -> spec.tokens[symbol.type].name
+        private fun getName(symbol: SymbolReference, spec: GrammarSpec) = when (symbol) {
+            is RuleReference -> symbol.name
+            is TerminalReference -> spec.tokens[symbol.type].name
+        }
+
+        private fun createAcceptFunction(spec: GrammarSpec, variantSpec: VariantSpec) = FunSpec.builder("accept")
+            .addTypeVariable(TypeVariableName("R"))
+            .addTypeVariable(TypeVariableName("C"))
+            .addParameter(
+                "visitor",
+                ClassNames.NODE_VISITOR.parameterizedBy(TypeVariableName("R"), TypeVariableName("C"))
+            )
+            .addParameter("ctx", TypeVariableName("C"))
+            .beginControlFlow("return when (visitor)")
+            .addStatement("is %T -> visitor.%L(this, ctx)", spec.visitorClassName, variantSpec.visitMethodName)
+            .addStatement("else -> visitor.visit(this, ctx)")
+            .endControlFlow()
+            .addModifiers(KModifier.OVERRIDE)
+            .returns(TypeVariableName("R"))
+            .build()
+
+        private fun TypeSpec.Builder.addApplyMethod(grammarSpec: GrammarSpec, variantSpec: VariantSpec) =
+            this.apply {
+                val accept = createAcceptFunction(grammarSpec, variantSpec)
+                addFunction(accept)
             }
 
-            private fun createAcceptFunction(spec: GrammarSpec, variantSpec: VariantSpec) = FunSpec.builder("accept")
-                .addTypeVariable(TypeVariableName("R"))
-                .addTypeVariable(TypeVariableName("C"))
-                .addParameter(
-                    "visitor",
-                    ClassNames.NODE_VISITOR.parameterizedBy(TypeVariableName("R"), TypeVariableName("C"))
-                )
-                .addParameter("ctx", TypeVariableName("C"))
-                .beginControlFlow("return when (visitor)")
-                .addStatement("is %T -> visitor.%L(this, ctx)", spec.visitorClassName, variantSpec.visitMethodName)
-                .addStatement("else -> visitor.visit(this, ctx)")
-                .endControlFlow()
-                .addModifiers(KModifier.OVERRIDE)
-                .returns(TypeVariableName("R"))
-                .build()
+        private fun createPrimaryConstructor() = FunSpec.constructorBuilder()
+            .addParameter("state", Int::class)
+            .addParameter("children", ClassNames.LIST_NODE)
+            .addParameter("parent", Node::class.asTypeName().copy(nullable = true))
+            .build()
 
-            private fun TypeSpec.Builder.addApplyMethod(grammarSpec: GrammarSpec, variantSpec: VariantSpec) =
-                this.apply {
-                    val accept = createAcceptFunction(grammarSpec, variantSpec)
-                    addFunction(accept)
-                }
+        private fun TypeSpec.Builder.addPrimaryConstructor() = this.apply {
+            this.primaryConstructor(createPrimaryConstructor())
+            this.addProperty(
+                PropertySpec.builder("state", Int::class, KModifier.OVERRIDE).initializer("state").build()
+            )
+            this.addProperty(
+                PropertySpec.builder("children", ClassNames.LIST_NODE, KModifier.OVERRIDE).initializer("children")
+                    .build()
+            )
+            this.addProperty(
+                PropertySpec.builder(
+                    "parent",
+                    Node::class.asTypeName().copy(nullable = true),
+                    KModifier.OVERRIDE
+                ).mutable(true).initializer("parent").build()
+            )
+            this.addSuperclassConstructorParameter(CodeBlock.of("state"))
+            this.addSuperclassConstructorParameter(CodeBlock.of("children"))
+            this.addSuperclassConstructorParameter(CodeBlock.of("parent"))
+        }
 
-            private fun createPrimaryConstructor() = FunSpec.constructorBuilder()
-                .addParameter("state", Int::class)
-                .addParameter("children", ClassNames.LIST_NODE)
-                .addParameter("parent", Node::class.asTypeName().copy(nullable = true))
-                .build()
-
-            private fun TypeSpec.Builder.addPrimaryConstructor() = this.apply {
-                this.primaryConstructor(createPrimaryConstructor())
-                this.addProperty(
-                    PropertySpec.builder("state", Int::class, KModifier.OVERRIDE).initializer("state").build()
-                )
-                this.addProperty(
-                    PropertySpec.builder("children", ClassNames.LIST_NODE, KModifier.OVERRIDE).initializer("children")
-                        .build()
-                )
-                this.addProperty(
-                    PropertySpec.builder(
-                        "parent",
-                        Node::class.asTypeName().copy(nullable = true),
-                        KModifier.OVERRIDE
-                    ).mutable(true).initializer("parent").build()
-                )
-                this.addSuperclassConstructorParameter(CodeBlock.of("state"))
-                this.addSuperclassConstructorParameter(CodeBlock.of("children"))
-                this.addSuperclassConstructorParameter(CodeBlock.of("parent"))
-            }
-
-            private fun TypeSpec.Builder.addToString() = this.apply {
-                this.addFunction(
-                    FunSpec.builder("toString")
-                        .addCode(
-                            CodeBlock.of(
-                                "return \"\"\"%L(state: %L, children: %L)\"\"\"",
-                                "\${this::class.simpleName}",
-                                "\$state",
-                                "\$children",
-                            )
+        private fun TypeSpec.Builder.addToString() = this.apply {
+            this.addFunction(
+                FunSpec.builder("toString")
+                    .addCode(
+                        CodeBlock.of(
+                            "return \"\"\"%L(state: %L, children: %L)\"\"\"",
+                            "\${this::class.simpleName}",
+                            "\$state",
+                            "\$children",
                         )
-                        .returns(String::class)
-                        .addModifiers(KModifier.OVERRIDE)
-                        .build()
-                )
-            }
+                    )
+                    .returns(String::class)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build()
+            )
         }
     }
-
+}
