@@ -12,7 +12,7 @@ import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.gen.GrammarSpec
-import io.johnedquinn.kanonic.machine.ParseTable
+import io.johnedquinn.kanonic.machine.ParseTableSerializer
 import io.johnedquinn.kanonic.parse.Node
 
 internal object MetadataGenerator {
@@ -41,17 +41,21 @@ internal object MetadataGenerator {
             val infoSpec = TypeSpec.classBuilder(parserInfoName)
             infoSpec.addSuperinterface(ClassNames.PARSER_INFO)
             infoSpec.addProperty(createGrammarVariable(grammarSpec))
+            infoSpec.addFunction(createTableFunction(grammarSpec))
             infoSpec.addFunction(createLambdaInitializerFunction(grammarSpec))
             infoSpec.addProperty(createLambdaFunctions())
             infoSpec.addFunction(createCreateRuleNode())
             return infoSpec.build()
         }
 
-//        public fun createTableProperty(grammarSpec: GrammarSpec): PropertySpec {
-//            val prop = PropertySpec.builder("table", String::class)
-//            prop.initializer("return \"${grammarSpec.table.}\"")
-//            return prop.build()
-//        }
+        public fun createTableFunction(grammarSpec: GrammarSpec): FunSpec {
+            val serialized = ParseTableSerializer.serialize(grammarSpec.table)
+            val func = FunSpec.builder("getTable")
+            func.addModifiers(KModifier.OVERRIDE)
+            func.returns(String::class)
+            func.addStatement("return \"\"\"%L\"\"\"", serialized)
+            return func.build()
+        }
 
         public fun createGrammarVariable(grammarSpec: GrammarSpec): PropertySpec {
             val block = CodeBlock.builder()

@@ -29,15 +29,4 @@ data class ParseTable(
         table.render(builder)
         return builder.toString()
     }
-
-    internal fun serializeActionTable(): String = buildString {
-        actionTable.forEach { row ->
-            appendLine(row.joinToString(","))
-        }
-    }
-    internal fun serializeGoToTable(): String = buildString {
-        goToTable.forEach { row ->
-            appendLine(row.joinToString(","))
-        }
-    }
 }

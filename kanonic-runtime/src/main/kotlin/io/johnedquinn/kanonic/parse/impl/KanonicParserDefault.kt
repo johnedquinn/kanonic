@@ -1,8 +1,7 @@
 package io.johnedquinn.kanonic.parse.impl
 
-import io.johnedquinn.kanonic.machine.AutomatonGenerator
 import io.johnedquinn.kanonic.machine.ParseTable
-import io.johnedquinn.kanonic.machine.TableGenerator
+import io.johnedquinn.kanonic.machine.ParseTableSerializer
 import io.johnedquinn.kanonic.parse.KanonicLexer
 import io.johnedquinn.kanonic.parse.KanonicParser
 import io.johnedquinn.kanonic.parse.Node
@@ -17,9 +16,11 @@ internal class KanonicParserDefault(
 
     private val grammar = info.grammar
 
-    private val generator = AutomatonGenerator()
-    private val automaton = generator.generate(grammar)
-    private val table: ParseTable = TableGenerator(grammar, automaton).generate()
+    // private val generator = AutomatonGenerator()
+    // private val automaton = generator.generate(grammar)
+    // private val table: ParseTable = TableGenerator(grammar, automaton).generate()
+
+    private val table: ParseTable = ParseTableSerializer.deserialize(info.getTable(), grammar.tokens.size)
 
     init {
         Logger.debug(table.prettify(grammar))
