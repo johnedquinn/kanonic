@@ -7,9 +7,9 @@ import kotlin.text.StringBuilder
 data class ParseTable(
     val actionTable: List<List<Action?>>,
     val goToTable: List<List<Action?>>,
-    val nonTerminals: List<String>
 ) {
     internal fun prettify(grammar: Grammar): String {
+        val nonTerminals = grammar.rules.map { it.name }
         val table = table {
             val headers = mutableListOf<String>()
             headers.add("STATE")
@@ -28,5 +28,16 @@ data class ParseTable(
         val builder = StringBuilder()
         table.render(builder)
         return builder.toString()
+    }
+
+    internal fun serializeActionTable(): String = buildString {
+        actionTable.forEach { row ->
+            appendLine(row.joinToString(","))
+        }
+    }
+    internal fun serializeGoToTable(): String = buildString {
+        goToTable.forEach { row ->
+            appendLine(row.joinToString(","))
+        }
     }
 }

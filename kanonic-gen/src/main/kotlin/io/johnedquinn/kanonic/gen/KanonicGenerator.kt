@@ -11,6 +11,8 @@ import io.johnedquinn.kanonic.gen.impl.GrammarUtils
 import io.johnedquinn.kanonic.gen.impl.MetadataGenerator
 import io.johnedquinn.kanonic.gen.impl.NodeGenerator
 import io.johnedquinn.kanonic.gen.impl.VisitorGenerator
+import io.johnedquinn.kanonic.machine.AutomatonGenerator
+import io.johnedquinn.kanonic.machine.TableGenerator
 import io.johnedquinn.kanonic.parse.TokenLiteral
 
 public object KanonicGenerator {
@@ -29,7 +31,9 @@ public object KanonicGenerator {
     }
 
     private fun Grammar.toSpec(): GrammarSpec {
-        this.printInformation()
+        val automaton = AutomatonGenerator().generate(this)
+        val table = TableGenerator(this, automaton).generate()
+
         val grammarNodeName = GrammarUtils.getGrammarNodeName(this)
         val visitorName = GrammarUtils.getGeneratedVisitorName(this)
         val topNodeClassName = ClassName(this.options.packageName!!, grammarNodeName)
@@ -100,7 +104,8 @@ public object KanonicGenerator {
             this.options.start,
             this.tokens,
             topNodeClassName,
-            visitorClassName
+            visitorClassName,
+            table
         )
     }
 }

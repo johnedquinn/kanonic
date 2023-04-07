@@ -12,6 +12,7 @@ import io.johnedquinn.kanonic.RuleReference
 import io.johnedquinn.kanonic.SymbolReference
 import io.johnedquinn.kanonic.TerminalReference
 import io.johnedquinn.kanonic.gen.GrammarSpec
+import io.johnedquinn.kanonic.machine.ParseTable
 import io.johnedquinn.kanonic.parse.Node
 
 internal object MetadataGenerator {
@@ -45,6 +46,12 @@ internal object MetadataGenerator {
             infoSpec.addFunction(createCreateRuleNode())
             return infoSpec.build()
         }
+
+//        public fun createTableProperty(grammarSpec: GrammarSpec): PropertySpec {
+//            val prop = PropertySpec.builder("table", String::class)
+//            prop.initializer("return \"${grammarSpec.table.}\"")
+//            return prop.build()
+//        }
 
         public fun createGrammarVariable(grammarSpec: GrammarSpec): PropertySpec {
             val block = CodeBlock.builder()

@@ -9,7 +9,7 @@ class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
     // Constants
     private val numberOfStates = automaton.states.size
     private val numberOfTerminals = grammar.tokens.size
-    private val nonTerminals = grammar.rules.map { it.name }.toSet().toList()
+    private val nonTerminals = grammar.rules.map { it.name }.toList()
     private val numberOfNonTerminals = nonTerminals.size
     private val namesToNonTerminalIndex = nonTerminals.mapIndexed { index, ruleName ->
         ruleName to index
@@ -73,6 +73,6 @@ class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
                 }
             }
         }
-        return ParseTable(actionTable, goToTable, nonTerminals)
+        return ParseTable(actionTable, goToTable)
     }
 }

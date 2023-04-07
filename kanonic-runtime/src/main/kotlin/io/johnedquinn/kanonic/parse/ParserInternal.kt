@@ -121,7 +121,8 @@ internal class ParserInternal(private val grammar: Grammar, private val table: P
         Logger.debug("FOUND NODE: $newNode")
         toAddNodes.push(newNode)
         val topState = stack.peek()
-        val ruleIndex = table.nonTerminals.indexOf(rule.parentName)
+        val ruleIndex = grammar.rules.map { it.name }.indexOf(rule.parentName)
+        // val ruleIndex = table.nonTerminals.indexOf(rule.parentName)
         val goToState = table.goToTable[topState][ruleIndex] as ShiftAction
         stack.push(goToState.state)
     }
