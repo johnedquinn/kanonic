@@ -8,24 +8,7 @@ import io.johnedquinn.kanonic.machine.ShiftAction
 import io.johnedquinn.kanonic.utils.Logger
 import java.util.Stack
 
-/**
- * Push S0 onto S.
- * Let a be the first input token.
- *
- * Loop:
- *   - Let s be the top of the stack.
- *   - If ACTION[s, a] is accept:
- *     - Parse complete.
- *   - Else if ACTION[s, a] is shift t:
- *     - Push state t on the stack.
- *     - Let a be the next input token.
- *   - Else if ACTION[s, a] is reduce A → β:
- *     - Pop states corresponding to β from the stack.
- *     - Let t be the top of stack.
- *     - Push GOTO[t, A] onto the stack.
- *   - Otherwise:
- *     - Halt with a parse error.
- */
+
 internal class ParserInternal(private val grammar: Grammar, private val table: ParseTable, private val info: ParserMetadata) {
 
     public fun parse(tokens: List<TokenLiteral>): Node {
