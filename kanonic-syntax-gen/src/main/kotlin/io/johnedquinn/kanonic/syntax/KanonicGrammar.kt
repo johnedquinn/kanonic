@@ -69,7 +69,17 @@ public object KanonicGrammar {
         //  : IDENT_CAMEL_CASE COLON IDENT_CAMEL_CASE COLON_SEMI
         //  ;
         configDef eq buildRule(this, configDef) {
-            "config_definition" eq IDENT_LOWER_CASE - COLON - IDENT_LOWER_CASE - COLON_SEMI
+            "config_definition" eq IDENT_LOWER_CASE - COLON - "text" - COLON_SEMI
+        }
+
+        "text" eq buildRule(this, "text") {
+            "text" eq "text_hidden"
+        }
+
+        "text_hidden" eq buildGeneratedRule(this, "text_hidden") {
+            "text_hidden_0" eq IDENT_LOWER_CASE
+            "text_hidden_1" eq IDENT_UPPER_CASE
+            "text_hidden_2" eq LITERAL_STRING
         }
 
         // token
@@ -90,7 +100,7 @@ public object KanonicGrammar {
         //   : item+ "-->" IDENT_CAMEL_CASE --> Variant
         //   ;
         ruleVariant eq buildRule(this, ruleVariant) {
-            "variant" eq ruleItems - DASH - DASH - CARROT_RIGHT - IDENT_LOWER_CASE
+            "variant" eq ruleItems - "optional_alias"
         }
 
         // item
@@ -108,6 +118,11 @@ public object KanonicGrammar {
         // GENERATED
         //
         //
+
+        "optional_alias" eq buildGeneratedRule(this, "optional_alias") {
+            "optional_alias" eq DASH - DASH - CARROT_RIGHT - IDENT_LOWER_CASE
+            "optional_alias" eq EPSILON
+        }
 
         configDefs eq buildGeneratedRule(this, configDefs) {
             "EmptyConfigDefinition" eq EPSILON

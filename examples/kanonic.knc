@@ -1,0 +1,88 @@
+// File: kanonic.knc
+// Author: Kanonic
+// Description: The Kanonic Grammar
+
+/**
+ *
+ * CONFIG
+ *
+ **/
+
+kanonic : {
+  name: kanonic;
+  root: file;
+  package: "io.johnedquinn.kanonic.syntax.generated";
+};
+
+/**
+ *
+ * TOKENS
+ *
+ **/
+
+// CONSTANTS
+// Note: EOF and EPSILON are hidden keywords
+
+ASTERISK: "\*";
+CARROT_RIGHT: ">";
+COLON: ":";
+COLON_SEMI: ";";
+CURLY_BRACE_LEFT: "\{";
+CURLY_BRACE_RIGHT: "\}";
+DASH: "-";
+LINE_VERTICAL: "\|"
+PAREN_LEFT: "\(";
+PAREN_RIGHT: "\(";
+PLUS: "\+";
+QUESTION_MARK: "\?";
+
+IDENT_UPPER_CASE: "[A-Z][A-Z_]*";
+IDENT_LOWER_CASE: "[a-z][a-z_]*";
+LITERAL_STRING: "\"((\")|[^\"])*\"";
+
+COMMENT_SINGLE: "//[^\r\n]*?\r?\n?" --> "hidden";
+COMMENT_BLOCK - ("/\*(?s).*?\*/" --> "hidden";
+
+/**
+ *
+ * RULES
+ *
+ **/
+
+file
+	: config ( token | rule )+ EOF
+	;
+
+config
+	: IDENT_CAMEL_CASE COLON BRACE_LEFT configDef* BRACE_RIGHT COLON_SEMI --> config_struct
+	;
+
+config_def
+	: IDENT_CAMEL_CASE COLON text COLON_SEMI --> config_def
+	;
+
+text
+	: (IDENT_CAMEL_CASE | IDENT_LOWER_CASE | LITERAL_STRING) --> text
+	;
+
+token
+	: IDENT_UPPER_CASE COLON LITERAL_STRING (DASH DASH CARROT_RIGHT IDENT_LOWER_CASE)? COLON_SEMI --> token_def
+	;
+
+rule
+	: IDENT_CAMEL_CASE COLON variant (LINE_VERTICAL variant)* COLON_SEMI --> rule
+	;
+
+variant
+	: item+ (DASH DASH CARROT_RIGHT IDENT_CAMEL_CASE)? --> variant
+	;
+
+item
+	: PAREN_LEFT item+ ( LINE_VERTICAL item+ )+ PAREN_RIGHT item_flag?    --> item_group
+	| IDENT_CAMEL_CASE item_flag?                                         --> item_rule
+	| IDENT_UPPER_CASE item_flag?                                         --> item_token
+	;
+
+item_flag
+	: ( QUESTION_MARK | ASTERISK | PLUS ) --> item_flag
+	;

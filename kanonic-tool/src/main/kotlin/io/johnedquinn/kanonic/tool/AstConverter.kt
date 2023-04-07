@@ -14,13 +14,27 @@ internal object AstConverter : KanonicBaseVisitor<Any, GrammarBuilder>() {
 
     override fun visitConfigDefinition(node: KanonicNode.ConfigDefNode.ConfigDefinitionNode, ctx: GrammarBuilder) {
         val lhs = node.IDENT_CAMEL_CASE()[0].token.content
-        val rhs = node.IDENT_CAMEL_CASE()[1].token.content
+        val rhs = visitText(node.text()[0], ctx)
         when (lhs.lowercase()) {
             "name" -> ctx.name = rhs
             "package" -> ctx.packageName(rhs)
             "root" -> ctx.start = rhs
             else -> error("Unrecognized")
         }
+    }
+
+    override fun visitText(node: KanonicNode.TextNode, ctx: GrammarBuilder): String {
+        return when (node) {
+            is KanonicNode.TextNode.TextNode -> visitText(node, ctx)
+        }
+    }
+
+    override fun visitText(node: KanonicNode.TextNode.TextNode, ctx: GrammarBuilder): String {
+        return node.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content
+            ?: node.IDENT_UPPER_CASE().getOrNull(0)?.token?.content
+            ?: node.LITERAL_STRING()[0].token.content.let {
+                it.substring(1, it.lastIndex)
+            }
     }
 
     override fun visitToken(node: KanonicNode.TokenDefNode.TokenNode, ctx: GrammarBuilder) {
@@ -31,12 +45,21 @@ internal object AstConverter : KanonicBaseVisitor<Any, GrammarBuilder>() {
 
     override fun visitRule(node: KanonicNode.RuleDefNode.RuleNode, ctx: GrammarBuilder) {
         val name = node.IDENT_CAMEL_CASE()[0].token.content
+        if (node.ruleVariant().size > 1) {
+            val count = node.ruleVariant().any {
+                it as KanonicNode.RuleVariantNode.VariantNode
+                it.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content == null
+            }
+            if (count) {
+                throw RuntimeException("Some variants are missing aliases for $name")
+            }
+        }
         val items = node.ruleVariant().map {
             it as KanonicNode.RuleVariantNode.VariantNode
             val items = it.ruleItem().map { item ->
                 visitRuleItem(item, ctx)
             }
-            val alias = it.IDENT_CAMEL_CASE()[0].token.content
+            val alias = it.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content ?: name
             RuleVariant(alias, name, items)
         }
         val rule = Rule(name, items, false)
