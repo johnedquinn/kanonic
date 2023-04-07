@@ -21,8 +21,8 @@ public object KanonicGenerator {
     public fun generate(grammar: Grammar): List<FileSpec> {
         val spec = grammar.toSpec()
         return listOf(
-            MetadataGenerator.generate(grammar, spec),
-            NodeGenerator.generate(grammar, spec),
+            MetadataGenerator.generate(spec),
+            NodeGenerator.generate(spec),
             VisitorGenerator.generate(spec),
             BaseVisitorGenerator.generate(spec)
         )
@@ -91,10 +91,14 @@ public object KanonicGenerator {
         val visitorClassName = ClassName(this.options.packageName!!, "${this.options.grammarName}Visitor")
         return GrammarSpec(
             this.options.grammarName,
+            GrammarUtils.getMetadataName(this),
+            grammarNodeName,
             visitorName,
             GrammarUtils.getGeneratedBaseVisitorName(this),
             this.options.packageName!!,
             rules,
+            this.options.start,
+            this.tokens,
             topNodeClassName,
             visitorClassName
         )
