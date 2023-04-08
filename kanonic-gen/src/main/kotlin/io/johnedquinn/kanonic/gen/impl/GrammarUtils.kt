@@ -22,17 +22,19 @@ internal object GrammarUtils {
         return prefix.replace(pattern) { it.value.last().uppercase() }
     }
 
-    public fun getGeneratedClassName(prefix: String): String {
+    public fun getGeneratedNodeName(prefix: String): String {
         return "${getNormalizedName(prefix)}Node"
     }
 
-    public fun getGeneratedVisitorName(grammar: Grammar) = "${grammar.options.grammarName}Visitor"
+    public fun getGeneratedVisitorName(grammar: Grammar) = "${grammar.options.grammarName.normalize()}Visitor"
 
-    public fun getGeneratedBaseVisitorName(grammar: Grammar) = "${grammar.options.grammarName}BaseVisitor"
+    public fun getGeneratedBaseVisitorName(grammar: Grammar) = "${grammar.options.grammarName.normalize()}BaseVisitor"
 
-    public fun getGrammarNodeName(grammar: Grammar) = getGeneratedClassName(grammar.options.grammarName)
+    public fun getGrammarNodeName(grammar: Grammar) = getGeneratedNodeName(grammar.options.grammarName)
 
     public fun getGeneratedNodeClassName(grammar: Grammar): ClassName {
         return ClassName(getPackageName(grammar), getGrammarNodeName(grammar))
     }
+
+    private fun String.normalize() = getNormalizedName(this)
 }

@@ -118,8 +118,8 @@ internal object MetadataGenerator {
                         false -> ClassName(
                             packageName,
                             grammarNodeName,
-                            GrammarUtils.getGeneratedClassName(rule.name),
-                            GrammarUtils.getGeneratedClassName(variant.originalName)
+                            GrammarUtils.getGeneratedNodeName(rule.name),
+                            GrammarUtils.getGeneratedNodeName(variant.originalName)
                         )
                     }
                     funSpec.addStatement(

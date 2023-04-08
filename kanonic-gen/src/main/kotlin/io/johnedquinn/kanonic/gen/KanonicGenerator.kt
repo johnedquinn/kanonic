@@ -41,10 +41,10 @@ public object KanonicGenerator {
         val visitorName = GrammarUtils.getGeneratedVisitorName(this)
         val topNodeClassName = ClassName(this.options.packageName!!, grammarNodeName)
         val rules = this.rules.map { rule ->
-            val ruleName = GrammarUtils.getGeneratedClassName(rule.name)
+            val ruleName = GrammarUtils.getGeneratedNodeName(rule.name)
             val ruleClassName = ClassName(topNodeClassName.canonicalName, ruleName)
             val variants = rule.variants.map { variant ->
-                val variantName = GrammarUtils.getGeneratedClassName(variant.name)
+                val variantName = GrammarUtils.getGeneratedNodeName(variant.name)
                 val className = ClassName(ruleClassName.canonicalName, variantName)
                 val allItems = mutableSetOf<SymbolReference>()
                 allItems.addAll(variant.items)
@@ -95,7 +95,7 @@ public object KanonicGenerator {
                 rule.generated
             )
         }
-        val visitorClassName = ClassName(this.options.packageName!!, "${this.options.grammarName}Visitor")
+        val visitorClassName = ClassName(this.options.packageName!!, visitorName)
         return GrammarSpec(
             this.options.grammarName,
             GrammarUtils.getMetadataName(this),

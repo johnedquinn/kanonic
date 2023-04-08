@@ -62,14 +62,14 @@ internal object NodeGenerator {
                     return@mapNotNull null
                 }
                 // Shared Information
-                val ruleClassName = GrammarUtils.getGeneratedClassName(rule.name)
+                val ruleClassName = GrammarUtils.getGeneratedNodeName(rule.name)
                 val packageName = spec.packageName
                 val grammarNodeName = spec.nodeName
 
                 // Create Rule Variants (Data Classes)
                 val ruleClassReference = ClassName(packageName, grammarNodeName, ruleClassName)
                 val typeSpecs = rule.variants.map { variant ->
-                    val variantClassName = GrammarUtils.getGeneratedClassName(variant.originalName)
+                    val variantClassName = GrammarUtils.getGeneratedNodeName(variant.originalName)
                     val variantSpec = TypeSpec.classBuilder(variantClassName)
                     variantSpec.addModifiers(KModifier.DATA)
                     variantSpec.addToString()
