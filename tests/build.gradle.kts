@@ -35,3 +35,32 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+val generatedSrc = "$buildDir/generated-src/main/kotlin"
+
+sourceSets {
+    main {
+        java.srcDir(generatedSrc)
+    }
+}
+
+kotlin.sourceSets {
+    main {
+        kotlin.srcDir(generatedSrc)
+    }
+}
+
+val generate = tasks.register<Exec>("generate") {
+    dependsOn(":kanonic-tool:install")
+    workingDir(projectDir)
+    commandLine(
+        "../kanonic-tool/build/install/kanonic-tool/bin/kanonic",
+        "-o",
+        "build/generated-src/main/kotlin",
+        "src/main/resources"
+    )
+}
+
+tasks.compileKotlin {
+    dependsOn(generate)
+}

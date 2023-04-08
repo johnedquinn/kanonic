@@ -19,5 +19,5 @@ internal object ClassNames {
     val LIST_CREATE_NODE = ClassName("kotlin.collections", "List").parameterizedBy(CREATE_NODE)
 
     internal fun createGrammarNodeClass(packageName: String, grammarName: String) =
-        ClassName(packageName, "${grammarName}Node")
+        ClassName(packageName, grammarName)
 }

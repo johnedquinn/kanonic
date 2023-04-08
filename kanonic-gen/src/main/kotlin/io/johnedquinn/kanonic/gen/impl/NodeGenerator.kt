@@ -10,10 +10,10 @@ import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asTypeName
+import io.johnedquinn.kanonic.runtime.ast.Node
 import io.johnedquinn.kanonic.runtime.grammar.RuleReference
 import io.johnedquinn.kanonic.runtime.grammar.SymbolReference
 import io.johnedquinn.kanonic.runtime.grammar.TerminalReference
-import io.johnedquinn.kanonic.runtime.ast.Node
 
 internal object NodeGenerator {
 
@@ -38,7 +38,7 @@ internal object NodeGenerator {
          */
         public fun createType(spec: GrammarSpec): TypeSpec {
             // Define the top-level grammar Node
-            val className = GrammarUtils.getGeneratedClassName(spec.grammarName)
+            val className = spec.nodeName
             val type = TypeSpec.classBuilder(className)
             type.addModifiers(KModifier.SEALED)
             type.superclass(ClassNames.NODE)
@@ -86,7 +86,7 @@ internal object NodeGenerator {
 
                 // Create Top-Level Rule (Abstract Class)
                 val ruleSpec = TypeSpec.classBuilder(ruleClassName)
-                val grammarNodeReference = ClassNames.createGrammarNodeClass(packageName, spec.grammarName)
+                val grammarNodeReference = ClassNames.createGrammarNodeClass(packageName, spec.nodeName)
                 ruleSpec.addModifiers(KModifier.SEALED)
                 ruleSpec.superclass(grammarNodeReference)
                 ruleSpec.addPrimaryConstructor()

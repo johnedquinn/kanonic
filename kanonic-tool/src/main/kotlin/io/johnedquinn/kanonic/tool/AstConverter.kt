@@ -55,7 +55,13 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
     override fun visitTokenDef(node: KanonicNode.TokenDefNode.TokenDefNode, ctx: Context) {
         val name = node.IDENT_UPPER_CASE()[0].token.content
         val definition = node.LITERAL_STRING()[0].token.content
-        ctx.grammarBuilder.addToken(name, definition, false)
+        val channel = node.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content ?: "main"
+        val hidden = when(channel.lowercase()) {
+            "hidden" -> true
+            "main" -> false
+            else -> error("Unsupported channel: $channel")
+        }
+        ctx.grammarBuilder.addToken(name, definition, hidden)
     }
 
     override fun visitRuleDef(node: KanonicNode.RuleDefNode.RuleDefNode, ctx: Context) {
