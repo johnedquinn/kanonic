@@ -30,7 +30,8 @@ root
     ;
 
 expr
-  : expr ( PLUS | MINUS | ASTERISK | ( SLASH_FORWARD )? ) atomic --> expr_plus
+  : expr PLUS atomic --> expr_plus
+  | expr MINUS atomic --> expr_minus
   | atomic --> expr_atomic
   ;
 

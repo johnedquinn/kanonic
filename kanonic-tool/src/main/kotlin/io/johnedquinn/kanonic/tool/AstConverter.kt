@@ -54,9 +54,9 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
 
     override fun visitTokenDef(node: KanonicNode.TokenDefNode.TokenDefNode, ctx: Context) {
         val name = node.IDENT_UPPER_CASE()[0].token.content
-        val definition = node.LITERAL_STRING()[0].token.content
+        val definition = node.LITERAL_STRING()[0].token.content.let { it.substring(1, it.lastIndex) }
         val channel = node.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content ?: "main"
-        val hidden = when(channel.lowercase()) {
+        val hidden = when (channel.lowercase()) {
             "hidden" -> true
             "main" -> false
             else -> error("Unsupported channel: $channel")
@@ -75,7 +75,9 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
                 throw RuntimeException("Some variants are missing aliases for $name")
             }
         }
-        val items = node.ruleVariant().map {
+        val allVariants = node.ruleVariant() + node.alternative().map { it as KanonicNode.AlternativeNode.AlternativeNode }.flatMap { it.ruleVariant() }
+        println(allVariants)
+        val items = allVariants.map {
             it as KanonicNode.RuleVariantNode.VariantNode
             val items = it.ruleItem().map { item ->
                 visitRuleItem(item, ctx)

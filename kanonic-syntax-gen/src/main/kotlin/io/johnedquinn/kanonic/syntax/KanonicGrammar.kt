@@ -116,11 +116,15 @@ internal object KanonicGrammar {
             ruleDef eq IDENT_LOWER_CASE - COLON - ruleVariant - ruleVariants - COLON_SEMI
         }
 
+        +buildRule("alternative") {
+            "alternative" eq LINE_VERTICAL - ruleVariant
+        }
+
         // GENERATED
         // ruleVariants : (LINE_VERTICAL variant)*
         +generateRule(name = ruleVariants) {
             "SingleVariant" eq EPSILON
-            "MultipleVariants" eq ruleVariants - LINE_VERTICAL - ruleVariant
+            "MultipleVariants" eq ruleVariants - "alternative"
         }
 
         // variant

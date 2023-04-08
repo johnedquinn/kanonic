@@ -8,7 +8,7 @@ internal object GrammarUtils {
 
     public fun getPackageName(grammar: Grammar): String = grammar.options.packageName ?: "io.johnedquinn.kanonic.example"
 
-    public fun getMetadataName(grammar: Grammar): String = "${grammar.options.grammarName}Specification"
+    public fun getMetadataName(grammar: Grammar): String = "${grammar.options.grammarName.normalize()}Specification"
 
     // Converts snake_case to UpperCamelCase
     public fun getNormalizedName(prefix: String): String {
