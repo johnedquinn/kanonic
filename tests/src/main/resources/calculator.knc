@@ -11,7 +11,7 @@
 kanonic : {
   name: calculator;
   root: root;
-  package: "io.johnedquinn.kanonic.examples";
+  package: "io.johnedquinn.kanonic.tests.calculator";
 };
 
 /** TOKENS **/
