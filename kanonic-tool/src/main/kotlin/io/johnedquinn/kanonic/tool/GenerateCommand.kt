@@ -43,9 +43,7 @@ internal class GenerateCommand : Runnable {
         Logger.debug(KanonicNodeFormatter.format(ast))
 
         // Convert the Kanonic AST --> Grammar
-        val grammarBuilder = GrammarBuilder("Placeholder", "root")
-        AstConverter.visit(ast, grammarBuilder)
-        val grammar = grammarBuilder.build()
+        val grammar = AstConverter.convert(ast)
 
         // Generate Files
         val files = KanonicGenerator.generate(grammar)

@@ -18,6 +18,10 @@ kanonic : {
 
 INTEGER: "[0-9]+";
 PLUS: "\+";
+MINUS: "-";
+ASTERISK: "\*";
+SLASH_FORWARD: "/";
+WS: "[\s]" --> hidden;
 
 /** RULES **/
 
@@ -26,7 +30,8 @@ root
     ;
 
 expr
-  : expr PLUS atomic --> plus
+  : expr ( PLUS | MINUS | ASTERISK | ( SLASH_FORWARD )? ) atomic --> expr_plus
+  | atomic --> expr_atomic
   ;
 
 atomic

@@ -1,7 +1,6 @@
 package io.johnedquinn.kanonic.runtime.parse.impl
 
 import io.johnedquinn.kanonic.runtime.parse.ParseTable
-import io.johnedquinn.kanonic.runtime.parse.ParseTableSerializer
 import io.johnedquinn.kanonic.runtime.ast.GeneratedNode
 import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
 import io.johnedquinn.kanonic.runtime.parse.KanonicParser
@@ -37,7 +36,7 @@ internal class KanonicParserDefault(
 ) : KanonicParser {
 
     private val grammar = info.grammar
-    private val table: ParseTable = ParseTableSerializer.deserialize(info.getTable(), grammar.tokens.size)
+    private val table: ParseTable = ParseTableDeserializer.deserialize(info.getTable(), grammar.tokens.size)
 
     /**
      * Parse

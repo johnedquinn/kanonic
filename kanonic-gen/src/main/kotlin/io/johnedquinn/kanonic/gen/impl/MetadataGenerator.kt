@@ -12,7 +12,6 @@ import io.johnedquinn.kanonic.runtime.ast.Node
 import io.johnedquinn.kanonic.runtime.grammar.RuleReference
 import io.johnedquinn.kanonic.runtime.grammar.SymbolReference
 import io.johnedquinn.kanonic.runtime.grammar.TerminalReference
-import io.johnedquinn.kanonic.runtime.parse.ParseTableSerializer
 
 internal object MetadataGenerator {
 

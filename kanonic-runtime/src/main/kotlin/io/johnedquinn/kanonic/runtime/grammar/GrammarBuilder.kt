@@ -31,6 +31,14 @@ class GrammarBuilder(var name: String, var start: String) {
         this.rules.add(rule)
     }
 
+    operator fun Rule.unaryPlus() = this.apply {
+        rules.add(this)
+    }
+
+    fun buildRule(name: String, f: RuleBuilder.() -> Unit) = RuleBuilder.buildRule(this, name, f)
+
+    fun generateRule(name: String, f: RuleBuilder.() -> Unit) = RuleBuilder.buildGeneratedRule(this, name, f)
+
     infix fun String.eq(other: Rule): Rule {
         this@GrammarBuilder.rules.add(other)
         return other

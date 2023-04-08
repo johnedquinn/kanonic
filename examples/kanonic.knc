@@ -24,15 +24,17 @@ kanonic : {
 // Note: EOF and EPSILON are hidden keywords
 
 ASTERISK: "\*";
+BRACE_LEFT: "\{";
+BRACE_RIGHT: "\}";
 CARROT_RIGHT: ">";
 COLON: ":";
 COLON_SEMI: ";";
 CURLY_BRACE_LEFT: "\{";
 CURLY_BRACE_RIGHT: "\}";
 DASH: "-";
-LINE_VERTICAL: "\|"
+LINE_VERTICAL: "\|";
 PAREN_LEFT: "\(";
-PAREN_RIGHT: "\(";
+PAREN_RIGHT: "\)";
 PLUS: "\+";
 QUESTION_MARK: "\?";
 
@@ -54,35 +56,36 @@ file
 	;
 
 config
-	: IDENT_CAMEL_CASE COLON BRACE_LEFT configDef* BRACE_RIGHT COLON_SEMI --> config_struct
+	: IDENT_LOWER_CASE COLON BRACE_LEFT config_def* BRACE_RIGHT COLON_SEMI
 	;
 
 config_def
-	: IDENT_CAMEL_CASE COLON text COLON_SEMI --> config_def
+	: IDENT_LOWER_CASE COLON text COLON_SEMI
 	;
 
 text
-	: (IDENT_CAMEL_CASE | IDENT_LOWER_CASE | LITERAL_STRING) --> text
+	: (IDENT_UPPER_CASE | IDENT_LOWER_CASE | LITERAL_STRING)
 	;
 
 token
-	: IDENT_UPPER_CASE COLON LITERAL_STRING (DASH DASH CARROT_RIGHT IDENT_LOWER_CASE)? COLON_SEMI --> token_def
+	: IDENT_UPPER_CASE COLON LITERAL_STRING (DASH DASH CARROT_RIGHT IDENT_LOWER_CASE)? COLON_SEMI
 	;
 
 rule
-	: IDENT_CAMEL_CASE COLON variant (LINE_VERTICAL variant)* COLON_SEMI --> rule
+	: IDENT_LOWER_CASE COLON variant (LINE_VERTICAL variant)* COLON_SEMI
 	;
 
 variant
-	: item+ (DASH DASH CARROT_RIGHT IDENT_CAMEL_CASE)? --> variant
+	: item+ (DASH DASH CARROT_RIGHT IDENT_LOWER_CASE)?
 	;
 
 item
-	: PAREN_LEFT item+ ( LINE_VERTICAL item+ )+ PAREN_RIGHT item_flag?    --> item_group
-	| IDENT_CAMEL_CASE item_flag?                                         --> item_rule
-	| IDENT_UPPER_CASE item_flag?                                         --> item_token
+	: PAREN_LEFT item+ ( LINE_VERTICAL item+ )* PAREN_RIGHT    --> item_group
+	| IDENT_LOWER_CASE                                         --> item_rule
+	| IDENT_UPPER_CASE                                         --> item_token
+	| item item_flag                                           --> item_flagged
 	;
 
 item_flag
-	: ( QUESTION_MARK | ASTERISK | PLUS ) --> item_flag
+	: ( QUESTION_MARK | ASTERISK | PLUS )
 	;
