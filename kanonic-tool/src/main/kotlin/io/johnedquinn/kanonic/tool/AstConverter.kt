@@ -27,7 +27,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
         var generatedRule: Int
     )
 
-    override fun visitConfigDefinition(node: KanonicNode.ConfigDefNode.ConfigDefinitionNode, ctx: Context) {
+    override fun visitConfigDef(node: KanonicNode.ConfigDefNode.ConfigDefNode, ctx: Context) {
         val lhs = node.IDENT_LOWER_CASE()[0].token.content
         val rhs = visitText(node.text()[0], ctx)
         when (lhs.lowercase()) {
@@ -52,7 +52,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
             }
     }
 
-    override fun visitTokenDef(node: KanonicNode.TokenDefNode.TokenDefNode, ctx: Context) {
+    override fun visitToken(node: KanonicNode.TokenNode.TokenNode, ctx: Context) {
         val name = node.IDENT_UPPER_CASE()[0].token.content
         val definition = node.LITERAL_STRING()[0].token.content.let { it.substring(1, it.lastIndex) }
         val channel = node.IDENT_LOWER_CASE().getOrNull(0)?.token?.content ?: "main"
@@ -64,23 +64,23 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
         ctx.grammarBuilder.addToken(name, definition, hidden)
     }
 
-    override fun visitRuleDef(node: KanonicNode.RuleDefNode.RuleDefNode, ctx: Context) {
+    override fun visitRule(node: KanonicNode.RuleNode.RuleNode, ctx: Context) {
         val name = node.IDENT_LOWER_CASE()[0].token.content
-        if (node.ruleVariant().size > 1) {
-            val count = node.ruleVariant().any {
-                it as KanonicNode.RuleVariantNode.VariantNode
+        if (node.variant().size > 1) {
+            val count = node.variant().any {
+                it as KanonicNode.VariantNode.VariantNode
                 it.IDENT_LOWER_CASE().getOrNull(0)?.token?.content == null
             }
             if (count) {
                 throw RuntimeException("Some variants are missing aliases for $name")
             }
         }
-        val allVariants = node.ruleVariant() + node.alternative().map { it as KanonicNode.AlternativeNode.AlternativeNode }.flatMap { it.ruleVariant() }
+        val allVariants = node.variant() + node.alternative().map { it as KanonicNode.AlternativeNode.AlternativeNode }.flatMap { it.variant() }
         println(allVariants)
         val items = allVariants.map {
-            it as KanonicNode.RuleVariantNode.VariantNode
-            val items = it.ruleItem().map { item ->
-                visitRuleItem(item, ctx)
+            it as KanonicNode.VariantNode.VariantNode
+            val items = it.item().map { item ->
+                visitItem(item, ctx)
             }
             val alias = it.IDENT_LOWER_CASE().getOrNull(0)?.token?.content ?: name
             RuleVariant(alias, name, items)
@@ -89,35 +89,35 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
         ctx.grammarBuilder.add(rule = rule)
     }
 
-    override fun visitRuleItem(node: KanonicNode.RuleItemNode, ctx: Context): SymbolReference {
-        return super.visitRuleItem(node, ctx) as SymbolReference
+    override fun visitItem(node: KanonicNode.ItemNode, ctx: Context): SymbolReference {
+        return super.visitItem(node, ctx) as SymbolReference
     }
 
-    override fun visitItemToken(node: KanonicNode.RuleItemNode.ItemTokenNode, ctx: Context): TerminalReference {
+    override fun visitItemToken(node: KanonicNode.ItemNode.ItemTokenNode, ctx: Context): TerminalReference {
         val name = node.IDENT_UPPER_CASE()[0].token.content
         val index = ctx.grammarBuilder.tokens.find { it.name == name }?.index ?: error("Couldn't find token reference: $name")
         return TerminalReference(index)
     }
 
-    override fun visitItemRule(node: KanonicNode.RuleItemNode.ItemRuleNode, ctx: Context): RuleReference {
+    override fun visitItemRule(node: KanonicNode.ItemNode.ItemRuleNode, ctx: Context): RuleReference {
         val name = node.IDENT_LOWER_CASE()[0].token.content
         return RuleReference(name)
     }
 
-    override fun visitItemGroup(node: KanonicNode.RuleItemNode.ItemGroupNode, ctx: Context): SymbolReference {
+    override fun visitItemGroup(node: KanonicNode.ItemNode.ItemGroupNode, ctx: Context): SymbolReference {
         val name = getGeneratedRuleName(ctx)
-        val items = node.ruleItem().map { visitRuleItem(it, ctx) }
+        val items = node.item().map { visitItem(it, ctx) }
         val variant = RuleVariant(name, name, items)
         val rule = Rule(name, listOf(variant), true)
         ctx.grammarBuilder.add(rule)
         return RuleReference(name)
     }
 
-    override fun visitItemFlagged(node: KanonicNode.RuleItemNode.ItemFlaggedNode, ctx: Context): SymbolReference {
+    override fun visitItemFlagged(node: KanonicNode.ItemNode.ItemFlaggedNode, ctx: Context): SymbolReference {
         val name = getGeneratedRuleName(ctx)
         val variantEmptyName = getGeneratedRuleName(ctx)
         val variantName = getGeneratedRuleName(ctx)
-        val nodeRef = visitRuleItem(node.ruleItem()[0], ctx)
+        val nodeRef = visitItem(node.item()[0], ctx)
         val variantItems1 = when (node.itemFlag()[0]) {
             is KanonicNode.ItemFlagNode.ItemFlagQuestionNode,
             is KanonicNode.ItemFlagNode.ItemFlagAsteriskNode -> listOf(TerminalReference(TokenLiteral.ReservedTypes.EPSILON))

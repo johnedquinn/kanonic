@@ -30,10 +30,12 @@ internal object KanonicGrammar {
     private const val file = "file"
     private const val config = "config"
     private const val configDef = "config_def"
-    private const val tokenDef = "token_def"
-    private const val ruleDef = "rule_def"
-    private const val ruleItem = "rule_item"
-    private const val ruleVariant = "rule_variant"
+    private const val token = "token"
+    private const val rule = "rule"
+    private const val item = "item"
+    private const val variant = "variant"
+    private const val text = "text"
+    private const val alternative = "alternative"
 
     // GENERATED RULE NAMES
     private const val configDefs = "_0"
@@ -41,7 +43,7 @@ internal object KanonicGrammar {
     private const val ruleItems = "_2"
     private const val ruleVariants = "_3"
 
-    public val grammar = buildGrammar("Kanonic", "file") {
+    public val grammar = buildGrammar("Kanonic", file) {
         packageName("io.johnedquinn.kanonic.syntax.generated")
         tokens {
             // Constants
@@ -69,29 +71,29 @@ internal object KanonicGrammar {
         // file
         // : config ( token | rule )+ EOF
         // ;
-        file eq buildRule(this, file) {
-            "root" eq config - "tokensOrRules"
+        +buildRule(file) {
+            file eq config - "tokensOrRules"
         }
 
         // config
         // : IDENT_CAMEL_CASE COLON BRACE_LEFT configDef* BRACE_RIGHT COLON_SEMI
         // ;
-        config eq buildRule(this, config) {
-            "config" eq IDENT_LOWER_CASE - COLON - BRACE_LEFT - configDefs - BRACE_RIGHT - COLON_SEMI
+        +buildRule(config) {
+            config eq IDENT_LOWER_CASE - COLON - BRACE_LEFT - configDefs - BRACE_RIGHT - COLON_SEMI
         }
 
         // config_def
         // : IDENT_CAMEL_CASE COLON text COLON_SEMI
         // ;
-        configDef eq buildRule(this, configDef) {
-            "config_definition" eq IDENT_LOWER_CASE - COLON - "text" - COLON_SEMI
+        +buildRule(configDef) {
+            configDef eq IDENT_LOWER_CASE - COLON - "text" - COLON_SEMI
         }
 
         // text
         // : (IDENT_CAMEL_CASE | IDENT_LOWER_CASE | LITERAL_STRING)
         // ;
-        "text" eq buildRule(this, "text") {
-            "text" eq "text_hidden"
+        +buildRule(text) {
+            text eq "text_hidden"
         }
 
         "text_hidden" eq buildGeneratedRule(this, "text_hidden") {
@@ -103,8 +105,8 @@ internal object KanonicGrammar {
         // token
         // : IDENT_UPPER_CASE COLON LITERAL_STRING (DASH DASH CARROT_RIGHT IDENT_LOWER_CASE)? COLON_SEMI
         // ;
-        tokenDef eq buildRule(this, tokenDef) {
-            "token_def" eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - "optional_channel" - COLON_SEMI
+        +buildRule(token) {
+            token eq IDENT_UPPER_CASE - COLON - LITERAL_STRING - "optional_channel" - COLON_SEMI
         }
 
         +generateRule("optional_channel") {
@@ -115,12 +117,12 @@ internal object KanonicGrammar {
         // rule
         // : IDENT_CAMEL_CASE COLON variant (LINE_VERTICAL variant)* COLON_SEMI
         // ;
-        ruleDef eq buildRule(this, ruleDef) {
-            ruleDef eq IDENT_LOWER_CASE - COLON - ruleVariant - ruleVariants - COLON_SEMI
+        +buildRule(rule) {
+            rule eq IDENT_LOWER_CASE - COLON - variant - ruleVariants - COLON_SEMI
         }
 
-        +buildRule("alternative") {
-            "alternative" eq LINE_VERTICAL - ruleVariant
+        +buildRule(alternative) {
+            alternative eq LINE_VERTICAL - variant
         }
 
         // GENERATED
@@ -133,20 +135,20 @@ internal object KanonicGrammar {
         // variant
         // : item+ (DASH DASH CARROT_RIGHT IDENT_CAMEL_CASE)?
         // ;
-        ruleVariant eq buildRule(this, ruleVariant) {
-            "variant" eq ruleItems - "optional_alias"
+        +buildRule(variant) {
+            variant eq ruleItems - "optional_alias"
         }
 
         // GENERATED
         // ruleItems: ruleItem+
-        ruleItems eq buildGeneratedRule(this, ruleItems) {
-            "SingleRule" eq ruleItem
-            "MultipleRules" eq ruleItems - ruleItem
+        +generateRule(ruleItems) {
+            "SingleRule" eq item
+            "MultipleRules" eq ruleItems - item
         }
 
         // GENERATED
         // optional_alias : (DASH DASH CARROT_RIGHT IDENT_CAMEL_CASE)?
-        "optional_alias" eq buildGeneratedRule(this, "optional_alias") {
+        +generateRule("optional_alias") {
             "optional_alias" eq DASH - DASH - CARROT_RIGHT - IDENT_LOWER_CASE
             "optional_alias" eq EPSILON
         }
@@ -157,11 +159,11 @@ internal object KanonicGrammar {
         // | IDENT_UPPER_CASE                                         --> item_token
         // | item item_flag                                           --> item_flagged
         // ;
-        ruleItem eq buildRule(this, ruleItem) {
+        +buildRule(item) {
             "item_group" eq PAREN_LEFT - ruleItems - "appended_items" - PAREN_RIGHT
             "item_rule" eq IDENT_LOWER_CASE
             "item_token" eq IDENT_UPPER_CASE
-            "item_flagged" eq ruleItem - "item_flag"
+            "item_flagged" eq item - "item_flag"
         }
 
         // item_flag
@@ -192,7 +194,7 @@ internal object KanonicGrammar {
         //
         //
 
-        configDefs eq buildGeneratedRule(this, configDefs) {
+        +generateRule(configDefs) {
             "EmptyConfigDefinition" eq EPSILON
             "MultipleConfigDefinitions" eq configDefs - configDef
         }
@@ -203,9 +205,9 @@ internal object KanonicGrammar {
         }
 
         // EXPRESSIONS
-        tokenOrRule eq buildGeneratedRule(this, tokenOrRule) {
-            "TokenAdded" eq tokenDef
-            "RuleAdded" eq ruleDef
+        +generateRule(tokenOrRule) {
+            "TokenAdded" eq token
+            "RuleAdded" eq rule
         }
     }
 }
