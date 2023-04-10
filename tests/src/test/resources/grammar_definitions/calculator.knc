@@ -11,9 +11,15 @@ root
     ;
 
 expr
-    : expr PLUS expr --> expr_plus
-    | expr MINUS expr --> expr_minus
-    | atom --> expr_fall
+    : lhs=expr PLUS rhs=math_op --> expr_plus
+    | lhs=expr MINUS rhs=math_op --> expr_minus
+    | math_op --> expr_fall
+    ;
+
+math_op
+    : math_op FLASH_FORWARD atom --> expr_div
+    | math_op ASTERISK atom      --> expr_mult
+    | atom                       --> expr_atom
     ;
 
 atom

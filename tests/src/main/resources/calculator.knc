@@ -30,10 +30,16 @@ root
     ;
 
 expr
-  : expr PLUS atomic --> expr_plus
-  | expr MINUS atomic --> expr_minus
-  | atomic --> expr_atomic
+  : expr PLUS math_op --> expr_plus
+  | expr MINUS math_op --> expr_minus
+  | math_op --> expr_atomic
   ;
+
+math_op
+    : math_op SLASH_FORWARD atomic --> expr_div
+    | math_op ASTERISK atomic      --> expr_mult
+    | atomic                       --> expr_atom
+    ;
 
 atomic
   : INTEGER --> int

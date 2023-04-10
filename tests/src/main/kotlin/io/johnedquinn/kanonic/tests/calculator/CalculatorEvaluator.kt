@@ -11,11 +11,19 @@ object CalculatorEvaluator : CalculatorBaseVisitor<Int, Unit>() {
     }
 
     override fun visitExprPlus(node: CalculatorNode.ExprNode.ExprPlusNode, ctx: Unit): Int {
-        return visitExpr(node.expr()[0], ctx) + visitAtomic(node.atomic()[0], ctx)
+        return visitExpr(node.expr()[0], ctx) + visitMathOp(node.mathOp()[0], ctx)
     }
 
     override fun visitExprMinus(node: CalculatorNode.ExprNode.ExprMinusNode, ctx: Unit): Int {
-        return visitExpr(node.expr()[0], ctx) - visitAtomic(node.atomic()[0], ctx)
+        return visitExpr(node.expr()[0], ctx) - visitMathOp(node.mathOp()[0], ctx)
+    }
+
+    override fun visitExprMult(node: CalculatorNode.MathOpNode.ExprMultNode, ctx: Unit): Int {
+        return visitMathOp(node.mathOp()[0], ctx) * visitAtomic(node.atomic()[0], ctx)
+    }
+
+    override fun visitExprDiv(node: CalculatorNode.MathOpNode.ExprDivNode, ctx: Unit): Int {
+        return visitMathOp(node.mathOp()[0], ctx) / visitAtomic(node.atomic()[0], ctx)
     }
 
     override fun visitTerminal(node: TerminalNode, ctx: Unit): Int {

@@ -17,8 +17,26 @@ class CalculatorTests {
     }
 
     @Test
+    public fun mult() {
+        val result = CalculatorEvaluator.evaluate("2 * 3")
+        assertEquals(6, result)
+    }
+
+    @Test
+    public fun div() {
+        val result = CalculatorEvaluator.evaluate("2 / 3")
+        assertEquals(0, result)
+    }
+
+    @Test
     public fun minus() {
         val result = CalculatorEvaluator.evaluate("3 - 4")
         assertEquals(-1, result)
+    }
+
+    @Test
+    public fun complex() {
+        val result = CalculatorEvaluator.evaluate("2 * 3 + 1 + 5 * 7")
+        assertEquals(42, result)
     }
 }
