@@ -123,8 +123,9 @@ internal object MetadataGenerator {
                         )
                     }
                     funSpec.addStatement(
-                        "add(NodeCreator·{·state,·children,·parent·->·%T(state,·children,·parent)·})",
-                        ruleSpec
+                        "add(NodeCreator·{·state,·children,·parent,·alias·->·%T(state,·children,·parent,·\"%L\")·})",
+                        ruleSpec,
+                        rule.alias ?: "null"
                     )
                 }
             }
@@ -140,8 +141,9 @@ internal object MetadataGenerator {
             func.addParameter("state", Int::class)
             func.addParameter("children", ClassNames.LIST_NODE)
             func.addParameter("parent", Node::class.asTypeName().copy(nullable = true))
+            func.addParameter("alias", String::class.asTypeName().copy(nullable = true))
             func.addStatement("val nodeCreator = nodeLambdaList[index]")
-            func.addStatement("return nodeCreator.create(state, children, parent)")
+            func.addStatement("return nodeCreator.create(state, children, parent, alias)")
             return func.build()
         }
     }

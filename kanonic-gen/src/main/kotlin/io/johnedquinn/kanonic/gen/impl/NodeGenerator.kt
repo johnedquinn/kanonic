@@ -45,6 +45,7 @@ internal object NodeGenerator {
             type.addSuperclassConstructorParameter(CodeBlock.of("state"))
             type.addSuperclassConstructorParameter(CodeBlock.of("children"))
             type.addSuperclassConstructorParameter(CodeBlock.of("parent"))
+            type.addSuperclassConstructorParameter(CodeBlock.of("alias"))
             type.primaryConstructor(createPrimaryConstructor())
 
             // Add Variant Definitions
@@ -79,6 +80,7 @@ internal object NodeGenerator {
                         it.originalName == variant.originalName
                     } ?: error("Couldn't find variant ${variant.originalName}")
                     variantSpec.addChildrenFunctions(variantSpecification, spec)
+                    variantSpec.addAliasFunctions(variantSpecification, spec)
                     variantSpec.addApplyMethod(spec, variantSpecification)
                     variantSpec.addPrimaryConstructor()
                     variantSpec.build()
@@ -102,6 +104,29 @@ internal object NodeGenerator {
                     // 0 -> this.addChildrenFunctionSingle(entry.key, grammar, spec)
                     0 -> this.addChildrenFunctionMultiple(entry.key, spec)
                     else -> this.addChildrenFunctionMultiple(entry.key, spec)
+                }
+            }
+        }
+
+        // TODO: Clean this up and make alias an int
+        private fun TypeSpec.Builder.addAliasFunctions(variant: VariantSpec, spec: GrammarSpec) {
+            variant.items.forEach { item ->
+                val name = getName(item, spec)
+                spec.rules.firstOrNull { it.name == name }?.let {
+                    println("Found item: ${it.name} with alias: ${it.alias}")
+                    // Should always have a single child
+                    val aliasedItem = it.variants.getOrNull(0)?.items?.getOrNull(0)
+                        ?: error("Couldn't grab aliased item")
+                    val type = when (aliasedItem) {
+                        is TerminalReference -> ClassNames.TERMINAL_NODE
+                        is RuleReference -> spec.rules.find { it.name == aliasedItem.name }!!.className
+                    }
+                    if (it.alias != null) {
+                        val funBuilder = FunSpec.builder(it.alias)
+                        funBuilder.returns(type)
+                        funBuilder.addStatement("return this.children.filter { it.alias == \"%L\" }.first() as %L", it.alias, type)
+                        this.addFunction(funBuilder.build())
+                    }
                 }
             }
         }
@@ -171,6 +196,7 @@ internal object NodeGenerator {
             .addParameter("state", Int::class)
             .addParameter("children", ClassNames.LIST_NODE)
             .addParameter("parent", Node::class.asTypeName().copy(nullable = true))
+            .addParameter("alias", String::class.asTypeName().copy(nullable = true))
             .build()
 
         private fun TypeSpec.Builder.addPrimaryConstructor() = this.apply {
@@ -189,9 +215,17 @@ internal object NodeGenerator {
                     KModifier.OVERRIDE
                 ).mutable(true).initializer("parent").build()
             )
+            this.addProperty(
+                PropertySpec.builder(
+                    "alias",
+                    String::class.asTypeName().copy(nullable = true),
+                    KModifier.OVERRIDE
+                ).mutable(true).initializer("alias").build()
+            )
             this.addSuperclassConstructorParameter(CodeBlock.of("state"))
             this.addSuperclassConstructorParameter(CodeBlock.of("children"))
             this.addSuperclassConstructorParameter(CodeBlock.of("parent"))
+            this.addSuperclassConstructorParameter(CodeBlock.of("alias"))
         }
 
         private fun TypeSpec.Builder.addToString() = this.apply {
@@ -199,10 +233,11 @@ internal object NodeGenerator {
                 FunSpec.builder("toString")
                     .addCode(
                         CodeBlock.of(
-                            "return \"\"\"%L(state: %L, children: %L)\"\"\"",
+                            "return \"\"\"%L(state: %L, children: %L, alias: %L)\"\"\"",
                             "\${this::class.simpleName}",
                             "\$state",
                             "\$children",
+                            "\$alias",
                         )
                     )
                     .returns(String::class)

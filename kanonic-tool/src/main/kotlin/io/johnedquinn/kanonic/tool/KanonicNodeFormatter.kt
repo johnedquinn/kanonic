@@ -39,7 +39,7 @@ object KanonicNodeFormatter : KanonicBaseVisitor<Unit, KanonicNodeFormatter.Cont
     }
 
     override fun visitTerminal(node: TerminalNode, ctx: Context) {
-        val content = "${getLead(ctx.level)}TOKEN: ${node.token.content}"
+        val content = "${getLead(ctx.level)}TOKEN: ${node.token.content}, alias: ${node.alias}"
         ctx.builder.appendLine(content)
     }
 
@@ -56,7 +56,7 @@ object KanonicNodeFormatter : KanonicBaseVisitor<Unit, KanonicNodeFormatter.Cont
         // Build Current Level String
         val name = when (input) {
             null -> "null"
-            is TerminalNode -> "Token: \"${input.token}\""
+            is TerminalNode -> "Token: \"${input.token}\", alias: ${input.alias}"
             else -> input::class.simpleName.toString()
         }
         append(getLead(level, levels, isLast))

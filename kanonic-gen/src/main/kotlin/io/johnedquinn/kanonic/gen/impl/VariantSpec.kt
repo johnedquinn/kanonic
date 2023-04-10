@@ -10,5 +10,6 @@ internal class VariantSpec(
     val items: List<SymbolReference>,
     val implicitItems: List<SymbolReference>,
     val className: ClassName,
-    val generated: Boolean
+    val generated: Boolean,
+    val alias: String?
 )

@@ -28,7 +28,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
     )
 
     override fun visitConfigDef(node: KanonicNode.ConfigDefNode.ConfigDefNode, ctx: Context) {
-        val lhs = node.IDENT_LOWER_CASE()[0].token.content
+        val lhs = node.config_key().token.content
         val rhs = visitText(node.text()[0], ctx)
         when (lhs.lowercase()) {
             "name" -> ctx.grammarBuilder.name = rhs

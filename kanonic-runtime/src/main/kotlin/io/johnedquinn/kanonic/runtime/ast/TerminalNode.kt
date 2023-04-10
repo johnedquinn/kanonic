@@ -5,8 +5,9 @@ import io.johnedquinn.kanonic.runtime.parse.TokenLiteral
 public data class TerminalNode(
     override val state: Int,
     override var parent: Node?,
-    val token: TokenLiteral
-) : Node(state, emptyList(), parent) {
+    val token: TokenLiteral,
+    override var alias: String?
+) : Node(state, emptyList(), parent, alias) {
     override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R {
         return visitor.visitTerminal(this, ctx)
     }

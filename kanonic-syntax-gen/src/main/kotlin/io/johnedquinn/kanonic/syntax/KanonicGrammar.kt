@@ -83,10 +83,14 @@ internal object KanonicGrammar {
         }
 
         // config_def
-        // : IDENT_CAMEL_CASE COLON text COLON_SEMI
+        // : config_key=IDENT_CAMEL_CASE COLON text COLON_SEMI
         // ;
         +buildRule(configDef) {
-            configDef eq IDENT_LOWER_CASE - COLON - "text" - COLON_SEMI
+            configDef eq "config_key" - COLON - "text" - COLON_SEMI
+        }
+
+        +generateRule("config_key", "config_key") {
+            "config_key" eq IDENT_LOWER_CASE
         }
 
         // text

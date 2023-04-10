@@ -2,7 +2,8 @@ package io.johnedquinn.kanonic.runtime.grammar
 
 class RuleBuilder(var grammarBuilder: GrammarBuilder, var ruleName: String, var generated: Boolean = false) {
     private val variants = mutableListOf<RuleVariant>()
-    public fun build() = Rule(ruleName, variants, generated)
+    var alias: String? = null
+    public fun build() = Rule(ruleName, variants, generated, alias)
 
     companion object {
         @JvmStatic
@@ -13,8 +14,9 @@ class RuleBuilder(var grammarBuilder: GrammarBuilder, var ruleName: String, var 
         }
 
         @JvmStatic
-        public fun buildGeneratedRule(grammarBuilder: GrammarBuilder, name: String, f: RuleBuilder.() -> Unit): Rule {
+        public fun buildGeneratedRule(grammarBuilder: GrammarBuilder, name: String, alias: String? = null, f: RuleBuilder.() -> Unit): Rule {
             val ruleBuilder = RuleBuilder(grammarBuilder, name, true)
+            ruleBuilder.alias = alias
             ruleBuilder.f()
             return ruleBuilder.build()
         }

@@ -37,7 +37,7 @@ class GrammarBuilder(var name: String, var start: String) {
 
     fun buildRule(name: String, f: RuleBuilder.() -> Unit) = RuleBuilder.buildRule(this, name, f)
 
-    fun generateRule(name: String, f: RuleBuilder.() -> Unit) = RuleBuilder.buildGeneratedRule(this, name, f)
+    fun generateRule(name: String, alias: String? = null, f: RuleBuilder.() -> Unit) = RuleBuilder.buildGeneratedRule(this, name, alias, f)
 
     infix fun String.eq(other: Rule): Rule {
         this@GrammarBuilder.rules.add(other)

@@ -3,6 +3,7 @@ package io.johnedquinn.kanonic.runtime.parse.impl
 import io.johnedquinn.kanonic.runtime.ast.GeneratedNode
 import io.johnedquinn.kanonic.runtime.ast.Node
 import io.johnedquinn.kanonic.runtime.ast.TerminalNode
+import io.johnedquinn.kanonic.runtime.grammar.RuleVariant
 import io.johnedquinn.kanonic.runtime.parse.Action
 import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
 import io.johnedquinn.kanonic.runtime.parse.KanonicParser
@@ -38,6 +39,10 @@ internal class KanonicParserDefault(
     private val grammar = info.grammar
     private val tokens = grammar.tokens
     private val variants = grammar.rules.flatMap { it.variants }
+    private val variantAlias = variants.associate {
+        val parent = grammar.rules.find { rule -> it.parentName == rule.name }
+        "${it.parentName}++${it.name}" to parent?.alias
+    }
     private val ruleNameMap = grammar.rules.mapIndexed { index, rule -> index to rule }.associate { it.second.name to it.first }
     private val table: ParseTable = ParseTableDeserializer.deserialize(info.getTable(), grammar.tokens.size)
 
@@ -76,6 +81,8 @@ internal class KanonicParserDefault(
         }
     }
 
+    private fun getAlias(variant: RuleVariant): String? = variantAlias["${variant.parentName}++${variant.name}"]
+
     private fun parse(tokens: List<TokenLiteral>): Node {
         // Add first state
         val stack = Stack<Int>().also { it.push(0) }
@@ -102,7 +109,7 @@ internal class KanonicParserDefault(
                     val childrenReversed = toAddNodes.toList().flatMap {
                         getChildren(it)
                     }
-                    return info.createRuleNode(0, currentState, childrenReversed, null).also { root ->
+                    return info.createRuleNode(0, currentState, childrenReversed, null, null).also { root ->
                         root.children.forEach { it.parent = root }
                     }
                 }
@@ -146,7 +153,7 @@ internal class KanonicParserDefault(
     private fun shift(action: Action.Shift, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int, token: TokenLiteral) {
         stack.push(action.state)
         toAddNodes.push(
-            TerminalNode(currentState, null, token)
+            TerminalNode(currentState, null, token, null)
         )
     }
 
@@ -157,6 +164,7 @@ internal class KanonicParserDefault(
     private fun reduce(action: Action.Reduce, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int) {
         val rule = variants[action.rule]
         val children = mutableListOf<Node>()
+        val alias = getAlias(rule)
         repeat(rule.items.size) {
             stack.pop()
             val node = toAddNodes.pop()
@@ -164,7 +172,7 @@ internal class KanonicParserDefault(
         }
         val childrenReversed = children.reversed()
         Logger.debug("REDUCE USING ACTION $action")
-        val newNode = info.createRuleNode(action.rule, currentState, childrenReversed, null)
+        val newNode = info.createRuleNode(action.rule, currentState, childrenReversed, null, alias)
         Logger.debug("FOUND NODE: $newNode")
         toAddNodes.push(newNode)
         val topState = stack.peek()
@@ -178,6 +186,10 @@ internal class KanonicParserDefault(
             it is TerminalNode && it.token.type == TokenLiteral.ReservedTypes.EPSILON
         }.flatMap {
             getChildren(it)
+        }.also {
+            if (node.alias != null) {
+                it.map { child -> child.alias = node.alias }
+            }
         }
         else -> listOf(node)
     }

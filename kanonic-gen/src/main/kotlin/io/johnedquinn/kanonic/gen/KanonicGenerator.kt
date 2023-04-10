@@ -2,20 +2,20 @@ package io.johnedquinn.kanonic.gen
 
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
+import io.johnedquinn.kanonic.gen.impl.AutomatonGenerator
+import io.johnedquinn.kanonic.gen.impl.BaseVisitorGenerator
+import io.johnedquinn.kanonic.gen.impl.GrammarSpec
+import io.johnedquinn.kanonic.gen.impl.GrammarUtils
+import io.johnedquinn.kanonic.gen.impl.MetadataGenerator
+import io.johnedquinn.kanonic.gen.impl.NodeGenerator
+import io.johnedquinn.kanonic.gen.impl.RuleSpec
+import io.johnedquinn.kanonic.gen.impl.TableGenerator
+import io.johnedquinn.kanonic.gen.impl.VariantSpec
+import io.johnedquinn.kanonic.gen.impl.VisitorGenerator
 import io.johnedquinn.kanonic.runtime.grammar.Grammar
 import io.johnedquinn.kanonic.runtime.grammar.RuleReference
 import io.johnedquinn.kanonic.runtime.grammar.SymbolReference
 import io.johnedquinn.kanonic.runtime.grammar.TerminalReference
-import io.johnedquinn.kanonic.gen.impl.BaseVisitorGenerator
-import io.johnedquinn.kanonic.gen.impl.GrammarUtils
-import io.johnedquinn.kanonic.gen.impl.MetadataGenerator
-import io.johnedquinn.kanonic.gen.impl.NodeGenerator
-import io.johnedquinn.kanonic.gen.impl.VisitorGenerator
-import io.johnedquinn.kanonic.gen.impl.AutomatonGenerator
-import io.johnedquinn.kanonic.gen.impl.GrammarSpec
-import io.johnedquinn.kanonic.gen.impl.RuleSpec
-import io.johnedquinn.kanonic.gen.impl.TableGenerator
-import io.johnedquinn.kanonic.gen.impl.VariantSpec
 import io.johnedquinn.kanonic.runtime.parse.TokenLiteral
 
 public object KanonicGenerator {
@@ -83,7 +83,8 @@ public object KanonicGenerator {
                     variant.items,
                     implicitItems,
                     className,
-                    rule.generated
+                    rule.generated,
+                    rule.alias
                 )
             }
             RuleSpec(
@@ -92,7 +93,8 @@ public object KanonicGenerator {
                 "visit${GrammarUtils.getNormalizedName(rule.name)}",
                 variants,
                 ruleClassName,
-                rule.generated
+                rule.generated,
+                rule.alias
             )
         }
         val visitorClassName = ClassName(this.options.packageName!!, visitorName)
