@@ -29,8 +29,6 @@ BRACE_RIGHT: "\}";
 CARROT_RIGHT: ">";
 COLON: ":";
 COLON_SEMI: ";";
-CURLY_BRACE_LEFT: "\{";
-CURLY_BRACE_RIGHT: "\}";
 DASH: "-";
 LINE_VERTICAL: "\|";
 PAREN_LEFT: "\(";

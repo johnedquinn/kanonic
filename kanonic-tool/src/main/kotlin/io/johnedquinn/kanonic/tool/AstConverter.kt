@@ -28,7 +28,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
     )
 
     override fun visitConfigDefinition(node: KanonicNode.ConfigDefNode.ConfigDefinitionNode, ctx: Context) {
-        val lhs = node.IDENT_CAMEL_CASE()[0].token.content
+        val lhs = node.IDENT_LOWER_CASE()[0].token.content
         val rhs = visitText(node.text()[0], ctx)
         when (lhs.lowercase()) {
             "name" -> ctx.grammarBuilder.name = rhs
@@ -45,7 +45,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
     }
 
     override fun visitText(node: KanonicNode.TextNode.TextNode, ctx: Context): String {
-        return node.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content
+        return node.IDENT_LOWER_CASE().getOrNull(0)?.token?.content
             ?: node.IDENT_UPPER_CASE().getOrNull(0)?.token?.content
             ?: node.LITERAL_STRING()[0].token.content.let {
                 it.substring(1, it.lastIndex)
@@ -55,7 +55,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
     override fun visitTokenDef(node: KanonicNode.TokenDefNode.TokenDefNode, ctx: Context) {
         val name = node.IDENT_UPPER_CASE()[0].token.content
         val definition = node.LITERAL_STRING()[0].token.content.let { it.substring(1, it.lastIndex) }
-        val channel = node.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content ?: "main"
+        val channel = node.IDENT_LOWER_CASE().getOrNull(0)?.token?.content ?: "main"
         val hidden = when (channel.lowercase()) {
             "hidden" -> true
             "main" -> false
@@ -65,11 +65,11 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
     }
 
     override fun visitRuleDef(node: KanonicNode.RuleDefNode.RuleDefNode, ctx: Context) {
-        val name = node.IDENT_CAMEL_CASE()[0].token.content
+        val name = node.IDENT_LOWER_CASE()[0].token.content
         if (node.ruleVariant().size > 1) {
             val count = node.ruleVariant().any {
                 it as KanonicNode.RuleVariantNode.VariantNode
-                it.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content == null
+                it.IDENT_LOWER_CASE().getOrNull(0)?.token?.content == null
             }
             if (count) {
                 throw RuntimeException("Some variants are missing aliases for $name")
@@ -82,7 +82,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
             val items = it.ruleItem().map { item ->
                 visitRuleItem(item, ctx)
             }
-            val alias = it.IDENT_CAMEL_CASE().getOrNull(0)?.token?.content ?: name
+            val alias = it.IDENT_LOWER_CASE().getOrNull(0)?.token?.content ?: name
             RuleVariant(alias, name, items)
         }
         val rule = Rule(name, items, false)
@@ -100,7 +100,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
     }
 
     override fun visitItemRule(node: KanonicNode.RuleItemNode.ItemRuleNode, ctx: Context): RuleReference {
-        val name = node.IDENT_CAMEL_CASE()[0].token.content
+        val name = node.IDENT_LOWER_CASE()[0].token.content
         return RuleReference(name)
     }
 

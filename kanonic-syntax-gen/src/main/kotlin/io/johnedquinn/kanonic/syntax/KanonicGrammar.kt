@@ -8,12 +8,12 @@ internal object KanonicGrammar {
 
     // TOKEN NAMES
     private const val IDENT_UPPER_CASE = "IDENT_UPPER_CASE"
-    private const val IDENT_LOWER_CASE = "IDENT_CAMEL_CASE"
+    private const val IDENT_LOWER_CASE = "IDENT_LOWER_CASE"
     private const val EPSILON = "EPSILON"
     private const val COLON = "COLON"
     private const val COLON_SEMI = "COLON_SEMI"
-    private const val CURLY_BRACE_LEFT = "CURLY_BRACE_LEFT"
-    private const val CURLY_BRACE_RIGHT = "CURLY_BRACE_RIGHT"
+    private const val BRACE_LEFT = "BRACE_LEFT"
+    private const val BRACE_RIGHT = "BRACE_RIGHT"
     private const val LINE_VERTICAL = "LINE_VERTICAL"
     private const val LITERAL_STRING = "LITERAL_STRING"
     private const val DASH = "DASH"
@@ -44,21 +44,24 @@ internal object KanonicGrammar {
     public val grammar = buildGrammar("Kanonic", "file") {
         packageName("io.johnedquinn.kanonic.syntax.generated")
         tokens {
-            PAREN_LEFT - "\\("
-            PAREN_RIGHT - "\\)"
-            QUESTION_MARK - "\\?"
+            // Constants
             ASTERISK - "\\*"
-            PLUS - "\\+"
-            IDENT_UPPER_CASE - "[A-Z][A-Z_]*"
-            IDENT_LOWER_CASE - "[a-z][a-z_]*"
+            BRACE_LEFT - "\\{"
+            BRACE_RIGHT - "\\}"
+            CARROT_RIGHT - ">"
             COLON - ":"
             COLON_SEMI - ";"
-            CURLY_BRACE_LEFT - "\\{"
-            CURLY_BRACE_RIGHT - "\\}"
-            LINE_VERTICAL - "\\|"
-            LITERAL_STRING - "\\\"([^\\\"\\\\]|\\\\.)*\\\""
             DASH - "-"
-            CARROT_RIGHT - ">"
+            LINE_VERTICAL - "\\|"
+            PAREN_LEFT - "\\("
+            PAREN_RIGHT - "\\)"
+            PLUS - "\\+"
+            QUESTION_MARK - "\\?"
+
+            // Identifiers
+            IDENT_UPPER_CASE - "[A-Z][A-Z_]*"
+            IDENT_LOWER_CASE - "[a-z][a-z_]*"
+            LITERAL_STRING - "\\\"([^\\\"\\\\]|\\\\.)*\\\""
             COMMENT_SINGLE - ("//[^\\r\\n]*?\\r?\\n?" channel "hidden")
             COMMENT_BLOCK - ("/\\*(?s).*?\\*/" channel "hidden")
         }
@@ -74,7 +77,7 @@ internal object KanonicGrammar {
         // : IDENT_CAMEL_CASE COLON BRACE_LEFT configDef* BRACE_RIGHT COLON_SEMI
         // ;
         config eq buildRule(this, config) {
-            "config" eq IDENT_LOWER_CASE - COLON - CURLY_BRACE_LEFT - configDefs - CURLY_BRACE_RIGHT - COLON_SEMI
+            "config" eq IDENT_LOWER_CASE - COLON - BRACE_LEFT - configDefs - BRACE_RIGHT - COLON_SEMI
         }
 
         // config_def
