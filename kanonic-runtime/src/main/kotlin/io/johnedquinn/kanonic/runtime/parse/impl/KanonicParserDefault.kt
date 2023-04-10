@@ -1,13 +1,13 @@
 package io.johnedquinn.kanonic.runtime.parse.impl
 
-import io.johnedquinn.kanonic.runtime.parse.ParseTable
 import io.johnedquinn.kanonic.runtime.ast.GeneratedNode
-import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
-import io.johnedquinn.kanonic.runtime.parse.KanonicParser
 import io.johnedquinn.kanonic.runtime.ast.Node
-import io.johnedquinn.kanonic.runtime.parse.ParserSpecification
 import io.johnedquinn.kanonic.runtime.ast.TerminalNode
 import io.johnedquinn.kanonic.runtime.parse.Action
+import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
+import io.johnedquinn.kanonic.runtime.parse.KanonicParser
+import io.johnedquinn.kanonic.runtime.parse.ParseTable
+import io.johnedquinn.kanonic.runtime.parse.ParserSpecification
 import io.johnedquinn.kanonic.runtime.parse.TokenLiteral
 import io.johnedquinn.kanonic.runtime.utils.Logger
 import java.util.Stack
@@ -36,6 +36,9 @@ internal class KanonicParserDefault(
 ) : KanonicParser {
 
     private val grammar = info.grammar
+    private val tokens = grammar.tokens
+    private val variants = grammar.rules.flatMap { it.variants }
+    private val ruleNameMap = grammar.rules.mapIndexed { index, rule -> index to rule }.associate { it.second.name to it.first }
     private val table: ParseTable = ParseTableDeserializer.deserialize(info.getTable(), grammar.tokens.size)
 
     /**
@@ -127,7 +130,7 @@ internal class KanonicParserDefault(
                         if (act != null) { possible.add(index) }
                     }
                     val tokenNames = possible.map { tokenInd ->
-                        grammar.tokens[tokenInd].name
+                        this.tokens[tokenInd].name
                     }
                     Logger.error("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
                     Logger.error("Received $token, but expected token type of: $tokenNames")
@@ -152,7 +155,7 @@ internal class KanonicParserDefault(
      * building nodes as the children of the reduction node.
      */
     private fun reduce(action: Action.Reduce, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int) {
-        val rule = grammar.rules.flatMap { it.variants }[action.rule]
+        val rule = variants[action.rule]
         val children = mutableListOf<Node>()
         repeat(rule.items.size) {
             stack.pop()
@@ -165,7 +168,7 @@ internal class KanonicParserDefault(
         Logger.debug("FOUND NODE: $newNode")
         toAddNodes.push(newNode)
         val topState = stack.peek()
-        val ruleIndex = grammar.rules.map { it.name }.indexOf(rule.parentName)
+        val ruleIndex = ruleNameMap[rule.parentName] ?: error("Could not find rule index of ${rule.parentName}")
         val goToState = table.goToTable[topState][ruleIndex] as Action.Shift
         stack.push(goToState.state)
     }
