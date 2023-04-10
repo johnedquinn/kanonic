@@ -43,7 +43,10 @@ internal class KanonicParserDefault(
      */
     override fun parse(input: String): Node {
         val tokens = lexer.tokenize(input)
-        Logger.debug("TOKENS: $tokens")
+        Logger.debug("TOKENs:")
+        tokens.forEach { token ->
+            Logger.debug(" - $token")
+        }
         return parse(tokens)
     }
 

@@ -42,8 +42,8 @@ IDENT_UPPER_CASE: "[A-Z][A-Z_]*";
 IDENT_LOWER_CASE: "[a-z][a-z_]*";
 LITERAL_STRING: "\"((\")|[^\"])*\"";
 
-COMMENT_SINGLE: "//[^\r\n]*?\r?\n?" --> "hidden";
-COMMENT_BLOCK - ("/\*(?s).*?\*/" --> "hidden";
+COMMENT_SINGLE: "//[^\r\n]*?\r?\n?" --> hidden;
+COMMENT_BLOCK: "/\*(?s).*?\*/" --> hidden;
 
 /**
  *

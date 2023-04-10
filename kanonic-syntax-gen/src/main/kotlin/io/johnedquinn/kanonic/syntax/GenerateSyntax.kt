@@ -21,6 +21,10 @@ internal class GenerateSyntax : Runnable {
 
     override fun run() {
         val grammar = KanonicGrammar.grammar
+        println("TOKEN DEFINITIONS")
+        grammar.tokens.forEach { token ->
+            println(" - $token")
+        }
         val files = KanonicGenerator.generate(grammar)
         files.forEach {
             it.writeTo(output)

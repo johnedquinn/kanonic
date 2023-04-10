@@ -56,7 +56,7 @@ internal object KanonicGrammar {
             CURLY_BRACE_LEFT - "\\{"
             CURLY_BRACE_RIGHT - "\\}"
             LINE_VERTICAL - "\\|"
-            LITERAL_STRING - "\"((\\\")|[^\"])*\""
+            LITERAL_STRING - "\\\"([^\\\"\\\\]|\\\\.)*\\\""
             DASH - "-"
             CARROT_RIGHT - ">"
             COMMENT_SINGLE - ("//[^\\r\\n]*?\\r?\\n?" channel "hidden")

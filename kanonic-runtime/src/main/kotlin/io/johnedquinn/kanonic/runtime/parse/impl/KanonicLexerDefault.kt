@@ -3,6 +3,7 @@ package io.johnedquinn.kanonic.runtime.parse.impl
 import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
 import io.johnedquinn.kanonic.runtime.grammar.TokenDefinition
 import io.johnedquinn.kanonic.runtime.parse.TokenLiteral
+import io.johnedquinn.kanonic.runtime.utils.Logger
 
 internal class KanonicLexerDefault(private val definitions: List<TokenDefinition>) : KanonicLexer {
     public override fun tokenize(input: String): List<TokenLiteral> {
@@ -20,6 +21,8 @@ internal class KanonicLexerDefault(private val definitions: List<TokenDefinition
             definitions.firstOrNull {
                 currentString.matches(it.def.toRegex())
             }?.let {
+                val regex = it.def.toRegex()
+                Logger.debug(" - Def: $${it.def} - Regex: $regex")
                 tokenStartIndex = currentIndex
                 while (currentString.matches(it.def.toRegex())) {
                     currentIndex++
