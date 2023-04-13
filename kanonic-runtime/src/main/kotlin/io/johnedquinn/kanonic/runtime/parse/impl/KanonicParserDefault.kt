@@ -153,7 +153,7 @@ internal class KanonicParserDefault(
     private fun shift(action: Action.Shift, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int, token: TokenLiteral) {
         stack.push(action.state)
         toAddNodes.push(
-            TerminalNode(currentState, null, token, null)
+            TerminalNode(currentState, null, token, token.type, null)
         )
     }
 

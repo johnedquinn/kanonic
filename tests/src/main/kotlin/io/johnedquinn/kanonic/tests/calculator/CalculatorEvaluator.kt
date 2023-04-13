@@ -2,28 +2,49 @@ package io.johnedquinn.kanonic.tests.calculator
 
 import io.johnedquinn.kanonic.runtime.ast.TerminalNode
 import io.johnedquinn.kanonic.runtime.parse.KanonicParser
+import kotlin.math.pow
 
 object CalculatorEvaluator : CalculatorBaseVisitor<Int, Unit>() {
+
     private val parser = KanonicParser.Builder.standard().withSpecification(CalculatorSpecification).build()
+
     public fun evaluate(input: String): Int {
         val ast = parser.parse(input)
         return visit(ast, Unit)
     }
 
     override fun visitExprPlus(node: CalculatorNode.ExprNode.ExprPlusNode, ctx: Unit): Int {
-        return visitExpr(node.expr()[0], ctx) + visitMathOp(node.mathOp()[0], ctx)
-    }
-
-    override fun visitExprMinus(node: CalculatorNode.ExprNode.ExprMinusNode, ctx: Unit): Int {
-        return visitExpr(node.expr()[0], ctx) - visitMathOp(node.mathOp()[0], ctx)
-    }
-
-    override fun visitExprMult(node: CalculatorNode.MathOpNode.ExprMultNode, ctx: Unit): Int {
-        return visitMathOp(node.mathOp()[0], ctx) * visitAtomic(node.atomic()[0], ctx)
+        // TODO: Add Tokens to Specification
+        val op = when (node.op().type) {
+            3 -> { a: Int, b: Int -> a + b }
+            4 -> { a: Int, b: Int -> a - b }
+            else -> error("Didn't understand op type: ${node.op().type}")
+        }
+        val lhs = visitExpr(node.lhs(), ctx)
+        val rhs = visitMathOp(node.rhs(), ctx)
+        return op(lhs, rhs)
     }
 
     override fun visitExprDiv(node: CalculatorNode.MathOpNode.ExprDivNode, ctx: Unit): Int {
-        return visitMathOp(node.mathOp()[0], ctx) / visitAtomic(node.atomic()[0], ctx)
+        // TODO: Add Tokens to Specification
+        val op = when (node.op().type) {
+            5 -> { a: Int, b: Int -> a * b }
+            6 -> { a: Int, b: Int -> a / b }
+            else -> error("Didn't understand op type: ${node.op().type}")
+        }
+        val lhs = visitMathOp(node.lhs(), ctx)
+        val rhs = visitMathOpSecond(node.rhs(), ctx)
+        return op(lhs, rhs)
+    }
+
+    override fun visitMathOpSecond(node: CalculatorNode.MathOpSecondNode.MathOpSecondNode, ctx: Unit): Int {
+        val lhs = visitMathOpSecond(node.lhs(), ctx)
+        val rhs = visitAtomic(node.rhs(), ctx)
+        return lhs.toDouble().pow(rhs.toDouble()).toInt()
+    }
+
+    override fun visitParen(node: CalculatorNode.AtomicNode.ParenNode, ctx: Unit): Int {
+        return visitExpr(node.exp(), ctx)
     }
 
     override fun visitTerminal(node: TerminalNode, ctx: Unit): Int {
@@ -41,7 +62,5 @@ object CalculatorEvaluator : CalculatorBaseVisitor<Int, Unit>() {
         return result
     }
 
-    override fun defaultReturn(node: CalculatorNode, ctx: Unit): Int {
-        return 0
-    }
+    override fun defaultReturn(node: CalculatorNode, ctx: Unit): Int = 0
 }

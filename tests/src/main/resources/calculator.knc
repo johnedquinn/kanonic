@@ -21,6 +21,9 @@ PLUS: "\+";
 MINUS: "-";
 ASTERISK: "\*";
 SLASH_FORWARD: "/";
+CARROT: "\^";
+PAREN_LEFT: "\(";
+PAREN_RIGHT: "\)";
 WS: "[\s]" --> hidden;
 
 /** RULES **/
@@ -30,17 +33,21 @@ root
     ;
 
 expr
-  : expr PLUS math_op --> expr_plus
-  | expr MINUS math_op --> expr_minus
-  | math_op --> expr_atomic
+  : @lhs=expr @op=(PLUS|MINUS) @rhs=math_op --> expr_plus
+  | math_op                                 --> expr_atomic
   ;
 
 math_op
-    : math_op SLASH_FORWARD atomic --> expr_div
-    | math_op ASTERISK atomic      --> expr_mult
-    | atomic                       --> expr_atom
+    : @lhs=math_op @op=(SLASH_FORWARD|ASTERISK) @rhs=math_op_second --> expr_div
+    | math_op_second                                        --> math_op_fallback
+    ;
+
+math_op_second
+    : @lhs=math_op_second CARROT @rhs=atomic --> math_op_second
+    | atomic                                       --> expr_atom
     ;
 
 atomic
   : INTEGER --> int
+  | PAREN_LEFT @exp=expr PAREN_RIGHT --> paren
   ;

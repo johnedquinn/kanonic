@@ -93,31 +93,85 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
         return super.visitItem(node, ctx) as SymbolReference
     }
 
-    override fun visitItemToken(node: KanonicNode.ItemNode.ItemTokenNode, ctx: Context): TerminalReference {
+    override fun visitItem(node: KanonicNode.ItemNode.ItemNode, ctx: Context): SymbolReference {
+        return super.visitItem(node, ctx) as SymbolReference
+    }
+
+    override fun visitItemAliased(node: KanonicNode.ItemNode.ItemAliasedNode, ctx: Context): SymbolReference {
+        val alias = node.IDENT_LOWER_CASE()[0].token.content
+        val baseItem = visitBaseItem(node.baseItem()[0], ctx)
+        val type = when (val base = node.baseItem()[0]) {
+            is KanonicNode.BaseItemNode.ItemGroupNode -> {
+                val baseChildClass = base.item()[0].getBaseItem()
+                val conformant = base.item().all {
+                    println("${it::class} ==? ${baseChildClass::class}")
+                    it.getBaseItem()::class == baseChildClass::class
+                }
+                when (conformant) {
+                    true -> baseItem
+                    false -> throw RuntimeException("Not all are equals")
+                }
+            }
+            is KanonicNode.BaseItemNode.ItemFlaggedNode,
+            is KanonicNode.BaseItemNode.ItemRuleNode,
+            is KanonicNode.BaseItemNode.ItemTokenNode -> baseItem
+        }
+        val generatedName = getGeneratedRuleName(ctx)
+        val newVariant = RuleVariant(alias, generatedName, listOf(type))
+        val newRule = Rule(generatedName, listOf(newVariant), true, alias = alias)
+        ctx.grammarBuilder.add(newRule)
+        return RuleReference(generatedName)
+    }
+
+    private fun KanonicNode.ItemNode.getBaseItem() = when (this) {
+        is KanonicNode.ItemNode.ItemNode -> this.baseItem()[0]
+        is KanonicNode.ItemNode.ItemAliasedNode -> this.baseItem()[0]
+    }
+
+    override fun visitItemToken(node: KanonicNode.BaseItemNode.ItemTokenNode, ctx: Context): TerminalReference {
         val name = node.IDENT_UPPER_CASE()[0].token.content
         val index = ctx.grammarBuilder.tokens.find { it.name == name }?.index ?: error("Couldn't find token reference: $name")
         return TerminalReference(index)
     }
 
-    override fun visitItemRule(node: KanonicNode.ItemNode.ItemRuleNode, ctx: Context): RuleReference {
+    override fun visitItemRule(node: KanonicNode.BaseItemNode.ItemRuleNode, ctx: Context): RuleReference {
         val name = node.IDENT_LOWER_CASE()[0].token.content
         return RuleReference(name)
     }
 
-    override fun visitItemGroup(node: KanonicNode.ItemNode.ItemGroupNode, ctx: Context): SymbolReference {
+    override fun visitItemGroup(node: KanonicNode.BaseItemNode.ItemGroupNode, ctx: Context): SymbolReference {
         val name = getGeneratedRuleName(ctx)
+        val appendedVariants = node.appendedItems().map {
+            val items = visitAppendedItems(it, ctx)
+            RuleVariant(name, name, items)
+        }
         val items = node.item().map { visitItem(it, ctx) }
         val variant = RuleVariant(name, name, items)
-        val rule = Rule(name, listOf(variant), true)
+        val rule = Rule(name, listOf(variant) + appendedVariants, true)
         ctx.grammarBuilder.add(rule)
         return RuleReference(name)
     }
 
-    override fun visitItemFlagged(node: KanonicNode.ItemNode.ItemFlaggedNode, ctx: Context): SymbolReference {
+    override fun visitAppendedItems(node: KanonicNode.AppendedItemsNode, ctx: Context): List<SymbolReference> {
+        return super.visitAppendedItems(node, ctx) as List<SymbolReference>
+    }
+
+    override fun visitAppendedItems_0(node: KanonicNode.AppendedItemsNode.AppendedItems_0Node, ctx: Context): List<SymbolReference> {
+        val items = node.item().map {
+            visitItem(it, ctx)
+        }
+        return items
+    }
+
+    override fun visitAppendedItems_1(node: KanonicNode.AppendedItemsNode.AppendedItems_1Node, ctx: Context): List<SymbolReference> {
+        return emptyList()
+    }
+
+    override fun visitItemFlagged(node: KanonicNode.BaseItemNode.ItemFlaggedNode, ctx: Context): SymbolReference {
         val name = getGeneratedRuleName(ctx)
         val variantEmptyName = getGeneratedRuleName(ctx)
         val variantName = getGeneratedRuleName(ctx)
-        val nodeRef = visitItem(node.item()[0], ctx)
+        val nodeRef = visitBaseItem(node.baseItem()[0], ctx)
         val variantItems1 = when (node.itemFlag()[0]) {
             is KanonicNode.ItemFlagNode.ItemFlagQuestionNode,
             is KanonicNode.ItemFlagNode.ItemFlagAsteriskNode -> listOf(TerminalReference(TokenLiteral.ReservedTypes.EPSILON))
@@ -134,7 +188,19 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
         return RuleReference(name)
     }
 
+    override fun visitBaseItem(node: KanonicNode.BaseItemNode, ctx: Context): SymbolReference {
+        return super.visitBaseItem(node, ctx) as SymbolReference
+    }
+
     override fun visitTerminal(node: TerminalNode, ctx: Context) { /** SKIP **/ }
+
+    override fun defaultVisit(node: KanonicNode, ctx: Context): Any {
+        var value: Any = Unit
+        for (child in node.children) {
+            value = child.accept(this, ctx)
+        }
+        return value
+    }
 
     override fun defaultReturn(node: KanonicNode, ctx: Context) { /** SKIP **/ }
 

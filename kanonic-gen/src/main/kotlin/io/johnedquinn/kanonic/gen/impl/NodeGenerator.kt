@@ -11,9 +11,11 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asTypeName
 import io.johnedquinn.kanonic.runtime.ast.Node
+import io.johnedquinn.kanonic.runtime.ast.TerminalNode
 import io.johnedquinn.kanonic.runtime.grammar.RuleReference
 import io.johnedquinn.kanonic.runtime.grammar.SymbolReference
 import io.johnedquinn.kanonic.runtime.grammar.TerminalReference
+import io.johnedquinn.kanonic.runtime.grammar.TokenDefinition
 
 internal object NodeGenerator {
 
@@ -119,7 +121,22 @@ internal object NodeGenerator {
                         ?: error("Couldn't grab aliased item")
                     val type = when (aliasedItem) {
                         is TerminalReference -> ClassNames.TERMINAL_NODE
-                        is RuleReference -> spec.rules.find { it.name == aliasedItem.name }!!.className
+                        is RuleReference -> {
+                            val rule = spec.rules.find { it.name == aliasedItem.name }!!
+                            if (rule.generated) {
+                                val items = rule.variants[0].items
+                                val allSame = rule.variants.all {
+                                    it.items == items
+                                }
+                                assert(allSame)
+                                rule.variants.forEach {
+                                    assert(it.items.size == 1)
+                                }
+                                items[0].findRule(spec)?.className ?: ClassNames.TERMINAL_NODE
+                            } else {
+                                rule.className
+                            }
+                        }
                     }
                     if (it.alias != null) {
                         val funBuilder = FunSpec.builder(it.alias)
@@ -129,6 +146,19 @@ internal object NodeGenerator {
                     }
                 }
             }
+        }
+
+        private fun SymbolReference.findRule(spec: GrammarSpec): RuleSpec? {
+            return spec.rules.find { it.name == this.name(spec) }
+        }
+
+        private fun SymbolReference.findTerminal(spec: GrammarSpec): TokenDefinition? {
+            return spec.tokens.find { it.name == this.name(spec) }
+        }
+
+        private fun SymbolReference.name(spec: GrammarSpec) = when (this) {
+            is RuleReference -> this.name
+            is TerminalReference -> spec.tokens.find { it.index == this.type }?.name ?: error("Couldn't find name")
         }
 
         private fun TypeSpec.Builder.addChildrenFunctionSingle(symbol: SymbolReference, spec: GrammarSpec) {

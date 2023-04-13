@@ -7,9 +7,11 @@ import io.johnedquinn.kanonic.runtime.grammar.RuleBuilder.Companion.buildRule
 internal object KanonicGrammar {
 
     // TOKEN NAMES
+    private const val AT_SYMBOL = "AT_SYMBOL"
     private const val IDENT_UPPER_CASE = "IDENT_UPPER_CASE"
     private const val IDENT_LOWER_CASE = "IDENT_LOWER_CASE"
     private const val EPSILON = "EPSILON"
+    private const val EQUALS = "EQUALS"
     private const val COLON = "COLON"
     private const val COLON_SEMI = "COLON_SEMI"
     private const val BRACE_LEFT = "BRACE_LEFT"
@@ -48,12 +50,14 @@ internal object KanonicGrammar {
         tokens {
             // Constants
             ASTERISK - "\\*"
+            AT_SYMBOL - "@"
             BRACE_LEFT - "\\{"
             BRACE_RIGHT - "\\}"
             CARROT_RIGHT - ">"
             COLON - ":"
             COLON_SEMI - ";"
             DASH - "-"
+            EQUALS - "="
             LINE_VERTICAL - "\\|"
             PAREN_LEFT - "\\("
             PAREN_RIGHT - "\\)"
@@ -164,10 +168,15 @@ internal object KanonicGrammar {
         // | item item_flag                                           --> item_flagged
         // ;
         +buildRule(item) {
+            item eq "base_item"
+            "item_aliased" eq AT_SYMBOL - IDENT_LOWER_CASE - EQUALS - "base_item"
+        }
+
+        +buildRule("base_item") {
             "item_group" eq PAREN_LEFT - ruleItems - "appended_items" - PAREN_RIGHT
             "item_rule" eq IDENT_LOWER_CASE
             "item_token" eq IDENT_UPPER_CASE
-            "item_flagged" eq item - "item_flag"
+            "item_flagged" eq "base_item" - "item_flag"
         }
 
         // item_flag
@@ -179,9 +188,8 @@ internal object KanonicGrammar {
             "item_flag_plus" eq PLUS
         }
 
-        // GENERATED
         // appendedItems: (LINE_VERTICAL item+)*
-        +generateRule("appended_items") {
+        +buildRule("appended_items") {
             "appended_items_1" eq EPSILON
             "appended_items_0" eq "appended_items" - "appended_items_unit"
         }
