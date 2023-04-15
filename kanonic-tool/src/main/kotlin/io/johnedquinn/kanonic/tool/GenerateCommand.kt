@@ -2,10 +2,11 @@ package io.johnedquinn.kanonic.tool
 
 import io.johnedquinn.kanonic.gen.KanonicGenerator
 import io.johnedquinn.kanonic.runtime.parse.KanonicParser
-import io.johnedquinn.kanonic.runtime.utils.Logger
+import io.johnedquinn.kanonic.runtime.utils.KanonicLogger
 import io.johnedquinn.kanonic.syntax.generated.KanonicSpecification
 import picocli.CommandLine
 import java.io.File
+import java.util.logging.ConsoleHandler
 
 @CommandLine.Command(
     name = "kanonic",
@@ -19,8 +20,14 @@ import java.io.File
 )
 internal class GenerateCommand : Runnable {
 
-    @CommandLine.Option(names = ["--debug"], description = ["Prints debug statements"])
-    var debug: Boolean = false
+    private val consoleHandler = ConsoleHandler()
+    private val logger = KanonicLogger.getLogger()
+    init {
+        logger.addHandler(consoleHandler)
+    }
+
+    @CommandLine.Option(names = ["--log-level"], description = ["Prints debug statements"])
+    var logLevel: KanonicLogger.LogLevel = KanonicLogger.LogLevel.SEVERE
 
     @CommandLine.Option(names = ["-o", "--output"], description = ["Output directory to place generated packages."], paramLabel = "<directory>")
     var output: File? = null
@@ -29,9 +36,12 @@ internal class GenerateCommand : Runnable {
     var file: File? = null
 
     override fun run() {
-        if (debug) { Logger.tolerance = Logger.Tolerance.DEBUG }
+        // Set Log Level
+        logger.level = logLevel.getJavaLogLevel()
+        consoleHandler.level = logLevel.getJavaLogLevel()
+
         if (file == null) {
-            println("File $file is null!")
+            logger.severe("File passed is null!")
             return
         }
 
@@ -40,6 +50,14 @@ internal class GenerateCommand : Runnable {
             true -> file!!.listFiles()?.toList() ?: emptyList()
         }
 
+        try {
+            writeOutput(files, output)
+        } catch (t: Throwable) {
+            t.printStackTrace()
+        }
+    }
+
+    private fun writeOutput(files: List<File>, output: File?) {
         files.forEach { file ->
             generate(file, output)
         }
@@ -54,8 +72,9 @@ internal class GenerateCommand : Runnable {
             .build()
         val ast = parser.parse(fileContent)
 
-        Logger.debug("Parsed Kanonic File into AST:")
-        Logger.debug(KanonicNodeFormatter.format(ast))
+        logger.fine("@@@")
+        logger.fine("Parsed Kanonic File into AST:")
+        logger.fine(KanonicNodeFormatter.format(ast))
 
         // Convert the Kanonic AST --> Grammar
         val grammar = AstConverter.convert(ast)

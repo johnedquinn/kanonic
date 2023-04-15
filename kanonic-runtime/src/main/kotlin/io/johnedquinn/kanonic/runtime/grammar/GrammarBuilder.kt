@@ -1,7 +1,7 @@
 package io.johnedquinn.kanonic.runtime.grammar
 
 import io.johnedquinn.kanonic.runtime.parse.TokenLiteral
-import io.johnedquinn.kanonic.runtime.utils.Logger
+import io.johnedquinn.kanonic.runtime.utils.KanonicLogger
 
 class GrammarBuilder(var name: String, var start: String) {
     private val rules = mutableListOf<Rule>()
@@ -23,7 +23,7 @@ class GrammarBuilder(var name: String, var start: String) {
     }
 
     public fun build(): Grammar {
-        Logger.debug(rules.toString())
+        KanonicLogger.debug(rules.toString())
         return Grammar(rules, Grammar.Options(name, RuleReference(start), packageName), tokens)
     }
 
@@ -59,7 +59,7 @@ class GrammarBuilder(var name: String, var start: String) {
             val toAdd = TokenDefinition(tokens.size, it.name, it.def, it.hidden)
             tokens.add(toAdd)
         }
-        Logger.debug(tokens.toString())
+        KanonicLogger.debug(tokens.toString())
         return this
     }
 

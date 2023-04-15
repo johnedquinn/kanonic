@@ -76,7 +76,6 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
             }
         }
         val allVariants = node.variant() + node.alternative().map { it as KanonicNode.AlternativeNode.AlternativeNode }.flatMap { it.variant() }
-        println(allVariants)
         val items = allVariants.map {
             it as KanonicNode.VariantNode.VariantNode
             val items = it.item().map { item ->
@@ -104,7 +103,6 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
             is KanonicNode.BaseItemNode.ItemGroupNode -> {
                 val baseChildClass = base.item()[0].getBaseItem()
                 val conformant = base.item().all {
-                    println("${it::class} ==? ${baseChildClass::class}")
                     it.getBaseItem()::class == baseChildClass::class
                 }
                 when (conformant) {
