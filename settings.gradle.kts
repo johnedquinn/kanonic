@@ -6,5 +6,6 @@ include(
     "kanonic-syntax",
     "kanonic-syntax-gen",
     "kanonic-tool",
-    "tests"
+    "examples:calculator",
+    "examples:ion",
 )
