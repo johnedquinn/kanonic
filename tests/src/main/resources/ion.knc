@@ -1,0 +1,25 @@
+kanonic: {
+  name: ion;
+  root: expr;
+  package: "io.johnedquinn.kanonic.tests.ion";
+};
+
+COLON: ":";
+PAREN_LEFT: "\(";
+PAREN_RIGHT: "\)";
+SYMBOL_QUOTED: "'((\')|[^'])*'";
+SYMBOL: "[a-z][A-Z]+";
+NUMBER: "[0-9]+";
+LITERAL_STRING: "\"((\")|[^\"])*\"";
+
+expr
+	: annotation? expr --> annotated_expr
+	| NUMBER --> number
+	| PAREN_LEFT expr+ PAREN_RIGHT --> sexp
+	| ( SYMBOL | SYMBOL_QUOTED ) --> symbol
+	| LITERAL_STRING --> string
+	;
+
+annotation
+	: ( SYMBOL | SYMBOL_QUOTED ) COLON COLON
+	;
