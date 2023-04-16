@@ -26,6 +26,9 @@ dependencies {
     implementation(project(":kanonic-syntax-gen"))
     implementation(project(":kanonic-tool"))
 
+    // Ion
+    implementation("com.amazon.ion:ion-element:1.0.0")
+
     // Test
     testImplementation(Dependencies.kotlinTest)
     testImplementation(Dependencies.junitParams)

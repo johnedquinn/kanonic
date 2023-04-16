@@ -1,6 +1,6 @@
 kanonic: {
   name: ion;
-  root: expr;
+  root: file;
   package: "io.johnedquinn.ion.generated";
 };
 
@@ -8,9 +8,11 @@ COLON: ":";
 PAREN_LEFT: "\(";
 PAREN_RIGHT: "\)";
 SYMBOL_QUOTED: "'((\')|[^'])*'";
-SYMBOL: "[a-z][A-Z]+";
+SYMBOL: "[a-zA-Z]+";
 NUMBER: "[0-9]+";
 LITERAL_STRING: "\"((\")|[^\"])*\"";
+
+file: expr --> expr;
 
 expr
 	: annotation? expr --> annotated_expr

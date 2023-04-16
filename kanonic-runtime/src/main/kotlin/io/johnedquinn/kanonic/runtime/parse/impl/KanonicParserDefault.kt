@@ -109,8 +109,14 @@ internal class KanonicParserDefault(
                     val childrenReversed = toAddNodes.toList().flatMap {
                         getChildren(it)
                     }
-                    return info.createRuleNode(0, currentState, childrenReversed, null, null).also { root ->
+                    val result = info.createRuleNode(0, currentState, childrenReversed, null, null).also { root ->
                         root.children.forEach { it.parent = root }
+                    }
+                    getChildren(result).also {
+                        if (it.size != 1) {
+                            error("fff")
+                        }
+                        return it.first()
                     }
                 }
                 is Action.Shift -> {

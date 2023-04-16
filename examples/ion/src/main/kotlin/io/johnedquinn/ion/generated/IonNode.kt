@@ -13,6 +13,31 @@ public sealed class IonNode(
   parent: Node?,
   alias: String?,
 ) : Node(state, children, parent, alias) {
+  public sealed class FileNode(
+    public override val state: Int,
+    public override val children: List<Node>,
+    public override var parent: Node?,
+    public override var alias: String?,
+  ) : IonNode(state, children, parent, alias) {
+    public data class ExprNode(
+      public override val state: Int,
+      public override val children: List<Node>,
+      public override var parent: Node?,
+      public override var alias: String?,
+    ) : FileNode(state, children, parent, alias) {
+      public override fun toString(): String = """${this::class.simpleName}(state: $state, children:
+          $children, alias: $alias)"""
+
+      public fun expr(): List<io.johnedquinn.ion.generated.IonNode.ExprNode> =
+          this.children.filterIsInstance<io.johnedquinn.ion.generated.IonNode.ExprNode>()
+
+      public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
+        is IonVisitor -> visitor.visitExpr(this, ctx)
+        else -> visitor.visit(this, ctx)
+      }
+    }
+  }
+
   public sealed class ExprNode(
     public override val state: Int,
     public override val children: List<Node>,

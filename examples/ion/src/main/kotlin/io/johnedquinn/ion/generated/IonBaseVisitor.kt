@@ -1,12 +1,13 @@
 package io.johnedquinn.ion.generated
 
 import io.johnedquinn.ion.generated.IonNode.AnnotationNode.AnnotationNode
-import io.johnedquinn.ion.generated.IonNode.ExprNode
 import io.johnedquinn.ion.generated.IonNode.ExprNode.AnnotatedExprNode
 import io.johnedquinn.ion.generated.IonNode.ExprNode.NumberNode
 import io.johnedquinn.ion.generated.IonNode.ExprNode.SexpNode
 import io.johnedquinn.ion.generated.IonNode.ExprNode.StringNode
 import io.johnedquinn.ion.generated.IonNode.ExprNode.SymbolNode
+import io.johnedquinn.ion.generated.IonNode.FileNode
+import io.johnedquinn.ion.generated.IonNode.FileNode.ExprNode
 import io.johnedquinn.kanonic.runtime.ast.Node
 
 public abstract class IonBaseVisitor<R, C> : IonVisitor<R, C> {
@@ -24,6 +25,12 @@ public abstract class IonBaseVisitor<R, C> : IonVisitor<R, C> {
     else -> node.accept(this, ctx)
   }
 
+  public open override fun visitExpr(node: ExprNode, ctx: C): R = defaultVisit(node, ctx)
+
+  public open override fun visitFile(node: FileNode, ctx: C): R = when (node) {
+    is ExprNode -> visitExpr(node, ctx)
+  }
+
   public open override fun visitAnnotatedExpr(node: AnnotatedExprNode, ctx: C): R =
       defaultVisit(node, ctx)
 
@@ -35,7 +42,8 @@ public abstract class IonBaseVisitor<R, C> : IonVisitor<R, C> {
 
   public open override fun visitString(node: StringNode, ctx: C): R = defaultVisit(node, ctx)
 
-  public open override fun visitExpr(node: ExprNode, ctx: C): R = when (node) {
+  public open override fun visitExpr(node: io.johnedquinn.ion.generated.IonNode.ExprNode, ctx: C): R
+      = when (node) {
     is AnnotatedExprNode -> visitAnnotatedExpr(node, ctx)
     is NumberNode -> visitNumber(node, ctx)
     is SexpNode -> visitSexp(node, ctx)

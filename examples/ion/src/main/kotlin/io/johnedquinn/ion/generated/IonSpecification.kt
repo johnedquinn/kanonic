@@ -13,16 +13,19 @@ import kotlin.String
 import kotlin.collections.List
 
 public object IonSpecification : ParserSpecification {
-  public override val grammar: Grammar = buildGrammar("IonNode", "expr") {
+  public override val grammar: Grammar = buildGrammar("IonNode", "file") {
     packageName("io.johnedquinn.ion.generated")
     tokens {
       "COLON" - ":"
       "PAREN_LEFT" - "\\("
       "PAREN_RIGHT" - "\\)"
       "SYMBOL_QUOTED" - "'((\\')|[^'])*'"
-      "SYMBOL" - "[a-z][A-Z]+"
+      "SYMBOL" - "[a-zA-Z]+"
       "NUMBER" - "[0-9]+"
       "LITERAL_STRING" - "\\\"((\\\")|[^\\\"])*\\\""
+    }
+    "file" eq buildRule(this, "file") {
+      "expr" eq "expr"
     }
     "_generated_0" eq buildGeneratedRule(this, "_generated_0") {
       "_generated_1" eq "EPSILON"
@@ -55,41 +58,43 @@ public object IonSpecification : ParserSpecification {
 
   private val nodeLambdaList: List<NodeCreator> = initializeLambdas()
 
-  public override fun getTable(): String = """,S26,,S4,,S29,S28,S3,S25,S1,,S24,,S30,S27
-  ,S26,,S4,,S29,S28,S3,S25,S1,,S24,S2,S30,S27
-  A0,,,,,,,,,,,,,,
-  A0,,,,,,,,,,,,,,
-  ,S16,,S11,,S19,S18,S10,S15,S8,S5,S14,S23,S20,S17
-  ,S16,,S11,S6,S19,S18,S10,S15,S8,,S14,S7,S20,S17
-  A0,,,,,,,,,,,,,,
-  ,R3,,R3,R3,R3,R3,R3,R3,,,,,,
-  ,S16,,S11,,S19,S18,S10,S15,S8,,S14,S9,S20,S17
-  ,A1,,A3,A4,A5,A6,A7,A8,,,,,,
-  ,A1,,A3,A4,A5,A6,A7,A8,,,,,,
-  ,S16,,S11,,S19,S18,S10,S15,S8,S12,S14,S23,S20,S17
-  ,S16,,S11,S13,S19,S18,S10,S15,S8,,S14,S7,S20,S17
-  ,A1,,A3,A4,A5,A6,A7,A8,,,,,,
-  ,A1,,A3,A4,A5,A6,A7,A8,,,,,,
-  ,A1,,A3,A4,A5,A6,A7,A8,,,,,,
-  ,R0,,R0,R0,R0,R0,R0,R0,,,,,,
-  ,R1,,R1,R1,R1,R1,R1,R1,,,,,,
-  ,R4,R11,R4,R4,R4,R4,R4,R4,,,,,,
-  ,R5,R12,R5,R5,R5,R5,R5,R5,,,,,,
-  ,,S21,,,,,,,,,,,,
-  ,,S22,,,,,,,,,,,,
-  ,R13,,R13,R13,R13,R13,R13,R13,,,,,,
-  ,R2,,R2,R2,R2,R2,R2,R2,,,,,,
-  A0,,,,,,,,,,,,,,
-  A0,,,,,,,,,,,,,,
-  R0,R0,,R0,,R0,R0,R0,R0,,,,,,
-  R1,R1,,R1,,R1,R1,R1,R1,,,,,,
-  R4,,R11,,,,,,,,,,,,
-  R5,,R12,,,,,,,,,,,,
-  ,,S31,,,,,,,,,,,,
-  ,,S32,,,,,,,,,,,,
-  R13,R13,,R13,,R13,R13,R13,R13,,,,,,"""
+  public override fun getTable(): String = """,S27,,S5,,S30,S29,S4,S26,,S2,,S25,S1,S31,S28
+  A0,,,,,,,,,,,,,,,
+  ,S27,,S5,,S30,S29,S4,S26,,S2,,S25,S3,S31,S28
+  R7,,,,,,,,,,,,,,,
+  R8,,,,,,,,,,,,,,,
+  ,S17,,S12,,S20,S19,S11,S16,,S9,S6,S15,S24,S21,S18
+  ,S17,,S12,S7,S20,S19,S11,S16,,S9,,S15,S8,S21,S18
+  R9,,,,,,,,,,,,,,,
+  ,R4,,R4,R4,R4,R4,R4,R4,,,,,,,
+  ,S17,,S12,,S20,S19,S11,S16,,S9,,S15,S10,S21,S18
+  ,R7,,R7,R7,R7,R7,R7,R7,,,,,,,
+  ,R8,,R8,R8,R8,R8,R8,R8,,,,,,,
+  ,S17,,S12,,S20,S19,S11,S16,,S9,S13,S15,S24,S21,S18
+  ,S17,,S12,S14,S20,S19,S11,S16,,S9,,S15,S8,S21,S18
+  ,R9,,R9,R9,R9,R9,R9,R9,,,,,,,
+  ,R10,,R10,R10,R10,R10,R10,R10,,,,,,,
+  ,R11,,R11,R11,R11,R11,R11,R11,,,,,,,
+  ,R1,,R1,R1,R1,R1,R1,R1,,,,,,,
+  ,R2,,R2,R2,R2,R2,R2,R2,,,,,,,
+  ,R5,R12,R5,R5,R5,R5,R5,R5,,,,,,,
+  ,R6,R13,R6,R6,R6,R6,R6,R6,,,,,,,
+  ,,S22,,,,,,,,,,,,,
+  ,,S23,,,,,,,,,,,,,
+  ,R14,,R14,R14,R14,R14,R14,R14,,,,,,,
+  ,R3,,R3,R3,R3,R3,R3,R3,,,,,,,
+  R10,,,,,,,,,,,,,,,
+  R11,,,,,,,,,,,,,,,
+  R1,R1,,R1,,R1,R1,R1,R1,,,,,,,
+  R2,R2,,R2,,R2,R2,R2,R2,,,,,,,
+  R5,,R12,,,,,,,,,,,,,
+  R6,,R13,,,,,,,,,,,,,
+  ,,S32,,,,,,,,,,,,,
+  ,,S33,,,,,,,,,,,,,
+  R14,R14,,R14,,R14,R14,R14,R14,,,,,,,"""
 
   private fun initializeLambdas(): List<NodeCreator> = buildList {
+    add(NodeCreator { state, children, parent, alias -> IonNode.FileNode.ExprNode(state, children, parent, "null") })
     add(NodeCreator { state, children, parent, alias -> GeneratedNode(state, children, parent, "null") })
     add(NodeCreator { state, children, parent, alias -> GeneratedNode(state, children, parent, "null") })
     add(NodeCreator { state, children, parent, alias -> GeneratedNode(state, children, parent, "null") })
