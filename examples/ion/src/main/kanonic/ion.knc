@@ -1,7 +1,7 @@
 kanonic: {
   name: ion;
   root: expr;
-  package: "io.johnedquinn.kanonic.tests.ion";
+  package: "io.johnedquinn.ion.generated";
 };
 
 COLON: ":";

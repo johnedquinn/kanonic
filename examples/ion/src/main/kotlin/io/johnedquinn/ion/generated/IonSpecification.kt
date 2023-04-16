@@ -1,4 +1,4 @@
-package io.johnedquinn.kanonic.tests.ion
+package io.johnedquinn.ion.generated
 
 import io.johnedquinn.kanonic.runtime.ast.GeneratedNode
 import io.johnedquinn.kanonic.runtime.ast.Node
@@ -14,7 +14,7 @@ import kotlin.collections.List
 
 public object IonSpecification : ParserSpecification {
   public override val grammar: Grammar = buildGrammar("IonNode", "expr") {
-    packageName("io.johnedquinn.kanonic.tests.ion")
+    packageName("io.johnedquinn.ion.generated")
     tokens {
       "COLON" - ":"
       "PAREN_LEFT" - "\\("

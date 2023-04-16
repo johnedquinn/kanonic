@@ -1,4 +1,4 @@
-package io.johnedquinn.kanonic.tests.ion
+package io.johnedquinn.ion.generated
 
 import io.johnedquinn.kanonic.runtime.ast.Node
 import io.johnedquinn.kanonic.runtime.ast.NodeVisitor
@@ -29,10 +29,10 @@ public sealed class IonNode(
           $children, alias: $alias)"""
 
       public fun expr(): List<ExprNode> =
-          this.children.filterIsInstance<io.johnedquinn.kanonic.tests.ion.IonNode.ExprNode>()
+          this.children.filterIsInstance<io.johnedquinn.ion.generated.IonNode.ExprNode>()
 
       public fun `annotation`(): List<AnnotationNode> =
-          this.children.filterIsInstance<io.johnedquinn.kanonic.tests.ion.IonNode.AnnotationNode>()
+          this.children.filterIsInstance<io.johnedquinn.ion.generated.IonNode.AnnotationNode>()
 
       public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
         is IonVisitor -> visitor.visitAnnotatedExpr(this, ctx)
@@ -80,7 +80,7 @@ public sealed class IonNode(
       }
 
       public fun expr(): List<ExprNode> =
-          this.children.filterIsInstance<io.johnedquinn.kanonic.tests.ion.IonNode.ExprNode>()
+          this.children.filterIsInstance<io.johnedquinn.ion.generated.IonNode.ExprNode>()
 
       public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
         is IonVisitor -> visitor.visitSexp(this, ctx)

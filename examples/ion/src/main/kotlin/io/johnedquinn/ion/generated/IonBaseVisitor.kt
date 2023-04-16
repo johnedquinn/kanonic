@@ -1,13 +1,13 @@
-package io.johnedquinn.kanonic.tests.ion
+package io.johnedquinn.ion.generated
 
+import io.johnedquinn.ion.generated.IonNode.AnnotationNode.AnnotationNode
+import io.johnedquinn.ion.generated.IonNode.ExprNode
+import io.johnedquinn.ion.generated.IonNode.ExprNode.AnnotatedExprNode
+import io.johnedquinn.ion.generated.IonNode.ExprNode.NumberNode
+import io.johnedquinn.ion.generated.IonNode.ExprNode.SexpNode
+import io.johnedquinn.ion.generated.IonNode.ExprNode.StringNode
+import io.johnedquinn.ion.generated.IonNode.ExprNode.SymbolNode
 import io.johnedquinn.kanonic.runtime.ast.Node
-import io.johnedquinn.kanonic.tests.ion.IonNode.AnnotationNode.AnnotationNode
-import io.johnedquinn.kanonic.tests.ion.IonNode.ExprNode
-import io.johnedquinn.kanonic.tests.ion.IonNode.ExprNode.AnnotatedExprNode
-import io.johnedquinn.kanonic.tests.ion.IonNode.ExprNode.NumberNode
-import io.johnedquinn.kanonic.tests.ion.IonNode.ExprNode.SexpNode
-import io.johnedquinn.kanonic.tests.ion.IonNode.ExprNode.StringNode
-import io.johnedquinn.kanonic.tests.ion.IonNode.ExprNode.SymbolNode
 
 public abstract class IonBaseVisitor<R, C> : IonVisitor<R, C> {
   public abstract fun defaultReturn(node: IonNode, ctx: C): R
@@ -47,8 +47,8 @@ public abstract class IonBaseVisitor<R, C> : IonVisitor<R, C> {
       ctx)
 
   public open override
-      fun visitAnnotation(node: io.johnedquinn.kanonic.tests.ion.IonNode.AnnotationNode, ctx: C): R
-      = when (node) {
+      fun visitAnnotation(node: io.johnedquinn.ion.generated.IonNode.AnnotationNode, ctx: C): R =
+      when (node) {
     is AnnotationNode -> visitAnnotation(node, ctx)
   }
 }
