@@ -36,6 +36,7 @@ internal class KanonicParserDefault(
     private val lexer: KanonicLexer
 ) : KanonicParser {
 
+    private val logger = KanonicLogger.getLogger()
     private val grammar = info.grammar
     private val tokens = grammar.tokens
     private val variants = grammar.rules.flatMap { it.variants }
@@ -51,9 +52,9 @@ internal class KanonicParserDefault(
      */
     override fun parse(input: String): Node {
         val tokens = lexer.tokenize(input)
-        KanonicLogger.debug("TOKENs:")
+        logger.fine("TOKENs:")
         tokens.forEach { token ->
-            KanonicLogger.debug(" - $token")
+            logger.fine(" - $token")
         }
         return parse(tokens)
     }
@@ -91,9 +92,9 @@ internal class KanonicParserDefault(
         var tokenIndex = 0
         while (true) {
             val currentState = stack.peek()
-            KanonicLogger.debug("CURRENT STATE: $currentState")
+            logger.fine("CURRENT STATE: $currentState")
             val token = tokens[tokenIndex]
-            KanonicLogger.debug("TOKEN: $token")
+            logger.fine("TOKEN: $token")
             var updateToken = true
             val action = when (val pre = table.actionTable[currentState][token.type]) {
                 null -> {
@@ -105,7 +106,6 @@ internal class KanonicParserDefault(
 
             when (action) {
                 is Action.Accept -> {
-                    KanonicLogger.debug("ACCEPT!")
                     val childrenReversed = toAddNodes.toList().flatMap {
                         getChildren(it)
                     }
@@ -114,7 +114,6 @@ internal class KanonicParserDefault(
                     }
                 }
                 is Action.Shift -> {
-                    KanonicLogger.debug("SHIFT!")
                     val foundToken = when (updateToken) {
                         true -> {
                             tokenIndex++
@@ -125,7 +124,6 @@ internal class KanonicParserDefault(
                     shift(action, stack, toAddNodes, currentState, foundToken)
                 }
                 is Action.Reduce -> {
-                    KanonicLogger.debug("REDUCE!")
                     reduce(action, stack, toAddNodes, currentState)
                 }
                 null -> {
@@ -139,8 +137,8 @@ internal class KanonicParserDefault(
                     val tokenNames = possible.map { tokenInd ->
                         this.tokens[tokenInd].name
                     }
-                    KanonicLogger.error("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
-                    KanonicLogger.error("Received $token, but expected token type of: $tokenNames")
+                    logger.severe("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
+                    logger.severe("Received $token, but expected token type of: $tokenNames")
                     throw ParseFailureException()
                 }
             }
@@ -171,9 +169,9 @@ internal class KanonicParserDefault(
             children.addAll(getChildren(node).reversed())
         }
         val childrenReversed = children.reversed()
-        KanonicLogger.debug("REDUCE USING ACTION $action")
+        logger.fine("REDUCE USING ACTION $action")
         val newNode = info.createRuleNode(action.rule, currentState, childrenReversed, null, alias)
-        KanonicLogger.debug("FOUND NODE: $newNode")
+        logger.fine("FOUND NODE: $newNode")
         toAddNodes.push(newNode)
         val topState = stack.peek()
         val ruleIndex = ruleNameMap[rule.parentName] ?: error("Could not find rule index of ${rule.parentName}")

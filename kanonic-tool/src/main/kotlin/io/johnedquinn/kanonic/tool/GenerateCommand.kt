@@ -72,7 +72,6 @@ internal class GenerateCommand : Runnable {
             .build()
         val ast = parser.parse(fileContent)
 
-        logger.fine("@@@")
         logger.fine("Parsed Kanonic File into AST:")
         logger.fine(KanonicNodeFormatter.format(ast))
 

@@ -15,33 +15,19 @@ public object KanonicLogger {
         FINE {
             override fun getJavaLogLevel(): Level = Level.FINE
         },
+        INFO {
+            override fun getJavaLogLevel(): Level = Level.INFO
+        },
+        WARNING {
+            override fun getJavaLogLevel(): Level = Level.WARNING
+        },
         SEVERE {
             override fun getJavaLogLevel(): Level = Level.SEVERE
         },
         ALL {
             override fun getJavaLogLevel(): Level = Level.ALL
         };
+
         abstract fun getJavaLogLevel(): Level
-    }
-
-    public var tolerance: Tolerance = Tolerance.ERROR
-
-    enum class Tolerance {
-        ERROR,
-        DEBUG;
-    }
-
-    public fun log(str: String, level: Tolerance = Tolerance.ERROR) {
-        if (level <= tolerance) {
-            println(str)
-        }
-    }
-
-    public fun debug(str: String) {
-        log(str, Tolerance.DEBUG)
-    }
-
-    public fun error(str: String) {
-        log(str, Tolerance.ERROR)
     }
 }

@@ -8,6 +8,8 @@ class GrammarBuilder(var name: String, var start: String) {
     public var tokens: MutableList<TokenDefinition> = mutableListOf()
     private var packageName: String? = null
 
+    private val logger = KanonicLogger.getLogger()
+
     init {
         tokens.add(TokenDefinition(TokenLiteral.ReservedTypes.EOF, "EOF", "", false))
         tokens.add(TokenDefinition(TokenLiteral.ReservedTypes.EPSILON, "EPSILON", "", false))
@@ -23,7 +25,7 @@ class GrammarBuilder(var name: String, var start: String) {
     }
 
     public fun build(): Grammar {
-        KanonicLogger.debug(rules.toString())
+        logger.fine("RULES: $rules")
         return Grammar(rules, Grammar.Options(name, RuleReference(start), packageName), tokens)
     }
 
@@ -59,7 +61,7 @@ class GrammarBuilder(var name: String, var start: String) {
             val toAdd = TokenDefinition(tokens.size, it.name, it.def, it.hidden)
             tokens.add(toAdd)
         }
-        KanonicLogger.debug(tokens.toString())
+        logger.fine("TOKENS: $tokens")
         return this
     }
 
