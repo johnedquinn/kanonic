@@ -11,11 +11,11 @@ import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.TypeVariableName
 import com.squareup.kotlinpoet.asTypeName
 import io.johnedquinn.kanonic.runtime.ast.Node
-import io.johnedquinn.kanonic.runtime.ast.TerminalNode
 import io.johnedquinn.kanonic.runtime.grammar.RuleReference
 import io.johnedquinn.kanonic.runtime.grammar.SymbolReference
 import io.johnedquinn.kanonic.runtime.grammar.TerminalReference
 import io.johnedquinn.kanonic.runtime.grammar.TokenDefinition
+import io.johnedquinn.kanonic.runtime.utils.KanonicLogger
 
 internal object NodeGenerator {
 
@@ -33,6 +33,8 @@ internal object NodeGenerator {
     }
 
     private object Private {
+
+        private val logger = KanonicLogger.getLogger()
 
         /**
          * Creates the Grammar Node and adds the Rule Nodes and the Rule Variant Nodes. Each variant should be a
@@ -115,7 +117,7 @@ internal object NodeGenerator {
             variant.items.forEach { item ->
                 val name = getName(item, spec)
                 spec.rules.firstOrNull { it.name == name }?.let {
-                    println("Found item: ${it.name} with alias: ${it.alias}")
+                    logger.fine("Found item: ${it.name} with alias: ${it.alias}")
                     // Should always have a single child
                     val aliasedItem = it.variants.getOrNull(0)?.items?.getOrNull(0)
                         ?: error("Couldn't grab aliased item")
