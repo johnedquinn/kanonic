@@ -2,6 +2,7 @@ package io.johnedquinn.ion.parser
 
 import com.amazon.ionelement.api.IonElement
 import com.amazon.ionelement.api.ionNull
+import com.amazon.ionelement.api.ionSexpOf
 import com.amazon.ionelement.api.ionSymbol
 import io.johnedquinn.ion.generated.IonBaseVisitor
 import io.johnedquinn.ion.generated.IonNode
@@ -25,6 +26,26 @@ object IonParser : IonBaseVisitor<IonElement, Unit>() {
             element = child.accept(this, ctx)
         }
         return element
+    }
+
+    override fun visitAnnotatedExpr(node: IonNode.ExprNode.AnnotatedExprNode, ctx: Unit): IonElement {
+        val expr = visitExpr(node.expr()[0], ctx)
+        val annotation = visitAnnotation(node.annotation()[0], ctx).asAnyElement().symbolValue
+        return expr.copy(
+            annotations = listOf(annotation) + expr.annotations
+        )
+    }
+
+    override fun visitSexp(node: IonNode.ExprNode.SexpNode, ctx: Unit): IonElement {
+        return ionSexpOf(node.expr().map { visitExpr(it, ctx) })
+    }
+
+    override fun visitAnnotation(node: IonNode.AnnotationNode.AnnotationNode, ctx: Unit): IonElement {
+        val content = node.SYMBOL().firstOrNull()?.token?.content ?: node.SYMBOL_QUOTED().firstOrNull()?.let {
+            val content = it.token.content
+            content.substring(1, content.lastIndex)
+        } ?: error("Unexpected empty symbol.")
+        return ionSymbol(content)
     }
 
     override fun visitExpr(node: IonNode.ExprNode, ctx: Unit): IonElement {
