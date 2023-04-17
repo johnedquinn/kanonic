@@ -1,0 +1,37 @@
+kanonic: {
+  name: parti_q_l;
+  root: statement;
+  package: "io.johnedquinn.partiql.generated";
+};
+
+SELECT: "SELECT";
+FROM: "FROM";
+COLON: ":";
+PAREN_LEFT: "\(";
+PAREN_RIGHT: "\)";
+SYMBOL_QUOTED: "'((\')|[^'])*'";
+SYMBOL: "[a-zA-Z]+";
+NUMBER: "[0-9]+";
+LITERAL_STRING: "\"((\")|[^\"])*\"";
+
+statement
+    : dql --> statement_dql
+    ;
+
+dql
+    : expr --> dql_expr
+    ;
+
+expr
+    : expr_select --> expr_sfw
+    ;
+
+expr_select
+    : SELECT expr FROM expr --> expr_select
+    | expr_atom --> expr_select_fallback
+    ;
+
+expr_atom
+    : SYMBOL --> expr_ident
+    | PAREN_LEFT expr PAREN_RIGHT --> expr_wrapped
+    ;

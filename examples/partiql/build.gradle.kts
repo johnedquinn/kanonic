@@ -20,15 +20,19 @@ object Dependencies {
 }
 
 dependencies {
+    // Runtime Dependencies
     implementation(kotlin("stdlib"))
-    implementation(project(":kanonic-gen"))
     implementation(project(":kanonic-runtime"))
     implementation(project(":kanonic-syntax"))
-    implementation(project(":kanonic-syntax-gen"))
-    implementation(project(":kanonic-tool"))
 
     // Ion
     implementation("com.amazon.ion:ion-element:1.0.0")
+    implementation("org.partiql:partiql-lang-kotlin:0.9.2")
+
+    // Compile Dependencies
+    compileOnly(project(":kanonic-gen"))
+    compileOnly(project(":kanonic-syntax-gen"))
+    compileOnly(project(":kanonic-tool"))
 
     // Test
     testImplementation(Dependencies.kotlinTest)

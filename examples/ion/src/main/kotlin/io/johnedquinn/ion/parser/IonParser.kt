@@ -10,14 +10,20 @@ import io.johnedquinn.ion.generated.IonSpecification
 import io.johnedquinn.kanonic.runtime.ast.TerminalNode
 import io.johnedquinn.kanonic.runtime.parse.KanonicParser
 import io.johnedquinn.kanonic.tool.KanonicNodeFormatter
+import java.time.Instant
 
 object IonParser : IonBaseVisitor<IonElement, Unit>() {
     private val parser = KanonicParser.Builder.standard().withSpecification(IonSpecification).build()
 
     public fun parse(input: String): IonElement {
         val ast = parser.parse(input)
-        println(KanonicNodeFormatter.format(ast))
+        // println(KanonicNodeFormatter.format(ast))
         return visit(ast, Unit)
+    }
+    
+    public fun timeDiff(older: Instant, newer: Instant): String {
+        val secondsInNanos = (newer.epochSecond - older.epochSecond) * 1_000_000_000L + newer.nano - older.nano
+        return "$secondsInNanos ns"
     }
 
     override fun defaultVisit(node: IonNode, ctx: Unit): IonElement {

@@ -39,7 +39,8 @@ class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
                     }
                     // Add GoTo
                     is RuleReference -> {
-                        val nonTerminalIndex = namesToNonTerminalIndex[edgeSymbol.name]!!
+                        val nonTerminalIndex = namesToNonTerminalIndex[edgeSymbol.name]
+                            ?: error("Couldn't find index of ${edgeSymbol.name}")
                         goToTable[stateIndex][nonTerminalIndex]?.let { foundAction ->
                             when (foundAction) {
                                 is Action.Shift -> throw RuntimeException("Shift-shift conflict!")

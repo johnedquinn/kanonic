@@ -8,4 +8,5 @@ include(
     "kanonic-tool",
     "examples:calculator",
     "examples:ion",
+    "examples:partiql"
 )

@@ -3,51 +3,51 @@ package io.johnedquinn.kanonic.runtime.parse.impl
 import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
 import io.johnedquinn.kanonic.runtime.grammar.TokenDefinition
 import io.johnedquinn.kanonic.runtime.parse.TokenLiteral
-import io.johnedquinn.kanonic.runtime.utils.KanonicLogger
 
 internal class KanonicLexerDefault(private val definitions: List<TokenDefinition>) : KanonicLexer {
-    private val logger = KanonicLogger.getLogger()
-    public override fun tokenize(input: String): List<TokenLiteral> {
-        val tokens = mutableListOf<TokenLiteral>()
+    public override fun tokenize(input: String): Sequence<TokenLiteral> {
         var currentIndex = 0
         var tokenStartIndex: Int
         var currentString = ""
-        while (currentIndex < input.length) {
-            currentString += input[currentIndex]
-            if (currentString.isBlank()) {
-                currentString = ""
-                currentIndex++
-                continue
-            }
-            definitions.firstOrNull {
-                currentString.matches(it.def.toRegex())
-            }?.let {
-                val regex = it.def.toRegex()
-                logger.fine(" - Def: $${it.def} - Regex: $regex")
-                tokenStartIndex = currentIndex
-                while (currentString.matches(it.def.toRegex())) {
+        return sequence {
+            while (currentIndex < input.length) {
+                currentString += input[currentIndex]
+                if (currentString.isBlank()) {
+                    currentString = ""
                     currentIndex++
-                    if (currentIndex > input.lastIndex) {
-                        break
+                    continue
+                }
+                definitions.firstOrNull {
+                    currentString.matches(it.def.toRegex())
+                }?.let {
+                    tokenStartIndex = currentIndex
+                    var matching: TokenDefinition? = it
+                    var result: TokenDefinition = it
+                    while (matching != null) {
+                        result = matching
+                        currentIndex++
+                        if (currentIndex > input.lastIndex) {
+                            break
+                        }
+                        currentString += input[currentIndex]
+                        matching = definitions.firstOrNull { def -> currentString.matches(def.def.toRegex()) }
                     }
-                    currentString += input[currentIndex]
+                    // TODO: Adjust index
+                    val actualString = when (currentIndex <= input.lastIndex) {
+                        true -> currentString.dropLast(1)
+                        false -> currentString
+                    }
+                    val tokenLiteral = TokenLiteral(result.index, tokenStartIndex.toLong(), actualString)
+                    if (result.hidden.not()) {
+                        yield(tokenLiteral)
+                    }
+                    currentIndex--
+                    currentString = ""
                 }
-                // TODO: Adjust index
-                val actualString = when (currentIndex <= input.lastIndex) {
-                    true -> currentString.dropLast(1)
-                    false -> currentString
-                }
-                val tokenLiteral = TokenLiteral(it.index, tokenStartIndex.toLong(), actualString)
-                if (it.hidden.not()) {
-                    tokens.add(tokenLiteral)
-                }
-                currentIndex--
-                currentString = ""
+                currentIndex++
             }
-            currentIndex++
+            yield(TokenLiteral(type = TokenLiteral.ReservedTypes.EOF, input.length.toLong(), "<EOF>"))
         }
-        tokens.add(TokenLiteral(type = TokenLiteral.ReservedTypes.EOF, input.length.toLong(), "<EOF>"))
-        return tokens
     }
 
     internal class Builder : KanonicLexer.Builder {
