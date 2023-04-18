@@ -18,6 +18,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
     internal fun convert(node: Node): Grammar {
         val builder = GrammarBuilder("Placeholder", "Placeholder")
         val context = Context(builder, 0)
+        // println(KanonicNodeFormatter.format(node))
         visit(node, context)
         return builder.build()
     }

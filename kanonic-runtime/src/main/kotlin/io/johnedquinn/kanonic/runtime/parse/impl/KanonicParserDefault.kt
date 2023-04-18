@@ -10,7 +10,6 @@ import io.johnedquinn.kanonic.runtime.parse.KanonicParser
 import io.johnedquinn.kanonic.runtime.parse.ParseTable
 import io.johnedquinn.kanonic.runtime.parse.ParserSpecification
 import io.johnedquinn.kanonic.runtime.parse.TokenLiteral
-import java.util.Stack
 
 /**
  * Push S0 onto S.
@@ -35,7 +34,6 @@ internal class KanonicParserDefault(
     private val lexer: KanonicLexer
 ) : KanonicParser {
 
-    // private val logger = KanonicLogger.getLogger()
     private val grammar = info.grammar
     private val tokens = grammar.tokens
     private val variants = grammar.rules.flatMap { it.variants }
@@ -51,10 +49,6 @@ internal class KanonicParserDefault(
      */
     override fun parse(input: String): Node {
         val tokens = lexer.tokenize(input)
-        // logger.fine("TOKENs:")
-        // tokens.forEach { token ->
-            // logger.fine(" - $token")
-        // }
         return parse(tokens)
     }
 
@@ -85,16 +79,13 @@ internal class KanonicParserDefault(
 
     private fun parse(tokens: Sequence<TokenLiteral>): Node {
         // Add first state
-        val stack = Stack<Int>().also { it.push(0) }
-        val toAddNodes = Stack<Node>()
+        val stack = mutableListOf<Int>().also { it.add(0) }
+        val toAddNodes = mutableListOf<Node>()
 
-        var tokenIndex = 0
         val tokenIter = tokens.iterator()
         var token = tokenIter.next()
         while (true) {
-            val currentState = stack.peek()
-            // logger.fine("CURRENT STATE: $currentState")
-            // logger.fine("TOKEN: $token")
+            val currentState = stack.last()
             var updateToken = true
             val action = when (val pre = table.actionTable[currentState][token.type]) {
                 null -> {
@@ -106,16 +97,12 @@ internal class KanonicParserDefault(
 
             when (action) {
                 is Action.Accept -> {
-                    val childrenReversed = toAddNodes.toList().flatMap {
-                        getChildren(it)
-                    }
-                    val result = info.createRuleNode(0, currentState, childrenReversed, null, null).also { root ->
+                    val children = toAddNodes.flatMap { getChildren(it) }
+                    val result = info.createRuleNode(0, currentState, children, null, null).also { root ->
                         root.children.forEach { it.parent = root }
                     }
                     getChildren(result).also {
-                        if (it.size != 1) {
-                            error("fff")
-                        }
+                        if (it.size != 1) { error("fff") }
                         return it.first()
                     }
                 }
@@ -124,7 +111,6 @@ internal class KanonicParserDefault(
                         true -> {
                             val shiftToken = token
                             token = tokenIter.next()
-                            // tokenIndex++
                             shiftToken
                         }
                         else -> TokenLiteral(TokenLiteral.ReservedTypes.EPSILON, token.index, "<epsilon>")
@@ -156,9 +142,9 @@ internal class KanonicParserDefault(
     /**
      * Adds another state to the stack and add the token to the list of building nodes
      */
-    private fun shift(action: Action.Shift, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int, token: TokenLiteral) {
-        stack.push(action.state)
-        toAddNodes.push(
+    private fun shift(action: Action.Shift, stack: MutableList<Int>, toAddNodes: MutableList<Node>, currentState: Int, token: TokenLiteral) {
+        stack.add(action.state)
+        toAddNodes.add(
             TerminalNode(currentState, null, token, token.type, null)
         )
     }
@@ -167,24 +153,24 @@ internal class KanonicParserDefault(
      * Reduces the number of states on the stack by the number of symbols in the matching rule. Also adds all the
      * building nodes as the children of the reduction node.
      */
-    private fun reduce(action: Action.Reduce, stack: Stack<Int>, toAddNodes: Stack<Node>, currentState: Int) {
+    private fun reduce(action: Action.Reduce, stack: MutableList<Int>, toAddNodes: MutableList<Node>, currentState: Int) {
         val rule = variants[action.rule]
         val children = mutableListOf<Node>()
         val alias = getAlias(rule)
         repeat(rule.items.size) {
-            stack.pop()
-            val node = toAddNodes.pop()
-            children.addAll(getChildren(node).reversed())
+            stack.removeLast()
         }
-        val childrenReversed = children.reversed()
-        // logger.fine("REDUCE USING ACTION $action")
-        val newNode = info.createRuleNode(action.rule, currentState, childrenReversed, null, alias)
-        // logger.fine("FOUND NODE: $newNode")
-        toAddNodes.push(newNode)
-        val topState = stack.peek()
+        val firstIndex = toAddNodes.size - rule.items.size
+        for (i in firstIndex..toAddNodes.lastIndex) {
+            children.addAll(getChildren(toAddNodes[i]))
+        }
+        toAddNodes.subList(firstIndex, toAddNodes.size).clear()
+        val newNode = info.createRuleNode(action.rule, currentState, children, null, alias)
+        toAddNodes.add(newNode)
+        val topState = stack.last()
         val ruleIndex = ruleNameMap[rule.parentName] ?: error("Could not find rule index of ${rule.parentName}")
         val goToState = table.goToTable[topState][ruleIndex] as Action.Shift
-        stack.push(goToState.state)
+        stack.add(goToState.state)
     }
 
     private fun getChildren(node: Node): List<Node> = when (node) {
@@ -199,6 +185,4 @@ internal class KanonicParserDefault(
         }
         else -> listOf(node)
     }
-
-    internal class ParseFailureException : RuntimeException()
 }
