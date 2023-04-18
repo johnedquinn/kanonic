@@ -1,0 +1,84 @@
+// File: kanonic.knc
+// Author: Kanonic
+// Description: The Kanonic Grammar
+
+/**
+ *
+ * CONFIG
+ *
+ **/
+
+kanonic : {
+  name: kanonic_lexer;
+  root: token;
+  package: "io.johnedquinn.kanonic.lexer.generated";
+};
+
+/**
+ *
+ * TOKENS
+ *
+ **/
+
+// CONSTANTS
+// Note: EOF and EPSILON are hidden keywords
+// 
+
+A: "A";
+B: "B";
+C: "C";
+D: "D";
+E: "E";
+F: "F";
+G: "G";
+H: "H";
+I: "I";
+J: "J";
+K: "K";
+L: "L";
+M: "M";
+N: "N";
+O: "O";
+P: "P";
+Q: "Q";
+R: "R";
+S: "S";
+T: "T";
+U: "U";
+V: "V";
+W: "W";
+X: "X";
+Y: "Y";
+Z: "Z";
+
+token
+    : select
+    | selector
+    | sell
+    | from
+    | ident
+    ;
+
+a_to_z_upper_plus
+    : a_to_z_upper
+    | a_to_z_upper_plus a_to_z_upper
+    ;
+
+a_to_z_upper
+    : A | B | C | D | E | F | G | H | I | J | K | L | M | N | O | P | Q | R | S | T | U | V | W | X | Y | Z
+    ;
+
+select: S E L E C T
+    ;
+
+ident: a_to_z_upper_plus;
+
+selector
+    : S E L E C T O R
+    ;
+
+sell: S E L L;
+
+from: F R O M
+    ;
+

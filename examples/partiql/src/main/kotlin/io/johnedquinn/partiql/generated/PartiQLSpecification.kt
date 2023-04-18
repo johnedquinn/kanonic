@@ -16,13 +16,10 @@ public object PartiQLSpecification : ParserSpecification {
     tokens {
       "SELECT" - "SELECT"
       "FROM" - "FROM"
-      "COLON" - ":"
       "PAREN_LEFT" - "\\("
       "PAREN_RIGHT" - "\\)"
-      "SYMBOL_QUOTED" - "'((\\')|[^'])*'"
       "SYMBOL" - "[a-zA-Z]+"
-      "NUMBER" - "[0-9]+"
-      "LITERAL_STRING" - "\\\"((\\\")|[^\\\"])*\\\""
+      "WS" - ("[\\s]" channel "hidden")
     }
     "statement" eq buildRule(this, "statement") {
       "statement_dql" eq "dql"
@@ -46,39 +43,39 @@ public object PartiQLSpecification : ParserSpecification {
 
   private val nodeLambdaList: List<NodeCreator> = initializeLambdas()
 
-  public override fun getTable(): String = """,,S4,,,S10,,,S9,,,,S1,S2,S3,S8
-  A0,,,,,,,,,,,,,,,
-  R1,,,,,,,,,,,,,,,
-  R2,,,,,,,,,,,,,,,
-  ,,S24,,,S30,,,S29,,,,,S5,S23,S28
-  ,,,S6,,,,,,,,,,,,
-  ,,S4,,,S10,,,S9,,,,,S7,S3,S8
-  R3,,,,,,,,,,,,,,,
-  R4,,,,,,,,,,,,,,,
-  R5,,,,,,,,,,,,,,,
-  ,,S14,,,S20,,,S19,,,,,S11,S13,S18
-  ,,,,,,S12,,,,,,,,,
-  R6,,,,,,,,,,,,,,,
-  ,,,,,,R2,,,,,,,,,
-  ,,S24,,,S30,,,S29,,,,,S15,S23,S28
-  ,,,S16,,,,,,,,,,,,
-  ,,S14,,,S20,,,S19,,,,,S17,S13,S18
-  ,,,,,,R3,,,,,,,,,
-  ,,,,,,R4,,,,,,,,,
-  ,,,,,,R5,,,,,,,,,
-  ,,S14,,,S20,,,S19,,,,,S21,S13,S18
-  ,,,,,,S22,,,,,,,,,
-  ,,,,,,R6,,,,,,,,,
-  ,,,R2,,,,,,,,,,,,
-  ,,S24,,,S30,,,S29,,,,,S25,S23,S28
-  ,,,S26,,,,,,,,,,,,
-  ,,S24,,,S30,,,S29,,,,,S27,S23,S28
-  ,,,R3,,,,,,,,,,,,
-  ,,,R4,,,,,,,,,,,,
-  ,,,R5,,,,,,,,,,,,
-  ,,S14,,,S20,,,S19,,,,,S31,S13,S18
-  ,,,,,,S32,,,,,,,,,
-  ,,,R6,,,,,,,,,,,,"""
+  public override fun getTable(): String = """,,S4,,S10,,S9,,,S1,S2,S3,S8
+  A0,,,,,,,,,,,,
+  R1,,,,,,,,,,,,
+  R2,,,,,,,,,,,,
+  ,,S24,,S30,,S29,,,,S5,S23,S28
+  ,,,S6,,,,,,,,,
+  ,,S4,,S10,,S9,,,,S7,S3,S8
+  R3,,,,,,,,,,,,
+  R4,,,,,,,,,,,,
+  R5,,,,,,,,,,,,
+  ,,S14,,S20,,S19,,,,S11,S13,S18
+  ,,,,,S12,,,,,,,
+  R6,,,,,,,,,,,,
+  ,,,,,R2,,,,,,,
+  ,,S24,,S30,,S29,,,,S15,S23,S28
+  ,,,S16,,,,,,,,,
+  ,,S14,,S20,,S19,,,,S17,S13,S18
+  ,,,,,R3,,,,,,,
+  ,,,,,R4,,,,,,,
+  ,,,,,R5,,,,,,,
+  ,,S14,,S20,,S19,,,,S21,S13,S18
+  ,,,,,S22,,,,,,,
+  ,,,,,R6,,,,,,,
+  ,,,R2,,,,,,,,,
+  ,,S24,,S30,,S29,,,,S25,S23,S28
+  ,,,S26,,,,,,,,,
+  ,,S24,,S30,,S29,,,,S27,S23,S28
+  ,,,R3,,,,,,,,,
+  ,,,R4,,,,,,,,,
+  ,,,R5,,,,,,,,,
+  ,,S14,,S20,,S19,,,,S31,S13,S18
+  ,,,,,S32,,,,,,,
+  ,,,R6,,,,,,,,,"""
 
   private fun initializeLambdas(): List<NodeCreator> = buildList {
     add(NodeCreator { state, children, parent, alias -> PartiQLNode.StatementNode.StatementDqlNode(state, children, parent, "null") })

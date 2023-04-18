@@ -27,6 +27,21 @@ class PartiQLParserTests {
     }
 
     @Test
+    fun testExperimental() {
+        val query = "SELECT a FROM b"
+        val expected = PartiqlAst.build {
+            query(
+                select(
+                    project = projectList(projectExpr_(id("a", caseInsensitive(), unqualified()))),
+                    from = scan(id("b", caseInsensitive(), unqualified()))
+                )
+            )
+        }
+        val result = parser.parseExperimental(query)
+        assertEquals(expected, result)
+    }
+
+    @Test
     fun test2() {
         val query = "SELECT (SELECT a FROM b) FROM b"
         parser.parseAstStatement(query)

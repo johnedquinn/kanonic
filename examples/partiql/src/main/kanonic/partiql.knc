@@ -6,13 +6,10 @@ kanonic: {
 
 SELECT: "SELECT";
 FROM: "FROM";
-COLON: ":";
 PAREN_LEFT: "\(";
 PAREN_RIGHT: "\)";
-SYMBOL_QUOTED: "'((\')|[^'])*'";
 SYMBOL: "[a-zA-Z]+";
-NUMBER: "[0-9]+";
-LITERAL_STRING: "\"((\")|[^\"])*\"";
+WS: "[\s]" --> hidden;
 
 statement
     : dql --> statement_dql

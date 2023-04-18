@@ -26,10 +26,10 @@ import java.util.concurrent.TimeUnit
 @Suppress("UNUSED")
 internal open class PartiQLParserBenchmark {
     companion object {
-        private const val FORK_VALUE: Int = 1 // 2
-        private const val MEASUREMENT_ITERATION_VALUE: Int = 10 // 10
+        private const val FORK_VALUE: Int = 2
+        private const val MEASUREMENT_ITERATION_VALUE: Int = 10
         private const val MEASUREMENT_TIME_VALUE: Int = 1
-        private const val WARMUP_ITERATION_VALUE: Int = 5 // 5
+        private const val WARMUP_ITERATION_VALUE: Int = 5
         private const val WARMUP_TIME_VALUE: Int = 1
     }
 
@@ -37,8 +37,10 @@ internal open class PartiQLParserBenchmark {
     open class MyState {
         val parser = PartiQLParser
         val kanonicParser = KanonicParser.Builder.standard().withSpecification(PartiQLSpecification).build()
+        val overriddenKanonicParser = KanonicParser.Builder.standard().withSpecification(PartiQLSpecification).withLexer(OverriddenLexer).build()
         val kanonicLexer = KanonicLexer.Builder.standard().withDefinitions(PartiQLSpecification.grammar.tokens).build()
         val partiQLParser = PartiQLParserBuilder.standard().build()
+        val antlrParser = AntlrParser
 
         @Param(
             "SELECT a FROM b",
@@ -48,22 +50,22 @@ internal open class PartiQLParserBenchmark {
         public var inputIndex: String = ""
     }
 
-//    @Benchmark
-//    @Fork(value = FORK_VALUE)
-//    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
-//    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
-//    @Suppress("UNUSED")
-//    fun parseUsingKanonic(state: MyState, blackhole: Blackhole) {
-//        val expr = state.kanonicParser.parse(state.inputIndex)
-//        blackhole.consume(expr)
-//    }
+    @Benchmark
+    @Fork(value = FORK_VALUE)
+    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
+    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
+    @Suppress("UNUSED")
+    fun parseUsingThisKanonicParser(state: MyState, blackhole: Blackhole) {
+        val expr = state.kanonicParser.parse(state.inputIndex)
+        blackhole.consume(expr)
+    }
 
     @Benchmark
     @Fork(value = FORK_VALUE)
     @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
     @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
     @Suppress("UNUSED")
-    fun tokenizeUsingNewLexer(state: MyState, blackhole: Blackhole) {
+    fun tokenizeUsingThisKanonicLexer(state: MyState, blackhole: Blackhole) {
         state.kanonicLexer.tokenize(state.inputIndex).forEach {
             blackhole.consume(it)
         }
@@ -74,7 +76,7 @@ internal open class PartiQLParserBenchmark {
     @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
     @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
     @Suppress("UNUSED")
-    fun tokenizeUsingAntlrLexer(state: MyState, blackhole: Blackhole) {
+    fun tokenizeUsingThisAntlrLexer(state: MyState, blackhole: Blackhole) {
         PartiQLTokens(CharStreams.fromString(state.inputIndex)).allTokens.forEach {
             blackhole.consume(it)
         }
@@ -85,7 +87,7 @@ internal open class PartiQLParserBenchmark {
     @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
     @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
     @Suppress("UNUSED")
-    fun parseUsingNewPartiQLParser(state: MyState, blackhole: Blackhole) {
+    fun parseUsingThisParser(state: MyState, blackhole: Blackhole) {
         val expr = state.parser.parseAstStatement(state.inputIndex)
         blackhole.consume(expr)
     }
@@ -95,8 +97,38 @@ internal open class PartiQLParserBenchmark {
     @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
     @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
     @Suppress("UNUSED")
-    fun parseUsingOldPartiQLParser(state: MyState, blackhole: Blackhole) {
+    fun parseUsingThisParserWithAntlrLexer(state: MyState, blackhole: Blackhole) {
+        val expr = state.parser.parseExperimental(state.inputIndex)
+        blackhole.consume(expr)
+    }
+
+    @Benchmark
+    @Fork(value = FORK_VALUE)
+    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
+    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
+    @Suppress("UNUSED")
+    fun parseUsingThisKanonicParserWithAntlrLexer(state: MyState, blackhole: Blackhole) {
+        val expr = state.overriddenKanonicParser.parse(state.inputIndex)
+        blackhole.consume(expr)
+    }
+
+    @Benchmark
+    @Fork(value = FORK_VALUE)
+    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
+    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
+    @Suppress("UNUSED")
+    fun parseUsingPartiQLParser(state: MyState, blackhole: Blackhole) {
         val expr = state.partiQLParser.parseAstStatement(state.inputIndex)
+        blackhole.consume(expr)
+    }
+
+    @Benchmark
+    @Fork(value = FORK_VALUE)
+    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
+    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
+    @Suppress("UNUSED")
+    fun parseUsingThisAntlrParser(state: MyState, blackhole: Blackhole) {
+        val expr = state.antlrParser.parse(state.inputIndex)
         blackhole.consume(expr)
     }
 }

@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "1.6.21"
     id("me.champeau.gradle.jmh") version "0.5.3"
+    id("org.gradle.antlr")
 }
 
 version = "unspecified"
@@ -11,6 +12,7 @@ repositories {
 
 object Versions {
     const val junit = "5.9.0"
+    const val antlr = "4.10.1"
 }
 
 object Dependencies {
@@ -20,14 +22,18 @@ object Dependencies {
 }
 
 dependencies {
+    // Plugins
+    antlr("org.antlr:antlr4:${Versions.antlr}")
+
     // Runtime Dependencies
     implementation(kotlin("stdlib"))
     implementation(project(":kanonic-runtime"))
     implementation(project(":kanonic-syntax"))
 
-    // Ion
+    // External Runtime Dependencies
     implementation("com.amazon.ion:ion-element:1.0.0")
     implementation("org.partiql:partiql-lang-kotlin:0.9.2")
+    implementation("org.antlr:antlr4-runtime:${Versions.antlr}")
 
     // Compile Dependencies
     compileOnly(project(":kanonic-gen"))
@@ -56,10 +62,22 @@ val generate = tasks.register<Exec>("generate") {
     )
 }
 
+tasks.generateGrammarSource {
+    val antlrPackage = "io.johnedquinn.partiql.antlr.generated"
+    val antlrSources = "src/main/java/${antlrPackage.replace('.', '/')}"
+    maxHeapSize = "64m"
+    arguments = listOf("-visitor", "-long-messages", "-package", antlrPackage)
+    outputDirectory = File(antlrSources)
+}
+
 //jmh {
 //    resultFormat = "json"
 //    resultsFile = project.file("$buildDir/reports/jmh/results.json")
 //}
+
+tasks.compileKotlin {
+    dependsOn(tasks.generateGrammarSource)
+}
 
 tasks.compileKotlin {
     dependsOn(generate)

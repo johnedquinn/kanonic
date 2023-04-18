@@ -158,7 +158,7 @@ public sealed class PartiQLNode(
 
       public fun SYMBOL(): List<TerminalNode> =
           this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
-        it.token.type == 8
+        it.token.type == 6
       }
 
       public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
@@ -178,7 +178,7 @@ public sealed class PartiQLNode(
 
       public fun PAREN_LEFT(): List<TerminalNode> =
           this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
-        it.token.type == 5
+        it.token.type == 4
       }
 
       public fun expr(): List<ExprNode> =
@@ -186,7 +186,7 @@ public sealed class PartiQLNode(
 
       public fun PAREN_RIGHT(): List<TerminalNode> =
           this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
-        it.token.type == 6
+        it.token.type == 5
       }
 
       public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
