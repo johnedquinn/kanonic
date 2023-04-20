@@ -37,10 +37,7 @@ internal class KanonicParserDefault(
     private val grammar = info.grammar
     private val tokens = grammar.tokens
     private val variants = grammar.rules.flatMap { it.variants }
-    private val variantAlias = variants.associate {
-        val parent = grammar.rules.find { rule -> it.parentName == rule.name }
-        "${it.parentName}++${it.name}" to parent?.alias
-    }
+    private val ruleAliases = grammar.rules.associate { it.name to it.alias }
     private val ruleNameMap = grammar.rules.mapIndexed { index, rule -> index to rule }.associate { it.second.name to it.first }
     private val table: ParseTable = ParseTableDeserializer.deserialize(info.getTable(), grammar.tokens.size)
 
@@ -75,12 +72,11 @@ internal class KanonicParserDefault(
         }
     }
 
-    private fun getAlias(variant: RuleVariant): String? = variantAlias["${variant.parentName}++${variant.name}"]
-
     private fun parse(tokens: Sequence<TokenLiteral>): Node {
         // Add first state
-        val stack = mutableListOf<Int>().also { it.add(0) }
+        val stack = mutableListOf<Int>()
         val toAddNodes = mutableListOf<Node>()
+        stack.add(0)
 
         val tokenIter = tokens.iterator()
         var token = tokenIter.next()
@@ -107,15 +103,13 @@ internal class KanonicParserDefault(
                     }
                 }
                 is Action.Shift -> {
-                    val foundToken = when (updateToken) {
+                    when (updateToken) {
                         true -> {
-                            val shiftToken = token
+                            shift(action, stack, toAddNodes, currentState, token)
                             token = tokenIter.next()
-                            shiftToken
                         }
-                        else -> TokenLiteral(TokenLiteral.ReservedTypes.EPSILON, token.index, "<epsilon>")
+                        false -> stack.add(action.state)
                     }
-                    shift(action, stack, toAddNodes, currentState, foundToken)
                 }
                 is Action.Reduce -> {
                     reduce(action, stack, toAddNodes, currentState)
@@ -131,8 +125,6 @@ internal class KanonicParserDefault(
                     val tokenNames = possible.map { tokenInd ->
                         this.tokens[tokenInd].name
                     }
-                    // logger.severe("Failure at state: $currentState and token: ${token.content}, index: ${token.index}")
-                    // logger.severe("Received $token, but expected token type of: $tokenNames")
                     throw RuntimeException("Failure at state: $currentState and token: ${token.content}, index: ${token.index}\n" + "Received $token, but expected token type of: $tokenNames")
                 }
             }
@@ -156,11 +148,11 @@ internal class KanonicParserDefault(
     private fun reduce(action: Action.Reduce, stack: MutableList<Int>, toAddNodes: MutableList<Node>, currentState: Int) {
         val rule = variants[action.rule]
         val children = mutableListOf<Node>()
-        val alias = getAlias(rule)
+        val alias = ruleAliases[rule.parentName]
         repeat(rule.items.size) {
             stack.removeLast()
         }
-        val firstIndex = toAddNodes.size - rule.items.size
+        val firstIndex = toAddNodes.size - rule.normalizedSize
         for (i in firstIndex..toAddNodes.lastIndex) {
             children.addAll(getChildren(toAddNodes[i]))
         }
@@ -174,15 +166,13 @@ internal class KanonicParserDefault(
     }
 
     private fun getChildren(node: Node): List<Node> = when (node) {
-        is GeneratedNode -> node.children.filterNot {
-            it is TerminalNode && it.token.type == TokenLiteral.ReservedTypes.EPSILON
-        }.flatMap {
+        !is GeneratedNode -> listOf(node)
+        else -> node.children.flatMap {
             getChildren(it)
         }.also {
             if (node.alias != null) {
                 it.map { child -> child.alias = node.alias }
             }
         }
-        else -> listOf(node)
     }
 }

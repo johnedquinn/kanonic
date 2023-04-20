@@ -1,6 +1,5 @@
 package io.johnedquinn.partiql.parser
 
-import com.amazon.ionelement.api.createIonElementLoader
 import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
 import io.johnedquinn.kanonic.runtime.parse.KanonicParser
 import io.johnedquinn.partiql.generated.PartiQLSpecification
@@ -71,16 +70,27 @@ internal open class PartiQLParserBenchmark {
 //        }
 //    }
 
-//    @Benchmark
-//    @Fork(value = FORK_VALUE)
-//    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
-//    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
-//    @Suppress("UNUSED")
-//    fun tokenizeUsingThisAntlrLexer(state: MyState, blackhole: Blackhole) {
-//        PartiQLTokens(CharStreams.fromString(state.inputIndex)).allTokens.forEach {
-//            blackhole.consume(it)
-//        }
-//    }
+    @Benchmark
+    @Fork(value = FORK_VALUE)
+    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
+    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
+    @Suppress("UNUSED")
+    fun tokenizeUsingThisAntlrLexer(state: MyState, blackhole: Blackhole) {
+        PartiQLTokens(CharStreams.fromString(state.inputIndex)).allTokens.forEach {
+            blackhole.consume(it)
+        }
+    }
+
+    @Benchmark
+    @Fork(value = FORK_VALUE)
+    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
+    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
+    @Suppress("UNUSED")
+    fun tokenizeUsingThisOverriddenAntlrLexer(state: MyState, blackhole: Blackhole) {
+        OverriddenLexer.tokenize(state.inputIndex).forEach {
+            blackhole.consume(it)
+        }
+    }
 
 //    @Benchmark
 //    @Fork(value = FORK_VALUE)

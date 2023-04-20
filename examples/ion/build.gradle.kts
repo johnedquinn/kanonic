@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm") version "1.6.21"
-    id("me.champeau.gradle.jmh") version "0.5.3"
+    id("me.champeau.jmh") version "0.7.1"
 }
 
 version = "unspecified"
