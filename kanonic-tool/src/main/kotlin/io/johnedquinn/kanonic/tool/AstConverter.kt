@@ -83,7 +83,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
                 visitItem(item, ctx)
             }
             val alias = it.IDENT_LOWER_CASE().getOrNull(0)?.token?.content ?: name
-            RuleVariant(alias, name, items)
+            RuleVariant(alias, name, items, null)
         }
         val rule = Rule(name, items, false)
         ctx.grammarBuilder.add(rule = rule)
@@ -116,7 +116,7 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
             is KanonicNode.BaseItemNode.ItemTokenNode -> baseItem
         }
         val generatedName = getGeneratedRuleName(ctx)
-        val newVariant = RuleVariant(alias, generatedName, listOf(type))
+        val newVariant = RuleVariant(alias, generatedName, listOf(type), alias)
         val newRule = Rule(generatedName, listOf(newVariant), true, alias = alias)
         ctx.grammarBuilder.add(newRule)
         return RuleReference(generatedName)
@@ -142,10 +142,10 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
         val name = getGeneratedRuleName(ctx)
         val appendedVariants = node.appendedItems().map {
             val items = visitAppendedItems(it, ctx)
-            RuleVariant(name, name, items)
+            RuleVariant(name, name, items, null)
         }
         val items = node.item().map { visitItem(it, ctx) }
-        val variant = RuleVariant(name, name, items)
+        val variant = RuleVariant(name, name, items, null)
         val rule = Rule(name, listOf(variant) + appendedVariants, true)
         ctx.grammarBuilder.add(rule)
         return RuleReference(name)
@@ -181,8 +181,8 @@ internal object AstConverter : KanonicBaseVisitor<Any, AstConverter.Context>() {
             is KanonicNode.ItemFlagNode.ItemFlagPlusNode -> listOf(RuleReference(name), nodeRef)
             is KanonicNode.ItemFlagNode.ItemFlagQuestionNode -> listOf(nodeRef)
         }
-        val variant1 = RuleVariant(variantEmptyName, name, variantItems1)
-        val variant2 = RuleVariant(variantName, name, items)
+        val variant1 = RuleVariant(variantEmptyName, name, variantItems1, null)
+        val variant2 = RuleVariant(variantName, name, items, null)
         ctx.grammarBuilder.add(Rule(name, listOf(variant1, variant2), true))
         return RuleReference(name)
     }

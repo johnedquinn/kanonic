@@ -3,7 +3,6 @@ package io.johnedquinn.kanonic.runtime.parse.impl
 import io.johnedquinn.kanonic.runtime.ast.GeneratedNode
 import io.johnedquinn.kanonic.runtime.ast.Node
 import io.johnedquinn.kanonic.runtime.ast.TerminalNode
-import io.johnedquinn.kanonic.runtime.grammar.RuleVariant
 import io.johnedquinn.kanonic.runtime.parse.Action
 import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
 import io.johnedquinn.kanonic.runtime.parse.KanonicParser
@@ -35,9 +34,8 @@ internal class KanonicParserDefault(
 ) : KanonicParser {
 
     private val grammar = info.grammar
-    private val tokens = grammar.tokens
-    private val variants = grammar.rules.flatMap { it.variants }
-    private val ruleAliases = grammar.rules.associate { it.name to it.alias }
+    private val tokens = grammar.tokens.toTypedArray()
+    private val variants = grammar.rules.flatMap { it.variants }.toTypedArray()
     private val ruleNameMap = grammar.rules.mapIndexed { index, rule -> index to rule }.associate { it.second.name to it.first }
     private val table: ParseTable = ParseTableDeserializer.deserialize(info.getTable(), grammar.tokens.size)
 
@@ -146,21 +144,20 @@ internal class KanonicParserDefault(
      * building nodes as the children of the reduction node.
      */
     private fun reduce(action: Action.Reduce, stack: MutableList<Int>, toAddNodes: MutableList<Node>, currentState: Int) {
-        val rule = variants[action.rule]
+        val variant = variants[action.rule]
         val children = mutableListOf<Node>()
-        val alias = ruleAliases[rule.parentName]
-        repeat(rule.items.size) {
+        repeat(variant.items.size) {
             stack.removeLast()
         }
-        val firstIndex = toAddNodes.size - rule.normalizedSize
+        val firstIndex = toAddNodes.size - variant.normalizedSize
         for (i in firstIndex..toAddNodes.lastIndex) {
             children.addAll(getChildren(toAddNodes[i]))
         }
         toAddNodes.subList(firstIndex, toAddNodes.size).clear()
-        val newNode = info.createRuleNode(action.rule, currentState, children, null, alias)
+        val newNode = info.createRuleNode(action.rule, currentState, children, null, variant.alias)
         toAddNodes.add(newNode)
         val topState = stack.last()
-        val ruleIndex = ruleNameMap[rule.parentName] ?: error("Could not find rule index of ${rule.parentName}")
+        val ruleIndex = ruleNameMap[variant.parentName] ?: error("Could not find rule index of ${variant.parentName}")
         val goToState = table.goToTable[topState][ruleIndex] as Action.Shift
         stack.add(goToState.state)
     }

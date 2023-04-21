@@ -4,7 +4,7 @@ import io.johnedquinn.kanonic.runtime.parse.TokenLiteral
 import io.johnedquinn.kanonic.runtime.utils.KanonicLogger
 
 class GrammarBuilder(var name: String, var start: String) {
-    private val rules = mutableListOf<Rule>()
+    public val rules = mutableListOf<Rule>()
     public var tokens: MutableList<TokenDefinition> = mutableListOf()
     private var packageName: String? = null
 

@@ -3,7 +3,7 @@ package io.johnedquinn.kanonic.runtime.grammar
 class RuleBuilder(var grammarBuilder: GrammarBuilder, var ruleName: String, var generated: Boolean = false) {
     private val variants = mutableListOf<RuleVariant>()
     var alias: String? = null
-    public fun build() = Rule(ruleName, variants, generated, alias)
+    public fun build() = Rule(ruleName, variants.map { it.copy(alias = alias) }, generated, alias)
 
     companion object {
         @JvmStatic
@@ -23,25 +23,25 @@ class RuleBuilder(var grammarBuilder: GrammarBuilder, var ruleName: String, var 
     }
 
     infix fun String.eq(other: List<SymbolReference>): RuleVariant {
-        val rule = RuleVariant(this, ruleName, other)
+        val rule = RuleVariant(this, ruleName, other, null)
         variants.add(rule)
         return rule
     }
 
     infix fun String.eq(other: String): RuleVariant {
-        val rule = RuleVariant(this, ruleName, listOf(getReference(other)))
+        val rule = RuleVariant(this, ruleName, listOf(getReference(other)), null)
         variants.add(rule)
         return rule
     }
 
     fun add(name: String, f: RuleBuilder.() -> List<SymbolReference>): RuleVariant {
-        val rule = RuleVariant(name, ruleName, this.f())
+        val rule = RuleVariant(name, ruleName, this.f(), null)
         this.variants.add(rule)
         return rule
     }
 
     fun add(name: String, def: List<SymbolReference>): RuleVariant {
-        val rule = RuleVariant(name, ruleName, def)
+        val rule = RuleVariant(name, ruleName, def, null)
         this.variants.add(rule)
         return rule
     }

@@ -14,7 +14,9 @@ internal object ParseTableDeserializer {
             val goToRow = finalRow.subList(numTerminals, finalRow.size)
             goToTable.add(goToRow)
         }
-        return ParseTable(actionTable, goToTable)
+        val newActionTable = actionTable.map { it.toTypedArray() }.toTypedArray()
+        val newGoToTable = goToTable.map { it.toTypedArray() }.toTypedArray()
+        return ParseTable(newActionTable, newGoToTable)
     }
 
     private fun convertToAction(value: String): Action? {

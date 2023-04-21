@@ -5,9 +5,14 @@ import io.johnedquinn.kanonic.runtime.grammar.Grammar
 import kotlin.text.StringBuilder
 
 data class ParseTable(
-    val actionTable: List<List<Action?>>,
-    val goToTable: List<List<Action?>>,
+    val actionTable: Array<Array<Action?>>,
+    val goToTable: Array<Array<Action?>>,
 ) {
+    public constructor(actionTable: List<List<Action?>>, goToTable: List<List<Action?>>) : this(
+        actionTable.map { it.toTypedArray() }.toTypedArray(),
+        goToTable.map { it.toTypedArray() }.toTypedArray()
+    )
+
     internal fun prettify(grammar: Grammar): String {
         val nonTerminals = grammar.rules.map { it.name }
         val table = table {
@@ -28,5 +33,23 @@ data class ParseTable(
         val builder = StringBuilder()
         table.render(builder)
         return builder.toString()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ParseTable
+
+        if (!actionTable.contentDeepEquals(other.actionTable)) return false
+        if (!goToTable.contentDeepEquals(other.goToTable)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = actionTable.contentDeepHashCode()
+        result = 31 * result + goToTable.contentDeepHashCode()
+        return result
     }
 }

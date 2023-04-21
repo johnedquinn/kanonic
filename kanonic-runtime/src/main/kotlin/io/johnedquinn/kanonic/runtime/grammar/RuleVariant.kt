@@ -6,6 +6,7 @@ data class RuleVariant(
     var name: String,
     val parentName: String,
     val items: List<SymbolReference>,
+    val alias: String?
 ) {
     val normalizedSize = items.filterNot {
         it is TerminalReference && it.type == TokenLiteral.ReservedTypes.EPSILON
