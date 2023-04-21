@@ -36,7 +36,6 @@ internal class KanonicParserDefault(
     private val grammar = info.grammar
     private val tokens = grammar.tokens.toTypedArray()
     private val variants = grammar.rules.flatMap { it.variants }.toTypedArray()
-    private val ruleNameMap = grammar.rules.mapIndexed { index, rule -> index to rule }.associate { it.second.name to it.first }
     private val table: ParseTable = ParseTableDeserializer.deserialize(info.getTable(), grammar.tokens.size)
 
     /**
@@ -157,18 +156,20 @@ internal class KanonicParserDefault(
         val newNode = info.createRuleNode(action.rule, currentState, children, null, variant.alias)
         toAddNodes.add(newNode)
         val topState = stack.last()
-        val ruleIndex = ruleNameMap[variant.parentName] ?: error("Could not find rule index of ${variant.parentName}")
-        val goToState = table.goToTable[topState][ruleIndex] as Action.Shift
+        val goToState = table.goToTable[topState][variant.parentIndex] as Action.Shift
         stack.add(goToState.state)
     }
 
     private fun getChildren(node: Node): List<Node> = when (node) {
         !is GeneratedNode -> listOf(node)
-        else -> node.children.flatMap {
-            getChildren(it)
+        else -> node.children.map {
+            // Generated nodes should have already been reduced when placed in other generated nodes
+            it
         }.also {
             if (node.alias != null) {
-                it.map { child -> child.alias = node.alias }
+                // Aliased Nodes should only have 1 child
+                node.children.getOrNull(0)?.alias = node.alias
+                // it.map { child -> child.alias = node.alias }
             }
         }
     }

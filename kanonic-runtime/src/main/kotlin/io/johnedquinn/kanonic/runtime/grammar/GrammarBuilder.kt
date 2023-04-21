@@ -30,10 +30,12 @@ class GrammarBuilder(var name: String, var start: String) {
     }
 
     fun add(rule: Rule) = this.apply {
+        rule.variants.forEach { it.parentIndex = this.rules.size }
         this.rules.add(rule)
     }
 
     operator fun Rule.unaryPlus() = this.apply {
+        this.variants.forEach { it.parentIndex = this@GrammarBuilder.rules.size }
         rules.add(this)
     }
 
@@ -42,6 +44,7 @@ class GrammarBuilder(var name: String, var start: String) {
     fun generateRule(name: String, alias: String? = null, f: RuleBuilder.() -> Unit) = RuleBuilder.buildGeneratedRule(this, name, alias, f)
 
     infix fun String.eq(other: Rule): Rule {
+        other.variants.forEach { it.parentIndex = this@GrammarBuilder.rules.size }
         this@GrammarBuilder.rules.add(other)
         return other
     }

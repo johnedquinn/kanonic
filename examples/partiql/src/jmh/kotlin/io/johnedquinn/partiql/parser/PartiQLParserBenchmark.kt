@@ -3,7 +3,6 @@ package io.johnedquinn.partiql.parser
 import io.johnedquinn.kanonic.runtime.parse.KanonicLexer
 import io.johnedquinn.kanonic.runtime.parse.KanonicParser
 import io.johnedquinn.partiql.generated.PartiQLSpecification
-import org.antlr.v4.runtime.CharStreams
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.BenchmarkMode
 import org.openjdk.jmh.annotations.Fork
@@ -16,7 +15,6 @@ import org.openjdk.jmh.annotations.State
 import org.openjdk.jmh.annotations.Warmup
 import org.openjdk.jmh.infra.Blackhole
 import org.partiql.lang.syntax.PartiQLParserBuilder
-import org.partiql.lang.syntax.antlr.PartiQLTokens
 import java.util.concurrent.TimeUnit
 
 
@@ -70,27 +68,27 @@ internal open class PartiQLParserBenchmark {
 //        }
 //    }
 
-    @Benchmark
-    @Fork(value = FORK_VALUE)
-    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
-    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
-    @Suppress("UNUSED")
-    fun tokenizeUsingThisAntlrLexer(state: MyState, blackhole: Blackhole) {
-        PartiQLTokens(CharStreams.fromString(state.inputIndex)).allTokens.forEach {
-            blackhole.consume(it)
-        }
-    }
-
-    @Benchmark
-    @Fork(value = FORK_VALUE)
-    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
-    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
-    @Suppress("UNUSED")
-    fun tokenizeUsingThisOverriddenAntlrLexer(state: MyState, blackhole: Blackhole) {
-        OverriddenLexer.tokenize(state.inputIndex).forEach {
-            blackhole.consume(it)
-        }
-    }
+//    @Benchmark
+//    @Fork(value = FORK_VALUE)
+//    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
+//    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
+//    @Suppress("UNUSED")
+//    fun tokenizeUsingThisAntlrLexer(state: MyState, blackhole: Blackhole) {
+//        PartiQLTokens(CharStreams.fromString(state.inputIndex)).allTokens.forEach {
+//            blackhole.consume(it)
+//        }
+//    }
+//
+//    @Benchmark
+//    @Fork(value = FORK_VALUE)
+//    @Measurement(iterations = MEASUREMENT_ITERATION_VALUE, time = MEASUREMENT_TIME_VALUE)
+//    @Warmup(iterations = WARMUP_ITERATION_VALUE, time = WARMUP_TIME_VALUE)
+//    @Suppress("UNUSED")
+//    fun tokenizeUsingThisOverriddenAntlrLexer(state: MyState, blackhole: Blackhole) {
+//        OverriddenLexer.tokenize(state.inputIndex).forEach {
+//            blackhole.consume(it)
+//        }
+//    }
 
 //    @Benchmark
 //    @Fork(value = FORK_VALUE)
