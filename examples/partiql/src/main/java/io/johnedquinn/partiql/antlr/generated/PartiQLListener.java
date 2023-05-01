@@ -91,4 +91,16 @@ public interface PartiQLListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExprWrapped(PartiQLParser.ExprWrappedContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code ExprArray}
+	 * labeled alternative in {@link PartiQLParser#expr_atom}.
+	 * @param ctx the parse tree
+	 */
+	void enterExprArray(PartiQLParser.ExprArrayContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code ExprArray}
+	 * labeled alternative in {@link PartiQLParser#expr_atom}.
+	 * @param ctx the parse tree
+	 */
+	void exitExprArray(PartiQLParser.ExprArrayContext ctx);
 }

@@ -65,7 +65,7 @@ class TableGenerator(val grammar: Grammar, val automaton: Automaton) {
                         false -> {
                             actionTable[stateIndex][lookaheadToken]?.let { foundAction ->
                                 when (foundAction) {
-                                    is Action.Shift -> throw RuntimeException("Shift-reduce conflict!")
+                                    is Action.Shift -> throw RuntimeException("Shift-reduce conflict! For ${grammar.tokens[lookaheadToken]}")
                                     is Action.Reduce -> throw RuntimeException("Reduce-reduce conflict!")
                                     else -> TODO()
                                 }

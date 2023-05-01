@@ -17,8 +17,8 @@ public class PartiQLParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		EPSILON=1, SELECT=2, FROM=3, PAREN_LEFT=4, PAREN_RIGHT=5, SYMBOL=6, WS=7, 
-		UNRECOGNIZED=8;
+		EPSILON=1, AS=2, SELECT=3, FROM=4, PAREN_LEFT=5, PAREN_RIGHT=6, BRACKET_LEFT=7, 
+		BRACKET_RIGHT=8, COMMA=9, SYMBOL=10, WS=11, UNRECOGNIZED=12;
 	public static final int
 		RULE_statement = 0, RULE_dql = 1, RULE_expr = 2, RULE_expr_select = 3, 
 		RULE_expr_atom = 4;
@@ -31,14 +31,15 @@ public class PartiQLParser extends Parser {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'EPSILON'", "'SELECT'", "'FROM'", "'('", "')'"
+			null, "'EPSILON'", "'AS'", "'SELECT'", "'FROM'", "'('", "')'", "'['", 
+			"']'", "','"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "EPSILON", "SELECT", "FROM", "PAREN_LEFT", "PAREN_RIGHT", "SYMBOL", 
-			"WS", "UNRECOGNIZED"
+			null, "EPSILON", "AS", "SELECT", "FROM", "PAREN_LEFT", "PAREN_RIGHT", 
+			"BRACKET_LEFT", "BRACKET_RIGHT", "COMMA", "SYMBOL", "WS", "UNRECOGNIZED"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -290,6 +291,7 @@ public class PartiQLParser extends Parser {
 			return getRuleContext(ExprContext.class,i);
 		}
 		public TerminalNode FROM() { return getToken(PartiQLParser.FROM, 0); }
+		public TerminalNode AS() { return getToken(PartiQLParser.AS, 0); }
 		public ExprSelectContext(Expr_selectContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
@@ -310,7 +312,7 @@ public class PartiQLParser extends Parser {
 		Expr_selectContext _localctx = new Expr_selectContext(_ctx, getState());
 		enterRule(_localctx, 6, RULE_expr_select);
 		try {
-			setState(22);
+			setState(25);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case SELECT:
@@ -325,14 +327,27 @@ public class PartiQLParser extends Parser {
 				match(FROM);
 				setState(19);
 				expr();
+				setState(22);
+				_errHandler.sync(this);
+				switch ( getInterpreter().adaptivePredict(_input,0,_ctx) ) {
+				case 1:
+					{
+					setState(20);
+					match(AS);
+					setState(21);
+					expr();
+					}
+					break;
+				}
 				}
 				break;
 			case PAREN_LEFT:
+			case BRACKET_LEFT:
 			case SYMBOL:
 				_localctx = new ExprSelectFallbackContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(21);
+				setState(24);
 				expr_atom();
 				}
 				break;
@@ -400,19 +415,48 @@ public class PartiQLParser extends Parser {
 			else return visitor.visitChildren(this);
 		}
 	}
+	public static class ExprArrayContext extends Expr_atomContext {
+		public TerminalNode BRACKET_LEFT() { return getToken(PartiQLParser.BRACKET_LEFT, 0); }
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public TerminalNode BRACKET_RIGHT() { return getToken(PartiQLParser.BRACKET_RIGHT, 0); }
+		public List<TerminalNode> COMMA() { return getTokens(PartiQLParser.COMMA); }
+		public TerminalNode COMMA(int i) {
+			return getToken(PartiQLParser.COMMA, i);
+		}
+		public ExprArrayContext(Expr_atomContext ctx) { copyFrom(ctx); }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof PartiQLListener ) ((PartiQLListener)listener).enterExprArray(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof PartiQLListener ) ((PartiQLListener)listener).exitExprArray(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PartiQLVisitor ) return ((PartiQLVisitor<? extends T>)visitor).visitExprArray(this);
+			else return visitor.visitChildren(this);
+		}
+	}
 
 	public final Expr_atomContext expr_atom() throws RecognitionException {
 		Expr_atomContext _localctx = new Expr_atomContext(_ctx, getState());
 		enterRule(_localctx, 8, RULE_expr_atom);
+		int _la;
 		try {
-			setState(29);
+			setState(43);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case SYMBOL:
 				_localctx = new ExprIdentContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(24);
+				setState(27);
 				match(SYMBOL);
 				}
 				break;
@@ -420,12 +464,40 @@ public class PartiQLParser extends Parser {
 				_localctx = new ExprWrappedContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(25);
+				setState(28);
 				match(PAREN_LEFT);
-				setState(26);
+				setState(29);
 				expr();
-				setState(27);
+				setState(30);
 				match(PAREN_RIGHT);
+				}
+				break;
+			case BRACKET_LEFT:
+				_localctx = new ExprArrayContext(_localctx);
+				enterOuterAlt(_localctx, 3);
+				{
+				setState(32);
+				match(BRACKET_LEFT);
+				setState(33);
+				expr();
+				setState(38);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+				while (_la==COMMA) {
+					{
+					{
+					setState(34);
+					match(COMMA);
+					setState(35);
+					expr();
+					}
+					}
+					setState(40);
+					_errHandler.sync(this);
+					_la = _input.LA(1);
+				}
+				setState(41);
+				match(BRACKET_RIGHT);
 				}
 				break;
 			default:
@@ -444,27 +516,35 @@ public class PartiQLParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\b \u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001\f.\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0001"+
 		"\u0000\u0001\u0000\u0001\u0001\u0001\u0001\u0001\u0002\u0001\u0002\u0001"+
 		"\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0001\u0003\u0003"+
-		"\u0003\u0017\b\u0003\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001"+
-		"\u0004\u0003\u0004\u001e\b\u0004\u0001\u0004\u0000\u0000\u0005\u0000\u0002"+
-		"\u0004\u0006\b\u0000\u0000\u001c\u0000\n\u0001\u0000\u0000\u0000\u0002"+
-		"\f\u0001\u0000\u0000\u0000\u0004\u000e\u0001\u0000\u0000\u0000\u0006\u0016"+
-		"\u0001\u0000\u0000\u0000\b\u001d\u0001\u0000\u0000\u0000\n\u000b\u0003"+
-		"\u0002\u0001\u0000\u000b\u0001\u0001\u0000\u0000\u0000\f\r\u0003\u0004"+
-		"\u0002\u0000\r\u0003\u0001\u0000\u0000\u0000\u000e\u000f\u0003\u0006\u0003"+
-		"\u0000\u000f\u0005\u0001\u0000\u0000\u0000\u0010\u0011\u0005\u0002\u0000"+
-		"\u0000\u0011\u0012\u0003\u0004\u0002\u0000\u0012\u0013\u0005\u0003\u0000"+
-		"\u0000\u0013\u0014\u0003\u0004\u0002\u0000\u0014\u0017\u0001\u0000\u0000"+
-		"\u0000\u0015\u0017\u0003\b\u0004\u0000\u0016\u0010\u0001\u0000\u0000\u0000"+
-		"\u0016\u0015\u0001\u0000\u0000\u0000\u0017\u0007\u0001\u0000\u0000\u0000"+
-		"\u0018\u001e\u0005\u0006\u0000\u0000\u0019\u001a\u0005\u0004\u0000\u0000"+
-		"\u001a\u001b\u0003\u0004\u0002\u0000\u001b\u001c\u0005\u0005\u0000\u0000"+
-		"\u001c\u001e\u0001\u0000\u0000\u0000\u001d\u0018\u0001\u0000\u0000\u0000"+
-		"\u001d\u0019\u0001\u0000\u0000\u0000\u001e\t\u0001\u0000\u0000\u0000\u0002"+
-		"\u0016\u001d";
+		"\u0003\u0017\b\u0003\u0001\u0003\u0003\u0003\u001a\b\u0003\u0001\u0004"+
+		"\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004"+
+		"\u0001\u0004\u0001\u0004\u0005\u0004%\b\u0004\n\u0004\f\u0004(\t\u0004"+
+		"\u0001\u0004\u0001\u0004\u0003\u0004,\b\u0004\u0001\u0004\u0000\u0000"+
+		"\u0005\u0000\u0002\u0004\u0006\b\u0000\u0000-\u0000\n\u0001\u0000\u0000"+
+		"\u0000\u0002\f\u0001\u0000\u0000\u0000\u0004\u000e\u0001\u0000\u0000\u0000"+
+		"\u0006\u0019\u0001\u0000\u0000\u0000\b+\u0001\u0000\u0000\u0000\n\u000b"+
+		"\u0003\u0002\u0001\u0000\u000b\u0001\u0001\u0000\u0000\u0000\f\r\u0003"+
+		"\u0004\u0002\u0000\r\u0003\u0001\u0000\u0000\u0000\u000e\u000f\u0003\u0006"+
+		"\u0003\u0000\u000f\u0005\u0001\u0000\u0000\u0000\u0010\u0011\u0005\u0003"+
+		"\u0000\u0000\u0011\u0012\u0003\u0004\u0002\u0000\u0012\u0013\u0005\u0004"+
+		"\u0000\u0000\u0013\u0016\u0003\u0004\u0002\u0000\u0014\u0015\u0005\u0002"+
+		"\u0000\u0000\u0015\u0017\u0003\u0004\u0002\u0000\u0016\u0014\u0001\u0000"+
+		"\u0000\u0000\u0016\u0017\u0001\u0000\u0000\u0000\u0017\u001a\u0001\u0000"+
+		"\u0000\u0000\u0018\u001a\u0003\b\u0004\u0000\u0019\u0010\u0001\u0000\u0000"+
+		"\u0000\u0019\u0018\u0001\u0000\u0000\u0000\u001a\u0007\u0001\u0000\u0000"+
+		"\u0000\u001b,\u0005\n\u0000\u0000\u001c\u001d\u0005\u0005\u0000\u0000"+
+		"\u001d\u001e\u0003\u0004\u0002\u0000\u001e\u001f\u0005\u0006\u0000\u0000"+
+		"\u001f,\u0001\u0000\u0000\u0000 !\u0005\u0007\u0000\u0000!&\u0003\u0004"+
+		"\u0002\u0000\"#\u0005\t\u0000\u0000#%\u0003\u0004\u0002\u0000$\"\u0001"+
+		"\u0000\u0000\u0000%(\u0001\u0000\u0000\u0000&$\u0001\u0000\u0000\u0000"+
+		"&\'\u0001\u0000\u0000\u0000\')\u0001\u0000\u0000\u0000(&\u0001\u0000\u0000"+
+		"\u0000)*\u0005\b\u0000\u0000*,\u0001\u0000\u0000\u0000+\u001b\u0001\u0000"+
+		"\u0000\u0000+\u001c\u0001\u0000\u0000\u0000+ \u0001\u0000\u0000\u0000"+
+		",\t\u0001\u0000\u0000\u0000\u0004\u0016\u0019&+";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

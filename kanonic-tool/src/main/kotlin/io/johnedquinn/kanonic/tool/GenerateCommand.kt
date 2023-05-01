@@ -7,6 +7,7 @@ import io.johnedquinn.kanonic.syntax.generated.KanonicSpecification
 import picocli.CommandLine
 import java.io.File
 import java.util.logging.ConsoleHandler
+import kotlin.system.exitProcess
 
 @CommandLine.Command(
     name = "kanonic",
@@ -54,6 +55,7 @@ internal class GenerateCommand : Runnable {
             writeOutput(files, output)
         } catch (t: Throwable) {
             t.printStackTrace()
+            exitProcess(1)
         }
     }
 

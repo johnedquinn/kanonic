@@ -60,4 +60,11 @@ public class PartiQLBaseVisitor<T> extends AbstractParseTreeVisitor<T> implement
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitExprWrapped(PartiQLParser.ExprWrappedContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitExprArray(PartiQLParser.ExprArrayContext ctx) { return visitChildren(ctx); }
 }

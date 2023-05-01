@@ -95,6 +95,18 @@ public class PartiQLBaseListener implements PartiQLListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitExprWrapped(PartiQLParser.ExprWrappedContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterExprArray(PartiQLParser.ExprArrayContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitExprArray(PartiQLParser.ExprArrayContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

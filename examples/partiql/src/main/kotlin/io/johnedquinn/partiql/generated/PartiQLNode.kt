@@ -105,7 +105,7 @@ public sealed class PartiQLNode(
 
       public fun SELECT(): List<TerminalNode> =
           this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
-        it.token.type == 2
+        it.token.type == 3
       }
 
       public fun expr(): List<ExprNode> =
@@ -113,8 +113,11 @@ public sealed class PartiQLNode(
 
       public fun FROM(): List<TerminalNode> =
           this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
-        it.token.type == 3
+        it.token.type == 4
       }
+
+      public fun optionalAs(): List<OptionalAsNode> =
+          this.children.filterIsInstance<io.johnedquinn.partiql.generated.PartiQLNode.OptionalAsNode>()
 
       public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
         is PartiQLVisitor -> visitor.visitExprSelect(this, ctx)
@@ -141,6 +144,38 @@ public sealed class PartiQLNode(
     }
   }
 
+  public sealed class OptionalAsNode(
+    public override val state: Int,
+    public override val children: List<Node>,
+    public override var parent: Node?,
+    public override var alias: String?,
+  ) : PartiQLNode(state, children, parent, alias) {
+    public data class OptionalAsNode(
+      public override val state: Int,
+      public override val children: List<Node>,
+      public override var parent: Node?,
+      public override var alias: String?,
+    ) : PartiQLNode.OptionalAsNode(state, children, parent, alias) {
+      public override fun toString(): String = """${this::class.simpleName}(state: $state, children:
+          $children, alias: $alias)"""
+
+      public fun AS(): List<TerminalNode> =
+          this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
+        it.token.type == 2
+      }
+
+      public fun SYMBOL(): List<TerminalNode> =
+          this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
+        it.token.type == 10
+      }
+
+      public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
+        is PartiQLVisitor -> visitor.visitOptionalAs(this, ctx)
+        else -> visitor.visit(this, ctx)
+      }
+    }
+  }
+
   public sealed class ExprAtomNode(
     public override val state: Int,
     public override val children: List<Node>,
@@ -158,7 +193,7 @@ public sealed class PartiQLNode(
 
       public fun SYMBOL(): List<TerminalNode> =
           this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
-        it.token.type == 6
+        it.token.type == 10
       }
 
       public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
@@ -178,7 +213,7 @@ public sealed class PartiQLNode(
 
       public fun PAREN_LEFT(): List<TerminalNode> =
           this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
-        it.token.type == 4
+        it.token.type == 5
       }
 
       public fun expr(): List<ExprNode> =
@@ -186,11 +221,72 @@ public sealed class PartiQLNode(
 
       public fun PAREN_RIGHT(): List<TerminalNode> =
           this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
-        it.token.type == 5
+        it.token.type == 6
       }
 
       public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
         is PartiQLVisitor -> visitor.visitExprWrapped(this, ctx)
+        else -> visitor.visit(this, ctx)
+      }
+    }
+
+    public data class ExprArrayNode(
+      public override val state: Int,
+      public override val children: List<Node>,
+      public override var parent: Node?,
+      public override var alias: String?,
+    ) : ExprAtomNode(state, children, parent, alias) {
+      public override fun toString(): String = """${this::class.simpleName}(state: $state, children:
+          $children, alias: $alias)"""
+
+      public fun BRACKET_LEFT(): List<TerminalNode> =
+          this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
+        it.token.type == 7
+      }
+
+      public fun expr(): List<ExprNode> =
+          this.children.filterIsInstance<io.johnedquinn.partiql.generated.PartiQLNode.ExprNode>()
+
+      public fun BRACKET_RIGHT(): List<TerminalNode> =
+          this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
+        it.token.type == 8
+      }
+
+      public fun exprMultiple(): List<ExprMultipleNode> =
+          this.children.filterIsInstance<io.johnedquinn.partiql.generated.PartiQLNode.ExprMultipleNode>()
+
+      public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
+        is PartiQLVisitor -> visitor.visitExprArray(this, ctx)
+        else -> visitor.visit(this, ctx)
+      }
+    }
+  }
+
+  public sealed class ExprMultipleNode(
+    public override val state: Int,
+    public override val children: List<Node>,
+    public override var parent: Node?,
+    public override var alias: String?,
+  ) : PartiQLNode(state, children, parent, alias) {
+    public data class ExprMultipleNode(
+      public override val state: Int,
+      public override val children: List<Node>,
+      public override var parent: Node?,
+      public override var alias: String?,
+    ) : PartiQLNode.ExprMultipleNode(state, children, parent, alias) {
+      public override fun toString(): String = """${this::class.simpleName}(state: $state, children:
+          $children, alias: $alias)"""
+
+      public fun COMMA(): List<TerminalNode> =
+          this.children.filterIsInstance<io.johnedquinn.kanonic.runtime.ast.TerminalNode>().filter {
+        it.token.type == 9
+      }
+
+      public fun expr(): List<ExprNode> =
+          this.children.filterIsInstance<io.johnedquinn.partiql.generated.PartiQLNode.ExprNode>()
+
+      public override fun <R, C> accept(visitor: NodeVisitor<R, C>, ctx: C): R = when (visitor) {
+        is PartiQLVisitor -> visitor.visitExprMultiple(this, ctx)
         else -> visitor.visit(this, ctx)
       }
     }

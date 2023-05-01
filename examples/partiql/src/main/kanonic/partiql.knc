@@ -4,10 +4,14 @@ kanonic: {
   package: "io.johnedquinn.partiql.generated";
 };
 
+AS: "AS";
 SELECT: "SELECT";
 FROM: "FROM";
 PAREN_LEFT: "\(";
 PAREN_RIGHT: "\)";
+BRACKET_LEFT: "\[";
+BRACKET_RIGHT: "\]";
+COMMA: ",";
 SYMBOL: "[a-zA-Z]+";
 WS: "[\s]" --> hidden;
 
@@ -24,11 +28,20 @@ expr
     ;
 
 expr_select
-    : SELECT expr FROM expr --> expr_select
+    : SELECT expr FROM expr optional_as? --> expr_select
     | expr_atom --> expr_select_fallback
+    ;
+
+optional_as
+    : AS SYMBOL --> optional_as
     ;
 
 expr_atom
     : SYMBOL --> expr_ident
     | PAREN_LEFT expr PAREN_RIGHT --> expr_wrapped
+    | BRACKET_LEFT expr expr_multiple* BRACKET_RIGHT --> expr_array
+    ;
+
+expr_multiple
+    : COMMA expr
     ;

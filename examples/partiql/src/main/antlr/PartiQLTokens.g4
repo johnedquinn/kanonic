@@ -26,10 +26,14 @@ options {
 
 
 EPSILON: 'EPSILON'; // TODO: HACK
+AS: 'AS';
 SELECT: 'SELECT';
 FROM: 'FROM';
 PAREN_LEFT: '(';
 PAREN_RIGHT: ')';
+BRACKET_LEFT: '[';
+BRACKET_RIGHT: ']';
+COMMA: ',';
 
 SYMBOL
     : [A-Z$_][A-Z0-9$_]*;

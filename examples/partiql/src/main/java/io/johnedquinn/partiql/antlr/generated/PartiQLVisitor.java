@@ -59,4 +59,11 @@ public interface PartiQLVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExprWrapped(PartiQLParser.ExprWrappedContext ctx);
+	/**
+	 * Visit a parse tree produced by the {@code ExprArray}
+	 * labeled alternative in {@link PartiQLParser#expr_atom}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExprArray(PartiQLParser.ExprArrayContext ctx);
 }

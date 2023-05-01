@@ -44,7 +44,7 @@ math_op
 
 math_op_second
     : @lhs=math_op_second CARROT @rhs=atomic --> math_op_second
-    | atomic                                       --> expr_atom
+    | atomic                                 --> expr_atom
     ;
 
 atomic

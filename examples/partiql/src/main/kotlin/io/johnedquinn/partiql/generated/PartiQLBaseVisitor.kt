@@ -4,12 +4,15 @@ import io.johnedquinn.kanonic.runtime.ast.Node
 import io.johnedquinn.partiql.generated.PartiQLNode.DqlNode
 import io.johnedquinn.partiql.generated.PartiQLNode.DqlNode.DqlExprNode
 import io.johnedquinn.partiql.generated.PartiQLNode.ExprAtomNode
+import io.johnedquinn.partiql.generated.PartiQLNode.ExprAtomNode.ExprArrayNode
 import io.johnedquinn.partiql.generated.PartiQLNode.ExprAtomNode.ExprIdentNode
 import io.johnedquinn.partiql.generated.PartiQLNode.ExprAtomNode.ExprWrappedNode
+import io.johnedquinn.partiql.generated.PartiQLNode.ExprMultipleNode.ExprMultipleNode
 import io.johnedquinn.partiql.generated.PartiQLNode.ExprNode
 import io.johnedquinn.partiql.generated.PartiQLNode.ExprNode.ExprSfwNode
 import io.johnedquinn.partiql.generated.PartiQLNode.ExprSelectNode.ExprSelectFallbackNode
 import io.johnedquinn.partiql.generated.PartiQLNode.ExprSelectNode.ExprSelectNode
+import io.johnedquinn.partiql.generated.PartiQLNode.OptionalAsNode.OptionalAsNode
 import io.johnedquinn.partiql.generated.PartiQLNode.StatementNode
 import io.johnedquinn.partiql.generated.PartiQLNode.StatementNode.StatementDqlNode
 
@@ -60,13 +63,34 @@ public abstract class PartiQLBaseVisitor<R, C> : PartiQLVisitor<R, C> {
     is ExprSelectFallbackNode -> visitExprSelectFallback(node, ctx)
   }
 
+  public open override fun visitOptionalAs(node: OptionalAsNode, ctx: C): R = defaultVisit(node,
+      ctx)
+
+  public open override
+      fun visitOptionalAs(node: io.johnedquinn.partiql.generated.PartiQLNode.OptionalAsNode,
+      ctx: C): R = when (node) {
+    is OptionalAsNode -> visitOptionalAs(node, ctx)
+  }
+
   public open override fun visitExprIdent(node: ExprIdentNode, ctx: C): R = defaultVisit(node, ctx)
 
   public open override fun visitExprWrapped(node: ExprWrappedNode, ctx: C): R = defaultVisit(node,
       ctx)
 
+  public open override fun visitExprArray(node: ExprArrayNode, ctx: C): R = defaultVisit(node, ctx)
+
   public open override fun visitExprAtom(node: ExprAtomNode, ctx: C): R = when (node) {
     is ExprIdentNode -> visitExprIdent(node, ctx)
     is ExprWrappedNode -> visitExprWrapped(node, ctx)
+    is ExprArrayNode -> visitExprArray(node, ctx)
+  }
+
+  public open override fun visitExprMultiple(node: ExprMultipleNode, ctx: C): R = defaultVisit(node,
+      ctx)
+
+  public open override
+      fun visitExprMultiple(node: io.johnedquinn.partiql.generated.PartiQLNode.ExprMultipleNode,
+      ctx: C): R = when (node) {
+    is ExprMultipleNode -> visitExprMultiple(node, ctx)
   }
 }
